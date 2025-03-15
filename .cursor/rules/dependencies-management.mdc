@@ -1,0 +1,19 @@
+---
+description: Dependencies and External Libraries Management
+globs: **/package.json,**/package-lock.json,**/yarn.lock,**/node_modules/**/*
+alwaysApply: false
+---
+---
+description: Dependencies and External Libraries Management
+globs: **/package.json,**/package-lock.json,**/yarn.lock,**/node_modules/**/*
+---
+
+# Dependencies and External Libraries
+- Carefully evaluate the need for external libraries or plugins (e.g., physics engines like Cannon.js or Ammo.js, animation libraries)
+- When choosing external dependencies, consider:
+  - Performance impact on game
+  - Compatibility with target platforms
+  - Active maintenance and community support
+  - Documentation quality
+  - Ease of integration and future upgrades
+- If using native plugins (e.g., for sound or device features), handle them in a centralized service

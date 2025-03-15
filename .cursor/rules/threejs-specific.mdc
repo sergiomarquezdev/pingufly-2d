@@ -1,0 +1,32 @@
+---
+description: Three.js Development Best Practices and Optimizations
+globs: **/three/**/*.js,**/three/**/*.ts,**/scenes/**/*.js,**/scenes/**/*.ts
+alwaysApply: false
+---
+---
+description: Three.js Development Best Practices and Optimizations
+globs: **/three/**/*.js,**/three/**/*.ts,**/scenes/**/*.js,**/scenes/**/*.ts
+---
+
+# JavaScript and Three.js Best Practices
+- Leverage JavaScript's dynamic nature effectively for game objects and Three.js elements
+- Use Three.js best practices for rendering, geometry optimization, and material management to minimize performance bottlenecks
+- Implement efficient asset loading and management techniques, considering formats like GLTF/GLB
+- Utilize the Three.js WebGL renderer for broad compatibility
+- Implement proper game loop using Three.js's requestAnimationFrame for consistent updates and rendering
+
+# Three.js Specific Optimizations
+- Optimize geometry by reducing vertex count, merging geometries, and using efficient data structures
+- Share materials and textures across multiple objects to reduce draw calls and memory usage
+- Manage the Three.js scene graph effectively, removing unused objects and considering object pooling for frequently created/destroyed objects
+- Use raycasting efficiently for interactions and collision detection
+- Utilize instancing for rendering large numbers of similar objects with minimal performance impact
+- Leverage Three.js's built-in frustum culling to avoid rendering objects outside the camera's view
+- Be mindful of the performance impact of shadows and use shadow maps efficiently
+- Optimize the use of lights in the scene, considering their performance cost
+- Use LOD (Level of Detail) to render simpler versions of objects as they get further away from the camera
+
+# Advanced Techniques
+- Understand and use advanced Three.js techniques when necessary, such as custom shaders, post-processing effects, or using the WebGLRenderer directly for fine-grained control
+- Be aware of potential performance bottlenecks related to complex geometries or excessive draw calls and implement workarounds when needed
+- Utilize advanced features like render targets and multi-pass rendering for complex effects

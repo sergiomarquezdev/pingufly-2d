@@ -1,0 +1,23 @@
+---
+description: General JavaScript Development Principle
+globs: **/*.js,**/*.jsx,**/*.ts,**/*.tsx
+alwaysApply: false
+---
+---
+description: General JavaScript Development Principle
+globs: **/*.js,**/*.jsx,**/*.ts,**/*.tsx
+---
+
+# Key Principles
+- Write concise, technically accurate JavaScript code with a focus on performance
+- Use functional and declarative programming patterns; avoid classes unless necessary for Three.js specific implementations
+- Prioritize code optimization and efficient resource management for smooth gameplay
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasRendered)
+- Structure files logically: game components, scenes, utilities, assets management, and types (using JSDoc or similar if needed)
+
+# Naming Conventions
+- camelCase: functions, variables (e.g., 'createMesh', 'playerHealth')
+- kebab-case: file names (e.g., 'game-scene.js', 'player-component.js')
+- PascalCase: classes and Three.js objects (e.g., 'PlayerModel', 'GameScene')
+- Booleans: use prefixes like 'should', 'has', 'is' (e.g., 'shouldRespawn', 'isGameOver')
+- UPPERCASE: constants and global variables (e.g., 'MAX_PLAYERS', 'GRAVITY')

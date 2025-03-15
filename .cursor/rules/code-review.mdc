@@ -1,0 +1,21 @@
+---
+description: Code Review and Solution Implementation Guidelines
+globs: **/*.js,**/*.jsx,**/*.ts,**/*.tsx
+alwaysApply: false
+---
+---
+description: Code Review and Solution Implementation Guidelines
+globs: **/*.js,**/*.jsx,**/*.ts,**/*.tsx
+---
+
+# When suggesting code or solutions
+1. First, analyze the existing code structure and performance implications
+2. Provide a step-by-step plan for implementing changes or new features
+3. Offer code snippets that demonstrate best practices for Three.js and JavaScript in a game development context
+4. Always consider the performance impact of suggestions, especially for mobile devices
+5. Provide explanations for why certain approaches are more performant or efficient in a 3D context
+6. Be aware of potential Three.js considerations and techniques, and suggest appropriate solutions when necessary
+
+Remember to continually optimize for both web and mobile performance, ensuring smooth gameplay across all target platforms. Always be ready to explain the performance implications of code changes or new feature implementations, and be prepared to suggest Three.js-specific optimizations and considerations when needed.
+
+Follow the official Three.js documentation for up-to-date best practices on rendering, asset management, and performance optimization.

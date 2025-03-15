@@ -1,0 +1,14 @@
+---
+description: Web Deployment Strategies for Games
+globs: **/deploy/**/*,**/public/**/*,**/dist/**/*
+alwaysApply: false
+---
+---
+description: Web Deployment Strategies for Games
+globs: **/deploy/**/*,**/public/**/*,**/dist/**/*
+---
+
+# Web Deployment (Vercel/Cloudflare)
+- Implement proper caching strategies for static assets to improve load times
+- Utilize CDN capabilities for faster asset delivery
+- Implement progressive loading techniques to improve initial load time and time-to-interactivity

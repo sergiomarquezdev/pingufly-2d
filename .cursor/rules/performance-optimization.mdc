@@ -1,0 +1,23 @@
+---
+description: Performance Optimization for JavaScript Games
+globs: **/game/**/*.js,**/game/**/*.ts,**/src/**/*.js,**/src/**/*.ts
+alwaysApply: false
+---
+---
+description: Performance Optimization for JavaScript Games
+globs: **/game/**/*.js,**/game/**/*.ts,**/src/**/*.js,**/src/**/*.ts
+---
+
+# Performance Optimization
+- Minimize object creation during gameplay to reduce garbage collection pauses
+- Implement efficient particle systems using libraries or Three.js's Points and custom shaders for complex visual effects
+- Use texture atlases or texture arrays to reduce texture swaps and improve rendering performance
+- Implement level streaming or chunking for large game worlds to manage memory usage
+- Optimize asset loading with progressive loading techniques and asset compression (e.g., using Draco compression for geometries)
+- Use requestAnimationFrame for smooth animations and game loop management
+- Be mindful of the complexity of your scene and optimize render order
+- Use smaller, low-res textures for older mobile devices
+- Implement proper bounding volume hierarchy (BVH) for efficient spatial queries like raycasting
+- Use caching for all the data that is needed multiple times
+- Implement lazy loading where appropriate
+- Use pre-fetching for critical data and assets
