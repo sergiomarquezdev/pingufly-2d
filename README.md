@@ -2,8 +2,6 @@
 
 Una recreación moderna del clásico juego "Yeti Sports: Pingu Throw" utilizando JavaScript y Three.js para gráficos 3D.
 
-![Yeti Sports: Pingu Throw](https://i.imgur.com/KjIxjQj.jpg)
-
 ## Descripción
 
 Este proyecto recrea el icónico minijuego de principios de los 2000 donde controlas a un Yeti que golpea a un pingüino con un bate, intentando lanzarlo lo más lejos posible. El juego se centra en el timing preciso para conseguir el golpe perfecto y maximizar la distancia del lanzamiento.
