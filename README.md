@@ -29,7 +29,7 @@ _Próximamente_
 
 1. Clona el repositorio:
    ```bash
-   git clone https://github.com/tu-usuario/yetisports-game.git
+   git clone https://github.com/sergiomarquezdev/yetisports-game.git
    cd yetisports-game
    ```
 
@@ -124,10 +124,6 @@ Las contribuciones son bienvenidas. Por favor, siéntete libre de abrir un issue
 3. Haz commit de tus cambios (`git commit -m 'Add some amazing feature'`)
 4. Haz push a la rama (`git push origin feature/amazing-feature`)
 5. Abre un Pull Request
-
-## Licencia
-
-Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
 
 ## Créditos
 
