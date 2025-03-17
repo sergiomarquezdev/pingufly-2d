@@ -1,0 +1,16 @@
+---
+description: Testing and quality assurance guidelines for Phaser game development
+globs: /tests/**/*
+---
+- Implement performance profiling and monitoring tools to identify bottlenecks (browser developer tools)
+- Use cross-device testing to ensure consistent performance across platforms
+- Implement error logging and crash reporting for easier debugging in production
+- Be aware of browser-specific issues and implement appropriate workarounds
+- Write unit tests for game logic and systems (using testing frameworks like Jest or Mocha)
+- Implement integration tests for game scenes and major features
+- Create automated performance tests to catch regressions
+- Use mocks for external services or APIs
+- Implement playtesting tools and analytics for gameplay balance and user experience testing
+- Set up automated builds and testing in the CI/CD pipeline
+- Use global error and alert handlers (window.onerror)
+- Integrate a crash reporting service for the application

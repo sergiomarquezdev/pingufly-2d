@@ -1,25 +1,35 @@
 {
   "name": "yetisports-game",
   "version": "1.0.0",
-  "description": "A recreation of the classic Yetisports Pingu Throw game using JavaScript and Three.js",
-  "main": "src/index.js",
+  "description": "Remake of Yeti Sports 5: Flamingo Drive using Phaser and Vite",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sergiomarquezdev/yetisports-game.git"
   },
   "keywords": [
-    "yetisports",
     "game",
-    "threejs",
-    "javascript"
+    "phaser",
+    "html5",
+    "javascript",
+    "yetisports"
   ],
   "author": "",
-  "license": "MIT",
-  "devDependencies": {
-    "three": "^0.174.0",
-    "vite": "^5.0.10"
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sergiomarquezdev/yetisports-game/issues"
   },
+  "homepage": "https://github.com/sergiomarquezdev/yetisports-game#readme",
   "dependencies": {
+    "phaser": "^3.70.0"
+  },
+  "devDependencies": {
+    "vite": "^5.1.5"
   }
 }

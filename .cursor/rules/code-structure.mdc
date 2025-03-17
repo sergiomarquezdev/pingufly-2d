@@ -1,0 +1,7 @@
+---
+description: Code structure and organization principles for Phaser game development
+globs: /src/**/*.{js,ts}
+---
+- Organize code into modular components: game engine (Phaser instance), scene management (Phaser Scenes), entity systems (custom classes or ECS patterns)
+- Implement a robust state management system for game progression and save states
+- Use design patterns appropriate for game development (e.g., Observer for event handling, Factory for object creation, State for game modes)

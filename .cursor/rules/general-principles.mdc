@@ -1,0 +1,9 @@
+---
+description: Key principles for JavaScript and Phaser game development
+globs: /**/*.js
+---
+- Write concise, technically accurate JavaScript code with a focus on performance
+- Use functional and declarative programming patterns; avoid classes unless necessary for Phaser specific implementations
+- Prioritize code optimization and efficient resource management for smooth gameplay
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasRendered)
+- Structure files logically: game components, scenes, utilities, assets management, and types (or JSDoc for typing)

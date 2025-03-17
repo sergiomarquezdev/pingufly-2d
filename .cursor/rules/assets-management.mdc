@@ -1,0 +1,12 @@
+---
+description: Asset management guidelines for Phaser game development
+globs: /src/assets/**/*
+---
+- Use proper asset organization with subdirectories for different asset types (images, audio, etc.)
+- Implement texture atlases and sprite sheets for related images
+- Optimize image sizes and formats (use WebP where supported)
+- Use appropriate audio formats with fallbacks (MP3, OGG)
+- Implement progressive and background loading for large assets
+- Properly release unused assets to free memory
+- Consider different asset versions for different device capabilities
+- Use meaningful, consistent naming conventions for all assets

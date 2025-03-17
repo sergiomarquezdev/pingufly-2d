@@ -1,14 +1,7 @@
 ---
-description: Web Deployment Strategies for Games
-globs: **/deploy/**/*,**/public/**/*,**/dist/**/*
-alwaysApply: false
+description: Web deployment best practices for Phaser games on Vercel/Cloudflare
+globs: /public/**/*
 ---
----
-description: Web Deployment Strategies for Games
-globs: **/deploy/**/*,**/public/**/*,**/dist/**/*
----
-
-# Web Deployment (Vercel/Cloudflare)
-- Implement proper caching strategies for static assets to improve load times
+- Implement proper caching strategies for static assets to improve load times (configure server headers)
 - Utilize CDN capabilities for faster asset delivery
-- Implement progressive loading techniques to improve initial load time and time-to-interactivity
+- Implement progressive loading techniques to improve initial load time and time-to-interactivity (Phaser Loader events)

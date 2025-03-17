@@ -1,23 +1,16 @@
 ---
-description: Performance Optimization for JavaScript Games
-globs: **/game/**/*.js,**/game/**/*.ts,**/src/**/*.js,**/src/**/*.ts
-alwaysApply: false
+description: Performance optimization techniques for Phaser game development
+globs: /src/**/*.{js,ts}
 ---
----
-description: Performance Optimization for JavaScript Games
-globs: **/game/**/*.js,**/game/**/*.ts,**/src/**/*.js,**/src/**/*.ts
----
-
-# Performance Optimization
 - Minimize object creation during gameplay to reduce garbage collection pauses
-- Implement efficient particle systems using libraries or Three.js's Points and custom shaders for complex visual effects
-- Use texture atlases or texture arrays to reduce texture swaps and improve rendering performance
-- Implement level streaming or chunking for large game worlds to manage memory usage
-- Optimize asset loading with progressive loading techniques and asset compression (e.g., using Draco compression for geometries)
-- Use requestAnimationFrame for smooth animations and game loop management
-- Be mindful of the complexity of your scene and optimize render order
+- Implement efficient particle systems and sprite batching for complex visual effects
+- Use texture atlases to reduce draw calls and improve rendering performance
+- Implement world streaming or chunking for large game worlds to manage memory usage
+- Optimize asset loading with progressive loading techniques and asset compression
+- Use Phaser's game loop (Scene update) for smooth animations and game loop management
+- Be mindful of the complexity of your scene and optimize draw order (Scene.depthSort())
 - Use smaller, low-res textures for older mobile devices
-- Implement proper bounding volume hierarchy (BVH) for efficient spatial queries like raycasting
+- Implement proper bounds management to avoid unnecessary calculations
 - Use caching for all the data that is needed multiple times
-- Implement lazy loading where appropriate
-- Use pre-fetching for critical data and assets
+- Implement lazy loading where appropriate (load assets or game elements only when needed)
+- Use pre-fetching for critical data and assets (load essential assets early)

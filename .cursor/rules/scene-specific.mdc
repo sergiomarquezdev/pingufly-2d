@@ -1,0 +1,12 @@
+---
+description: Phaser Scene-specific guidelines and best practices
+globs: /src/scenes/**/*.{js,ts}
+---
+- Follow Phaser's Scene lifecycle methods (init, preload, create, update)
+- Keep preload methods focused only on asset loading
+- Use create for scene setup and initialization
+- Implement clean update methods that avoid unnecessary calculations
+- Properly destroy and clean up resources when changing scenes
+- Use scene manager for handling scene transitions
+- Implement pause/resume functionality appropriately
+- Consider scene composition for complex game states

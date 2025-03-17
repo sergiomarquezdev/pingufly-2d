@@ -1,0 +1,9 @@
+---
+description: JavaScript and Phaser best practices for game development
+globs: /src/**/*.{js,ts}
+---
+- Leverage JavaScript's dynamic typing, but consider using JSDoc for better code understanding and tooling
+- Use Phaser best practices for rendering and object pooling to minimize garbage collection
+- Implement efficient asset loading and management techniques using Phaser's Loader
+- Utilize Phaser's WebGL renderer for optimal performance on supported browsers, falling back to Canvas for broader compatibility
+- Implement proper game loop using Phaser's Scene update method for consistent updates and rendering

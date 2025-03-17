@@ -1,0 +1,9 @@
+---
+description: Naming conventions for Phaser game development files and code
+globs: /**/*.{js,ts}
+---
+- camelCase: functions, variables (e.g., 'createSprite', 'playerHealth')
+- kebab-case: file names (e.g., 'game-scene.js', 'player-component.js')
+- PascalCase: classes and Phaser objects (e.g., 'PlayerSprite', 'GameScene')
+- Booleans: use prefixes like 'should', 'has', 'is' (e.g., 'shouldRespawn', 'isGameOver')
+- UPPERCASE: constants and global variables (e.g., 'MAX_PLAYERS', 'GRAVITY')

@@ -1,0 +1,12 @@
+---
+description: Phaser-specific optimizations for efficient game rendering and performance
+globs: /src/**/*.{js,ts}
+---
+- Use sprite batching and container nesting wisely to reduce draw calls
+- Implement texture atlases to optimize rendering and reduce texture swaps (Phaser Texture Packer)
+- Utilize Phaser's built-in caching mechanisms for complex graphics
+- Properly manage the Phaser scene graph, removing unused objects and using object pooling for frequently created/destroyed objects
+- Use Phaser's input manager for efficient event handling
+- Leverage Phaser's filters and effects effectively, being mindful of their performance impact
+- Use Particle Emitters (Phaser.GameObjects.Particles.ParticleEmitter) for large numbers of similar sprites
+- Implement camera culling for off-screen objects to reduce rendering load

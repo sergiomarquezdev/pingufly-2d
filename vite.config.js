@@ -1,26 +1,25 @@
-// vite.config.js
 import { defineConfig } from 'vite';
-import path from 'path';
 
 export default defineConfig({
-  root: './',
-  publicDir: 'public',
-  base: './',
   server: {
-    host: true,
-    open: true,
-    port: 3000
+    host: '0.0.0.0',
+    port: 3000,
+    open: true
   },
   build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
-    minify: true,
     sourcemap: true,
-    emptyOutDir: true
-  },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, 'src')
+    assetsInlineLimit: 0, // No inlinear assets como base64
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          phaser: ['phaser']
+        }
+      }
     }
-  }
+  },
+  optimizeDeps: {
+    exclude: ['fsevents']
+  },
+  publicDir: 'public',
+  base: './'
 });

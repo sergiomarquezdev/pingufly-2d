@@ -1,0 +1,7 @@
+---
+description: Advanced techniques for Phaser game development
+globs: /src/**/*.{js,ts}
+---
+- Understand and use Phaser's features when necessary, such as custom shaders or blend modes
+- Be aware of performance limitations and implement workarounds when needed (e.g., optimizing complex graphics)
+- Utilize advanced features like render textures and post-processing effects for complex visuals (Phaser Render Textures, Pipelines)

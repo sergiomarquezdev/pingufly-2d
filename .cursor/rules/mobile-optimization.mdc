@@ -1,16 +1,10 @@
 ---
-description: Mobile Optimization for Games with Ionic Capacitor
-globs: **/capacitor/**/*.js,**/capacitor/**/*.ts,**/mobile/**/*.js,**/mobile/**/*.ts
-alwaysApply: false
+description: Mobile optimization techniques for Phaser games on web browsers
+globs: /src/**/*.{js,ts}
 ---
----
-description: Mobile Optimization for Games with Ionic Capacitor
-globs: **/capacitor/**/*.js,**/capacitor/**/*.ts,**/mobile/**/*.js,**/mobile/**/*.ts
----
-
-# Mobile Optimization (Ionic Capacitor)
-- Implement touch controls and gestures optimized for mobile devices
-- Use responsive design techniques to adapt the game UI for various screen sizes and orientations
+- Implement touch controls and gestures optimized for mobile devices (Phaser Input events)
+- Use responsive design techniques to adapt the game UI for various screen sizes and orientations (Phaser Scale Manager)
 - Optimize asset quality and size for mobile devices to reduce load times and conserve bandwidth
-- Implement efficient power management techniques to preserve battery life on mobile devices
-- Utilize Capacitor plugins for accessing native device features when necessary
+- Implement efficient power management techniques (consider pausing or reducing activity when the game is not in focus)
+- Utilize browser APIs for accessing native device features if necessary (e.g., vibration)
+- Consider using the Canvas renderer on older mobile devices if WebGL performance is an issue (Phaser Renderer configuration)
