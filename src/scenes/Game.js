@@ -46,8 +46,8 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
-    // Configurar el mundo físico
-    this.matter.world.setBounds(0, 0, 10000, 600);
+    // Configurar el mundo físico con límites extendidos hacia la izquierda (valores negativos de X)
+    this.matter.world.setBounds(-10000, 0, 20000, 600);
     this.matter.world.setGravity(physicsConfig.world.gravity.x, physicsConfig.world.gravity.y);
 
     // Crear el fondo
@@ -99,10 +99,8 @@ export default class Game extends Phaser.Scene {
           this.cameras.main.scrollX = this.initialScrollX;
         }
 
-        // Limitar el desplazamiento para que no vaya más allá del borde del mundo
-        if (this.cameras.main.scrollX < 0) {
-          this.cameras.main.scrollX = 0;
-        }
+        // Eliminar la limitación que impedía ir más allá de x=0
+        // Ahora la cámara puede seguir al pingüino hasta el límite extendido
       }
     }
   }
@@ -166,9 +164,9 @@ export default class Game extends Phaser.Scene {
    * Crea el suelo y cualquier otra superficie de colisión
    */
   createGround() {
-    // Crear suelo físico
-    this.ground = this.matter.add.image(5000, 580, 'ground');
-    this.ground.setScale(50, 1); // Suelo muy ancho para permitir un largo recorrido
+    // Crear suelo físico extendido hacia la izquierda
+    this.ground = this.matter.add.image(0, 580, 'ground');
+    this.ground.setScale(200, 1); // Suelo mucho más ancho para permitir un recorrido extenso en ambas direcciones
     this.ground.setStatic(true);
 
     // Propiedades del suelo
@@ -180,8 +178,8 @@ export default class Game extends Phaser.Scene {
    * Configura la cámara para seguir al pingüino
    */
   configureCamera() {
-    // Configurar los límites de la cámara
-    this.cameras.main.setBounds(0, 0, 10000, 600);
+    // Configurar los límites de la cámara extendidos hacia la izquierda
+    this.cameras.main.setBounds(-10000, 0, 20000, 600);
 
     // Inicialmente, la cámara se enfoca en la posición de inicio
     this.cameras.main.centerOn(this.initialCameraX, 300);
