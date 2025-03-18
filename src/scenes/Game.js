@@ -50,7 +50,8 @@ export default class Game extends Phaser.Scene {
   create() {
     // Configurar el mundo físico con límites extendidos hacia la izquierda (valores negativos de X)
     this.matter.world.setBounds(-10000, 0, 20000, 600);
-    this.matter.world.setGravity(physicsConfig.world.gravity.x, physicsConfig.world.gravity.y);
+    // Reducir la gravedad para un vuelo más lento y mayor deslizamiento
+    this.matter.world.setGravity(0, 0.3);
 
     // Crear el fondo
     this.createBackground();
@@ -90,37 +91,25 @@ export default class Game extends Phaser.Scene {
   updateCameraFollow() {
     // Solo seguir si el pingüino está en movimiento
     if (this.gameState.currentState === 'FLYING') {
-      // Calcular la distancia del pingüino desde el borde izquierdo visible
-      const distanceFromEdge = this.penguin.x - this.getCameraLeftEdge();
+      // Obtener el centro de la pantalla
+      const centerX = this.initialScrollX + (this.cameras.main.width / 2);
 
-      // Punto en el que la cámara comienza a seguir (más lejos del borde)
-      const startFollowDistance = this.cameraLeftBoundary + 100;
+      // Verificar si el pingüino ha sobrepasado el centro de la pantalla
+      if (this.penguin.x < centerX) {
+        // Calcular la posición de la cámara para mantener al pingüino centrado
+        const targetScrollX = this.penguin.x - (this.cameras.main.width / 2);
 
-      // Calcular el factor de interpolación (qué tan rápido sigue la cámara)
-      // 0 = no seguir, 1 = seguir completamente
-      let followFactor = 0;
+        // Suavizar el movimiento de la cámara con interpolación lineal
+        const smoothness = 0.08; // Factor de suavizado (valores más bajos = más suave)
 
-      if (distanceFromEdge < startFollowDistance) {
-        // Calcular un factor basado en la distancia al borde
-        // Cuanto más cerca del borde, más alto será el factor (más rápido seguirá la cámara)
-        followFactor = Math.max(0, 1 - (distanceFromEdge / startFollowDistance));
-
-        // Aplicar una curva de ease para suavizar aún más el movimiento
-        // Esto da una aceleración gradual al movimiento
-        followFactor = Math.pow(followFactor, 2);
-
-        // Calcular la posición ideal de la cámara (donde debería estar para mantener la distancia deseada)
-        const targetScrollX = this.penguin.x - this.cameraLeftBoundary;
-
-        // Interpolar entre la posición actual y la posición objetivo usando el factor
-        // Esto hace que la cámara se mueva gradualmente hacia la posición deseada
+        // Aplicar interpolación para un movimiento más suave
         const newScrollX = Phaser.Math.Linear(
           this.cameras.main.scrollX,
           targetScrollX,
-          followFactor * 0.1 // Multiplicador para controlar la velocidad general de seguimiento
+          smoothness
         );
 
-        // Asegurarnos de que la cámara no retroceda si el pingüino rebota hacia la derecha
+        // Asegurarnos de que la cámara no retroceda más allá de su posición inicial
         if (newScrollX <= this.initialScrollX) {
           this.cameras.main.scrollX = newScrollX;
         }
@@ -174,10 +163,10 @@ export default class Game extends Phaser.Scene {
     });
 
     // Configurar propiedades físicas del pingüino
-    this.penguin.setFrictionAir(physicsConfig.penguin.frictionAir);
-    this.penguin.setFriction(physicsConfig.penguin.friction);
-    this.penguin.setBounce(physicsConfig.penguin.restitution);
-    this.penguin.setDensity(physicsConfig.penguin.density);
+    this.penguin.setFrictionAir(0.005); // Reducir aún más la fricción del aire para vuelo más lento
+    this.penguin.setFriction(0.001);    // Fricción casi nula para máximo deslizamiento
+    this.penguin.setBounce(0.7);        // Aumentar rebote para más deslizamiento
+    this.penguin.setDensity(0.001);     // Reducir densidad para que sea más ligero
 
     // Inicialmente, el pingüino está estático
     this.penguin.setStatic(true);
@@ -192,9 +181,9 @@ export default class Game extends Phaser.Scene {
     this.ground.setScale(200, 1); // Suelo mucho más ancho para permitir un recorrido extenso en ambas direcciones
     this.ground.setStatic(true);
 
-    // Propiedades del suelo
-    this.ground.setFriction(physicsConfig.collision.ground.friction);
-    this.ground.setFrictionStatic(physicsConfig.collision.ground.friction);
+    // Propiedades del suelo - reducir la fricción para simular hielo
+    this.ground.setFriction(0.001);       // Reducir casi a cero para deslizamiento extremo
+    this.ground.setFrictionStatic(0.001); // Fricción estática también casi nula
   }
 
   /**
@@ -392,7 +381,7 @@ export default class Game extends Phaser.Scene {
             child.text.includes('Distancia total') ||
             child.text.includes('Haz clic para') ||
             child.text.includes('NUEVO RÉCORD')))
-        .forEach(text => text.destroy());
+          .forEach(text => text.destroy());
 
       // Reiniciar posición del pingüino
       this.penguin.setPosition(this.launchPositionX, this.launchPositionY);
@@ -909,9 +898,16 @@ export default class Game extends Phaser.Scene {
     const invertedAngle = 180 - this.selectedAngle;
     const angleRad = Phaser.Math.DegToRad(invertedAngle);
 
-    const powerNormalized = physicsConfig.hitForce.min + this.selectedPower * (physicsConfig.hitForce.max - physicsConfig.hitForce.min);
-    const powerMultiplied = powerNormalized * physicsConfig.hitForce.multiplier;
+    // Aumentamos el rango de potencia para golpeos más fuertes
+    const minPower = 5;
+    const maxPower = 15;
+    const powerNormalized = minPower + this.selectedPower * (maxPower - minPower);
 
+    // Reducir el multiplicador para vuelo más lento pero manteniendo alcance
+    const powerMultiplier = 0.8;
+    const powerMultiplied = powerNormalized * powerMultiplier;
+
+    // Aplicamos velocidades más bajas para vuelo más lento
     const velocityX = powerMultiplied * Math.cos(angleRad);
     const velocityY = -powerMultiplied * Math.sin(angleRad); // Negativo porque en pantalla Y+ es hacia abajo
 
@@ -931,10 +927,9 @@ export default class Game extends Phaser.Scene {
     // Animar el golpe (versión simple) - ahora la animación ocurre en paralelo
     this.tweens.add({
       targets: this.flamingo,
-      angle: -90, // Ángulo negativo para girar hacia la izquierda
+      angle: -100, // Ángulo más pronunciado para dar sensación de mayor golpe
       duration: 200,
       yoyo: true
-      // Ya no necesitamos el onComplete, todo se configura antes de la animación
     });
   }
 
@@ -975,7 +970,6 @@ export default class Game extends Phaser.Scene {
    */
   updateDistance() {
     // Calcular la distancia desde el punto de lanzamiento
-    // Ahora hacia la izquierda, así que es negativa (distancia = punto inicial - punto actual)
     const distanceInPixels = this.launchPositionX - this.penguin.x;
 
     // Convertir a metros (escala arbitraria para el juego) y asegurar que sea positiva
@@ -1001,15 +995,20 @@ export default class Game extends Phaser.Scene {
       });
     }
 
-    // Comprobar si el pingüino se ha detenido
-    // Comparamos la posición actual con la última posición registrada
-    if (Math.abs(this.penguin.x - this.lastPenguinX) < 0.5 &&
-      Math.abs(this.penguin.body.velocity.x) < 0.2 &&
-      Math.abs(this.penguin.body.velocity.y) < 0.2) {
+    // Añadimos rotación para simular deslizamiento sobre hielo
+    if (this.penguin.body.velocity.x < -1 && this.penguin.y > 550) {
+      // Solo añadir rotación si está en movimiento horizontal y cerca del suelo
+      this.penguin.setAngularVelocity(-0.02);
+    }
+
+    // Comprobar si el pingüino se ha detenido - valores extremadamente bajos
+    if (Math.abs(this.penguin.x - this.lastPenguinX) < 0.1 &&
+      Math.abs(this.penguin.body.velocity.x) < 0.02 &&
+      Math.abs(this.penguin.body.velocity.y) < 0.02) {
       this.penguinStoppedFrames++;
 
-      // Si ha estado detenido durante varios frames, considerar que ha parado
-      if (this.penguinStoppedFrames > 60) { // aproximadamente 1 segundo a 60 FPS
+      // Aumentar mucho el tiempo para considerar detenido
+      if (this.penguinStoppedFrames > 120) { // 2 segundos a 60 FPS
         this.endLaunch();
       }
     } else {
