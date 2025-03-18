@@ -45,6 +45,9 @@ export default class Game extends Phaser.Scene {
     this.isCameraFollowing = false;
     this.initialCameraX = 400; // Posición inicial X de la cámara
     this.cameraLeftBoundary = 200; // Límite izquierdo para activar seguimiento de cámara
+
+    // Flag para evitar múltiples reinicios
+    this.isResetting = false;
   }
 
   create() {
@@ -499,6 +502,12 @@ export default class Game extends Phaser.Scene {
         break;
 
       case 'ENDED':
+        // Prevenir múltiples reinicios debido a clics rápidos
+        if (this.isResetting) return;
+        
+        // Establecer el flag de reinicio
+        this.isResetting = true;
+        
         // Eliminar el contenedor de controles si existe
         const controlsInfo = this.children.getByName('controlsInfo');
         if (controlsInfo) controlsInfo.destroy();
@@ -1196,6 +1205,9 @@ export default class Game extends Phaser.Scene {
           onComplete: () => {
             // Iniciar la selección de ángulo solo después de que los personajes hayan entrado
             this.startAngleSelection();
+            
+            // Restablecer el flag de reinicio para permitir futuros reinicios
+            this.isResetting = false;
           }
         });
       }
