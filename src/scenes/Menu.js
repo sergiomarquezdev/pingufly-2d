@@ -51,7 +51,7 @@ export default class Menu extends Phaser.Scene {
    */
   createMainMenu(width, height) {
     // Título del juego - Colocado en la parte superior
-    const title = this.add.text(width / 2, height * 0.15, 'YETI SPORTS 5', {
+    const title = this.add.text(width / 2, height * 0.15, 'PINGUFLY', {
       fontFamily: 'Arial',
       fontSize: '48px',
       fontStyle: 'bold',
@@ -61,7 +61,7 @@ export default class Menu extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Subtítulo - Justo debajo del título
-    const subtitle = this.add.text(width / 2, height * 0.25, 'Flamingo Drive', {
+    const subtitle = this.add.text(width / 2, height * 0.25, 'Fly Penguin, Fly!', {
       fontFamily: 'Arial',
       fontSize: '32px',
       fontStyle: 'italic',
