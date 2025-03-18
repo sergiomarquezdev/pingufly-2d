@@ -27,9 +27,9 @@
   },
   "homepage": "https://github.com/sergiomarquezdev/yetisports-game#readme",
   "dependencies": {
-    "phaser": "^3.70.0"
+    "phaser": "^3.88.2"
   },
   "devDependencies": {
-    "vite": "^5.1.5"
+    "vite": "^6.2.2"
   }
 }

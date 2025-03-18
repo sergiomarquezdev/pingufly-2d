@@ -344,6 +344,11 @@ export default class Game extends Phaser.Scene {
       .filter(child => child.name === 'angleInstructionText')
       .forEach(text => text.destroy());
 
+    // Limpiar el texto del ángulo si existe
+    if (this.angleText) {
+      this.angleText.destroy();
+    }
+
     // Guardar el ángulo seleccionado
     this.selectedAngle = this.angle;
   }
@@ -402,6 +407,17 @@ export default class Game extends Phaser.Scene {
     // Ocultar la barra de potencia
     this.powerBar.setVisible(false);
 
+    // Limpiar textos de porcentaje si existen
+    if (this.percentageTexts && this.percentageTexts.length > 0) {
+      this.percentageTexts.forEach(text => text.destroy());
+      this.percentageTexts = [];
+    }
+
+    // Eliminar el texto de potencia si existe
+    if (this.powerText) {
+      this.powerText.destroy();
+    }
+
     // Guardar la potencia seleccionada
     this.selectedPower = this.power;
   }
@@ -413,41 +429,98 @@ export default class Game extends Phaser.Scene {
     // Limpiar el gráfico
     this.angleIndicator.clear();
 
-    // Dibujar la flecha indicadora con el ángulo actual
-    this.angleIndicator.lineStyle(4, 0xffff00, 1);
-
-    // Origen (posición del pingüino)
+    // Origen (posición del lanzamiento)
     const originX = this.launchPositionX;
     const originY = this.launchPositionY;
 
-    // Para la dirección izquierda, necesitamos invertir el ángulo (180 + ángulo)
-    // Para que la flecha apunte hacia la izquierda en vez de la derecha
-    const invertedAngle = 180 - this.angle;
+    // Configuración del arco
+    const radius = 80;
+    const thickness = 10;
+    const startAngle = 180; // Ángulo izquierdo (en grados)
+    const endAngle = 270;   // Ángulo superior (en grados)
 
-    // Convertir de grados a radianes
-    const angleRad = Phaser.Math.DegToRad(invertedAngle);
+    // Para la dirección izquierda, la flecha debe apuntar entre 180° (izquierda) y 270° (arriba)
+    // Convertir el ángulo actual (0-90) al rango necesario (180-270)
+    const mappedAngle = 180 + this.angle;
 
-    // Calcular el punto final
-    const length = 50;
-    const endX = originX + length * Math.cos(angleRad);
-    const endY = originY - length * Math.sin(angleRad);
+    // Convertir los ángulos a radianes para dibujar el arco
+    const startRad = Phaser.Math.DegToRad(startAngle);
+    const endRad = Phaser.Math.DegToRad(endAngle);
+    const currentRad = Phaser.Math.DegToRad(mappedAngle);
 
-    // Dibujar la línea
-    this.angleIndicator.moveTo(originX, originY);
-    this.angleIndicator.lineTo(endX, endY);
+    // Dibujar el arco de fondo
+    this.angleIndicator.lineStyle(thickness, 0x444444, 0.8);
+    this.angleIndicator.beginPath();
+    this.angleIndicator.arc(originX, originY, radius, startRad, endRad, false);
+    this.angleIndicator.strokePath();
 
-    // Dibujar texto con el ángulo
+    // Dibujar el arco de progreso (desde el inicio hasta el ángulo actual)
+    this.angleIndicator.lineStyle(thickness, 0xffaa00, 1);
+    this.angleIndicator.beginPath();
+    this.angleIndicator.arc(originX, originY, radius, startRad, currentRad, false);
+    this.angleIndicator.strokePath();
+
+    // Dibujar marcas de grados en el arco
+    this.angleIndicator.lineStyle(2, 0xffffff, 0.7);
+    for (let angle = 0; angle <= 90; angle += 15) {
+      const markAngle = Phaser.Math.DegToRad(180 + angle);
+      const markStartX = originX + (radius - thickness/2) * Math.cos(markAngle);
+      const markStartY = originY + (radius - thickness/2) * Math.sin(markAngle);
+      const markEndX = originX + (radius + thickness/2) * Math.cos(markAngle);
+      const markEndY = originY + (radius + thickness/2) * Math.sin(markAngle);
+
+      this.angleIndicator.beginPath();
+      this.angleIndicator.moveTo(markStartX, markStartY);
+      this.angleIndicator.lineTo(markEndX, markEndY);
+      this.angleIndicator.strokePath();
+    }
+
+    // Calcular la posición de la flecha (en el extremo del arco actual)
+    const arrowX = originX + radius * Math.cos(currentRad);
+    const arrowY = originY + radius * Math.sin(currentRad);
+
+    // Dibujar la flecha
+    this.angleIndicator.fillStyle(0xffff00, 1);
+    this.angleIndicator.beginPath();
+
+    // Calcular la dirección tangente al arco en el punto actual
+    const tangentAngle = currentRad + Math.PI/2; // 90 grados más que el radio
+    const arrowSize = 15;
+
+    // Puntos de la flecha
+    const point1X = arrowX + arrowSize * Math.cos(tangentAngle);
+    const point1Y = arrowY + arrowSize * Math.sin(tangentAngle);
+
+    const point2X = arrowX + arrowSize * Math.cos(currentRad - Math.PI);
+    const point2Y = arrowY + arrowSize * Math.sin(currentRad - Math.PI);
+
+    const point3X = arrowX + arrowSize * Math.cos(tangentAngle - Math.PI);
+    const point3Y = arrowY + arrowSize * Math.sin(tangentAngle - Math.PI);
+
+    // Dibujar el triángulo de la flecha
+    this.angleIndicator.moveTo(point1X, point1Y);
+    this.angleIndicator.lineTo(point2X, point2Y);
+    this.angleIndicator.lineTo(point3X, point3Y);
+    this.angleIndicator.closePath();
+    this.angleIndicator.fillPath();
+
+    // Dibujar un punto en el centro del arco
+    this.angleIndicator.fillStyle(0xffffff, 1);
+    this.angleIndicator.fillCircle(originX, originY, 5);
+
+    // Texto con el ángulo actual
     if (this.angleText) {
       this.angleText.destroy();
     }
 
-    this.angleText = this.add.text(originX - 50, originY - 40, `Ángulo: ${Math.round(this.angle)}°`, {
+    this.angleText = this.add.text(originX, originY - radius - 30, `Ángulo: ${Math.round(this.angle)}°`, {
       fontFamily: 'Arial',
-      fontSize: '16px',
+      fontSize: '18px',
       color: '#ffffff',
       stroke: '#000000',
-      strokeThickness: 2
-    }).setScrollFactor(0);
+      strokeThickness: 3,
+      align: 'center'
+    }).setOrigin(0.5).setScrollFactor(0);
   }
 
   /**
@@ -457,25 +530,134 @@ export default class Game extends Phaser.Scene {
     // Limpiar el gráfico
     this.powerBar.clear();
 
-    // Dibujar fondo de la barra
-    this.powerBar.fillStyle(0x666666, 1);
-    this.powerBar.fillRect(550, 450, 200, 30);
+    // Configuración de la barra
+    const barWidth = 30;
+    const barHeight = 150;
+    const barX = this.launchPositionX + 50;
+    const barY = this.launchPositionY - barHeight/2;
+    const padding = 4;
 
-    // Dibujar barra de progreso
-    this.powerBar.fillStyle(0xff0000, 1);
-    this.powerBar.fillRect(550, 450, 200 * this.power, 30);
+    // Dibujar el marco de la barra (fondo)
+    this.powerBar.fillStyle(0x333333, 0.9);
+    this.powerBar.fillRect(barX - padding, barY - padding, barWidth + padding*2, barHeight + padding*2);
+
+    // Dibujar el fondo de la barra
+    this.powerBar.fillStyle(0x666666, 1);
+    this.powerBar.fillRect(barX, barY, barWidth, barHeight);
+
+    // Gradiente de color para la barra (verde-amarillo-rojo)
+    const colors = [0x00ff00, 0xffff00, 0xff0000]; // verde, amarillo, rojo
+    const sections = colors.length;
+    const sectionHeight = barHeight / sections;
+
+    // Dibujar las secciones de colores
+    for (let i = 0; i < sections; i++) {
+      this.powerBar.fillStyle(colors[i], 1);
+      this.powerBar.fillRect(
+        barX,
+        barY + barHeight - (i+1) * sectionHeight,
+        barWidth,
+        sectionHeight
+      );
+    }
+
+    // Posición actual del indicador (con efecto de fill de abajo hacia arriba)
+    const fillHeight = barHeight * this.power;
+
+    // Rellenar la barra desde abajo hasta el nivel actual
+    this.powerBar.fillStyle(0xaaaaaa, 0.3);
+    this.powerBar.fillRect(
+      barX,
+      barY + barHeight - fillHeight,
+      barWidth,
+      fillHeight
+    );
+
+    // Dibujar el indicador (línea horizontal que muestra la posición actual)
+    const indicatorY = barY + barHeight - fillHeight;
+    this.powerBar.fillStyle(0xffffff, 1);
+    this.powerBar.fillRect(
+      barX - 10,
+      indicatorY - 2,
+      barWidth + 20,
+      4
+    );
+
+    // Dibujar triángulos a los lados del indicador
+    this.powerBar.fillStyle(0xffffff, 1);
+
+    // Triángulo izquierdo
+    this.powerBar.beginPath();
+    this.powerBar.moveTo(barX - 15, indicatorY);
+    this.powerBar.lineTo(barX - 5, indicatorY - 6);
+    this.powerBar.lineTo(barX - 5, indicatorY + 6);
+    this.powerBar.closePath();
+    this.powerBar.fillPath();
+
+    // Triángulo derecho
+    this.powerBar.beginPath();
+    this.powerBar.moveTo(barX + barWidth + 15, indicatorY);
+    this.powerBar.lineTo(barX + barWidth + 5, indicatorY - 6);
+    this.powerBar.lineTo(barX + barWidth + 5, indicatorY + 6);
+    this.powerBar.closePath();
+    this.powerBar.fillPath();
+
+    // Añadir marcas de nivel en la barra
+    this.powerBar.lineStyle(2, 0xffffff, 0.5);
+    for (let i = 0; i <= 10; i++) {
+      const markY = barY + barHeight - (i * barHeight / 10);
+      const markWidth = (i % 5 === 0) ? 10 : 5; // Marcas más largas cada 50%
+
+      this.powerBar.beginPath();
+      this.powerBar.moveTo(barX - markWidth, markY);
+      this.powerBar.lineTo(barX, markY);
+      this.powerBar.strokePath();
+
+      this.powerBar.beginPath();
+      this.powerBar.moveTo(barX + barWidth, markY);
+      this.powerBar.lineTo(barX + barWidth + markWidth, markY);
+      this.powerBar.strokePath();
+
+      // Añadir porcentajes para las marcas principales
+      if (i % 5 === 0) {
+        this.powerBar.fillStyle(0xffffff, 1);
+        const percentText = i * 10 + '%';
+        const textX = barX + barWidth + 15;
+        const textY = markY;
+
+        // Añadir texto directamente aquí en lugar de usar Text
+        this.powerBar.fillStyle(0xffffff, 1);
+        const percentageText = this.add.text(textX, textY, percentText, {
+          fontFamily: 'Arial',
+          fontSize: '12px',
+          color: '#ffffff'
+        }).setOrigin(0, 0.5).setScrollFactor(0);
+
+        // Almacenar la referencia para poder eliminarla después
+        if (!this.percentageTexts) {
+          this.percentageTexts = [];
+        }
+        this.percentageTexts.push(percentageText);
+      }
+    }
 
     // Texto con el porcentaje
     if (this.powerText) {
       this.powerText.destroy();
     }
 
-    this.powerText = this.add.text(650, 465, `Potencia: ${Math.round(this.power * 100)}%`, {
+    if (this.percentageTexts && this.percentageTexts.length > 0) {
+      // Eliminar todos los textos de porcentaje anteriores
+      this.percentageTexts.forEach(text => text.destroy());
+      this.percentageTexts = [];
+    }
+
+    this.powerText = this.add.text(barX + barWidth/2, barY - 20, `${Math.round(this.power * 100)}%`, {
       fontFamily: 'Arial',
-      fontSize: '16px',
+      fontSize: '18px',
       color: '#ffffff',
       stroke: '#000000',
-      strokeThickness: 2
+      strokeThickness: 3
     }).setOrigin(0.5).setScrollFactor(0);
   }
 

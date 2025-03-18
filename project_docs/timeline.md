@@ -85,18 +85,15 @@ This document outlines the development roadmap for the Yeti Sports 5: Flamingo D
 
 ## Changelog:
 
-**March 19, 2025**:
-- Extended world physics boundaries to allow penguin to travel further:
-  - Configured matter.world.setBounds with negative X values (-10000, 0, 20000, 600)
-  - Repositioned and expanded ground to cover the entire extended world
-  - Modified camera system to follow the penguin beyond the left edge of the canvas
-  - Removed artificial boundary limitation at x=0
-- Reversed launch direction from right-to-left instead of left-to-right:
-  - Updated angle calculations and velocity application
-  - Flipped character sprites to face the new direction
-  - Adjusted UI elements for the new launch direction
+**March 21, 2025**:
+- Mejorada la interfaz de selección de ángulo y potencia:
+  - Implementado un arco circular para la selección de ángulo con marcadores visuales
+  - Creada una barra vertical de potencia con gradiente de colores (verde-amarillo-rojo)
+  - Añadidas marcas de escala y etiquetas de porcentaje para mejor precisión
+  - Mejorada la retroalimentación visual con indicadores animados
+  - Optimizada la limpieza de elementos UI temporales
 
-**March 17, 2025**:
+**March 20, 2025**:
 - Set up project structure and development environment
 - Configured Vite for Phaser development
 - Created basic config files for game and physics
@@ -119,6 +116,7 @@ This document outlines the development roadmap for the Yeti Sports 5: Flamingo D
 - Create proper character sprites or find temporary replacements
 - Add rotation to the penguin during flight
 - Test on mobile devices and resolve any responsive issues
+- Enhance remaining UI elements based on new design
 
 ## Phase 2: Core Gameplay Mechanics (Week 2)
 
@@ -196,6 +194,7 @@ This document outlines the development roadmap for the Yeti Sports 5: Flamingo D
 - [ ] Add visual polish:
   - [ ] Particle effects for impacts
   - [x] Animation transitions
+  - [x] Enhanced angle and power selection UI
   - [ ] Environmental details
 - [ ] Implement sound effects and background music:
   - [ ] Swing sound
