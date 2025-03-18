@@ -420,7 +420,7 @@ export default class Menu extends Phaser.Scene {
 
     // Panel decorativo para las instrucciones
     const panelWidth = width * 0.8;
-    const panelHeight = height * 0.7;
+    const panelHeight = height * 0.8;
     const instructionsPanel = this.add.graphics();
     instructionsPanel.fillStyle(0x222244, 0.9);
     instructionsPanel.fillRoundedRect(width / 2 - panelWidth / 2, height * 0.15, panelWidth, panelHeight, 20);
@@ -451,7 +451,7 @@ export default class Menu extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Botón para cerrar - Usando el mismo estilo de botón personalizado
-    const closeButtonY = height * 0.7;
+    const closeButtonY = height * 0.8;
     const closeButtonWidth = panelWidth * 0.4;
     const closeButtonHeight = panelHeight * 0.15;
 
@@ -523,16 +523,27 @@ export default class Menu extends Phaser.Scene {
     });
 
     closeButton.on('pointerdown', () => {
-      // Animar la salida de las instrucciones
+      // Hacer visible el menú principal pero con alpha 0
+      this.mainMenuContainer.setVisible(true);
+      this.mainMenuContainer.setAlpha(0);
+
+      // Animar ambas capas simultáneamente (cross-fade)
       this.tweens.add({
         targets: instructionsLayer,
         alpha: 0,
-        duration: 300,
+        duration: 500,
+        ease: 'Power2'
+      });
+
+      // Fade in del menú principal
+      this.tweens.add({
+        targets: this.mainMenuContainer,
+        alpha: 1,
+        duration: 500,
         ease: 'Power2',
         onComplete: () => {
+          // Solo destruir las instrucciones cuando ambas animaciones hayan terminado
           instructionsLayer.destroy();
-          // Mostrar el menú principal nuevamente
-          this.mainMenuContainer.setVisible(true);
         }
       });
     });
