@@ -521,7 +521,7 @@ export default class Game extends Phaser.Scene {
     this.angleAnimation = this.tweens.addCounter({
       from: physicsConfig.angle.min,
       to: physicsConfig.angle.max,
-      duration: 2000,
+      duration: 600,
       ease: 'Linear',
       repeat: -1,
       yoyo: true,
@@ -1141,8 +1141,12 @@ export default class Game extends Phaser.Scene {
       ease: 'Power2'
     });
 
-    // Restablecer la posición del pingüino
-    this.penguin.setPosition(this.launchPositionX, this.launchPositionY);
+    // Colocar el yeti y el pingüino fuera de la vista inicialmente (por debajo de la pantalla)
+    this.yeti.setPosition(this.launchPositionX + 30, this.launchPositionY + 200);
+    this.flamingo.setPosition(this.launchPositionX, this.launchPositionY + 200);
+    this.penguin.setPosition(this.launchPositionX, this.launchPositionY + 200);
+
+    // Restablecer propiedades del pingüino
     this.penguin.setVelocity(0, 0);
     this.penguin.setAngularVelocity(0);
     this.penguin.setAngle(0);
@@ -1159,8 +1163,43 @@ export default class Game extends Phaser.Scene {
           child.text.includes('¡Nuevo récord!')))
       .forEach(text => text.destroy());
 
-    // Iniciar la selección de ángulo para el nuevo lanzamiento
-    this.startAngleSelection();
+    // Añadir mensaje "Preparando el lanzamiento..."
+    const width = this.cameras.main.width;
+    const preparingText = this.add.text(width / 2, 170, 'Preparando el lanzamiento...', {
+      fontFamily: 'Arial',
+      fontSize: '24px',
+      color: '#ffffff',
+      stroke: '#000000',
+      strokeThickness: 3
+    }).setOrigin(0.5).setScrollFactor(0).setName('preparingText');
+
+    // Animar la entrada del yeti y el pingüino desde abajo
+    this.tweens.add({
+      targets: [this.yeti, this.flamingo, this.penguin],
+      y: { from: this.launchPositionY + 200, to: this.launchPositionY + 20 },
+      duration: 500,
+      ease: 'Back.easeOut',
+      onComplete: () => {
+        // Ajustar la posición final exacta del pingüino
+        this.penguin.setPosition(this.launchPositionX, this.launchPositionY);
+
+        // Eliminar texto "Preparando el lanzamiento..."
+        preparingText.destroy();
+
+        // Añadir un pequeño efecto de rebote al yeti y al flamingo
+        this.tweens.add({
+          targets: [this.yeti, this.flamingo],
+          y: '-=10',
+          duration: 150,
+          yoyo: true,
+          ease: 'Sine.easeInOut',
+          onComplete: () => {
+            // Iniciar la selección de ángulo solo después de que los personajes hayan entrado
+            this.startAngleSelection();
+          }
+        });
+      }
+    });
   }
 
   /**
