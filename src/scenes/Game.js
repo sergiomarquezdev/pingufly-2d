@@ -15,9 +15,9 @@ export default class Game extends Phaser.Scene {
       currentState: 'READY', // READY, ANGLE_SELECTION, POWER_SELECTION, LAUNCHING, FLYING, ENDED
       launchAttempts: 0,
       maxLaunchAttempts: 5,
-      bestDistance: 0,
-      currentDistance: 0,
-      totalDistance: 0  // Nueva propiedad para acumular la distancia total
+      currentDistance: 0, // Distancia del lanzamiento actual
+      totalDistance: 0,   // Distancia acumulada total de esta partida
+      bestTotalDistance: this.loadBestDistance() // Mejor distancia de todas las partidas
     };
 
     // Ángulo y potencia
@@ -194,31 +194,94 @@ export default class Game extends Phaser.Scene {
    * Crea la interfaz de usuario
    */
   createUI() {
-    // Textos para intentos y distancia
-    this.attemptsText = this.add.text(16, 16, 'Intentos: 0/' + this.gameState.maxLaunchAttempts, {
-      fontFamily: 'Arial',
-      fontSize: '18px',
+    // Tamaño del canvas
+    const width = this.scale.width;
+    const height = this.scale.height;
+
+    // Crear un footer en la parte inferior de la pantalla
+    this.uiFooter = this.add.container(0, height - 30).setScrollFactor(0);
+
+    // Fondo del footer
+    const footerBg = this.add.rectangle(0, 0, width, 30, 0x104080, 0.8)
+      .setOrigin(0, 0)
+      .setStrokeStyle(2, 0xffffff, 0.5);
+
+    // Añadir textura al footer para hacerlo más temático
+    const footerTexture = this.add.tileSprite(0, 0, width, 50, 'ground')
+      .setOrigin(0, 0)
+      .setAlpha(0.3)
+      .setTint(0x88bbff);
+
+    // ===== SECCIÓN DE INTENTOS (IZQUIERDA) =====
+    // Contenedor para los iconos de pingüino
+    const attemptsContainer = this.add.container(20, 20);
+
+    // Crear 5 iconos de pingüino
+    this.attemptIcons = [];
+    const ICON_SPACING = 30;
+
+    for (let i = 0; i < this.gameState.maxLaunchAttempts; i++) {
+      const icon = this.add.image(i * ICON_SPACING, 0, 'penguin')
+        .setOrigin(0.5, 0.75)
+        .setScale(1.3);
+
+      this.attemptIcons.push(icon);
+      attemptsContainer.add(icon);
+    }
+
+    // Calcular posición para el título después de los iconos de pingüino
+    const titlePosX = 20 + (this.gameState.maxLaunchAttempts * ICON_SPACING) + 15;
+
+    // Título del juego justo después de los iconos de intentos (pingüinos)
+    const gameTitle = this.add.text(titlePosX, 15, "YETISPORTS", {
+      fontFamily: 'Impact',
+      fontSize: '20px',
+      color: '#ffffff',
+      stroke: '#104080',
+      strokeThickness: 2,
+    }).setOrigin(0, 0.5);
+
+    // ===== SECCIÓN DE DISTANCIA TOTAL ACUMULADA (CENTRO-DERECHA) =====
+    const distanceLabel = this.add.text(width - 280, 15, "DISTANCE", {
+      fontFamily: 'Impact',
+      fontSize: '16px',
+      color: '#ffffff',
+    }).setOrigin(0.5, 0.5);
+
+    this.distanceText = this.add.text(width - 230, 15, "0 m", {
+      fontFamily: 'Impact',
+      fontSize: '23px',
       color: '#ffffff',
       stroke: '#000000',
-      strokeThickness: 3
-    }).setScrollFactor(0);
+      strokeThickness: 2,
+    }).setOrigin(0, 0.5);
 
-    this.distanceText = this.add.text(16, 50, 'Distancia: 0m', {
-      fontFamily: 'Arial',
-      fontSize: '18px',
-      color: '#ffffff',
-      stroke: '#000000',
-      strokeThickness: 3
-    }).setScrollFactor(0);
+    // ===== SECCIÓN DE MEJOR DISTANCIA (RÉCORD) =====
+    const bestLabel = this.add.text(width - 105, 15, "BEST", {
+      fontFamily: 'Impact',
+      fontSize: '16px',
+      color: '#ffdd00',
+    }).setOrigin(0.5, 0.5);
 
-    // Texto para la distancia total acumulada
-    this.totalDistanceText = this.add.text(16, 84, 'Total: 0m', {
-      fontFamily: 'Arial',
-      fontSize: '18px',
-      color: '#ffff00',
+    this.bestDistanceText = this.add.text(width - 75, 15, this.gameState.bestTotalDistance + " m", {
+      fontFamily: 'Impact',
+      fontSize: '23px',
+      color: '#ffdd00',
       stroke: '#000000',
-      strokeThickness: 3
-    }).setScrollFactor(0);
+      strokeThickness: 2,
+    }).setOrigin(0, 0.5);
+
+    // Añadir todo al footer
+    this.uiFooter.add([
+      footerBg,
+      footerTexture,
+      gameTitle,
+      attemptsContainer,
+      distanceLabel,
+      this.distanceText,
+      bestLabel,
+      this.bestDistanceText
+    ]);
 
     // Indicador de ángulo (flecha)
     this.angleIndicator = this.add.graphics().setScrollFactor(0);
@@ -242,11 +305,11 @@ export default class Game extends Phaser.Scene {
   startGame() {
     this.gameState.currentState = 'READY';
     this.gameState.launchAttempts = 0;
-    this.gameState.bestDistance = 0;
+    this.gameState.currentDistance = 0;
     this.gameState.totalDistance = 0; // Reiniciar la distancia total al comenzar
 
     // Actualizar texto de distancia total
-    this.totalDistanceText.setText('Total: 0m');
+    this.distanceText.setText('0 m');
 
     // Mostrar mensaje de inicio
     const width = this.cameras.main.width;
@@ -684,13 +747,12 @@ export default class Game extends Phaser.Scene {
 
     // Incrementar contador de intentos
     this.gameState.launchAttempts++;
-    this.attemptsText.setText('Intentos: ' + this.gameState.launchAttempts + '/' + this.gameState.maxLaunchAttempts);
+
+    // Actualizar el contador de intentos visual
+    this.updateAttemptsUI();
 
     // Hacer que el pingüino sea dinámico para que la física lo afecte
     this.penguin.setStatic(false);
-
-    // Guardar la distancia anterior como referencia (ya no necesitamos reiniciar aquí)
-    // No reiniciamos la distancia actual al lanzar, solo al resetear para el siguiente intento
 
     // Calcular el vector de velocidad basado en ángulo y potencia
     // Para lanzar hacia la izquierda, invertimos el ángulo
@@ -706,24 +768,56 @@ export default class Game extends Phaser.Scene {
     // Aplicar la velocidad al pingüino
     this.penguin.setVelocity(velocityX, velocityY);
 
-    // Animar el golpe (versión simple)
+    // Cambiar inmediatamente al estado FLYING sin esperar a la animación
+    this.gameState.currentState = 'FLYING';
+
+    // Reiniciar distancia actual inmediatamente
+    this.gameState.currentDistance = 0;
+
+    // Comenzar a registrar la última posición X del pingüino
+    this.lastPenguinX = this.penguin.x;
+    this.penguinStoppedFrames = 0;
+
+    // Animar el golpe (versión simple) - ahora la animación ocurre en paralelo
     this.tweens.add({
       targets: this.flamingo,
       angle: -90, // Ángulo negativo para girar hacia la izquierda
       duration: 200,
-      yoyo: true,
-      onComplete: () => {
-        // Cambiar estado
-        this.gameState.currentState = 'FLYING';
-
-        // Reiniciar distancia actual
-        this.gameState.currentDistance = 0;
-
-        // Comenzar a registrar la última posición X del pingüino
-        this.lastPenguinX = this.penguin.x;
-        this.penguinStoppedFrames = 0;
-      }
+      yoyo: true
+      // Ya no necesitamos el onComplete, todo se configura antes de la animación
     });
+  }
+
+  /**
+   * Actualiza la interfaz gráfica de intentos
+   */
+  updateAttemptsUI() {
+    // Actualizar los iconos de pingüino
+    for (let i = 0; i < this.gameState.maxLaunchAttempts; i++) {
+      if (i < this.gameState.launchAttempts) {
+        // Intento usado - pingüino completo
+        this.attemptIcons[i].setAlpha(0.4);
+        this.attemptIcons[i].setTint(0xaaccff);
+        this.attemptIcons[i].setScale(1.0); // Escala reducida para intentos usados
+      } else {
+        // Intento disponible - pingüino semi-transparente
+        this.attemptIcons[i].setAlpha(1); // Más transparente
+        this.attemptIcons[i].clearTint();
+        this.attemptIcons[i].setScale(1.3); // Mantener escala original
+      }
+    }
+
+    // Animar el icono del intento actual
+    if (this.gameState.launchAttempts > 0 && this.gameState.launchAttempts <= this.gameState.maxLaunchAttempts) {
+      const currentIcon = this.attemptIcons[this.gameState.launchAttempts - 1];
+      this.tweens.add({
+        targets: currentIcon,
+        scaleX: { from: 1.5, to: 1.0 },
+        scaleY: { from: 1.5, to: 1.0 },
+        duration: 300,
+        ease: 'Back.easeOut'
+      });
+    }
   }
 
   /**
@@ -740,8 +834,22 @@ export default class Game extends Phaser.Scene {
     // Actualizar la distancia actual (solo si es positiva, para evitar distancias negativas si va a la derecha)
     this.gameState.currentDistance = Math.max(0, distanceInMeters);
 
-    // Actualizar el texto de distancia
-    this.distanceText.setText('Distancia: ' + this.gameState.currentDistance + 'm');
+    // Calcular la distancia total (la acumulada hasta ahora + la del lanzamiento actual)
+    const totalDistance = this.gameState.totalDistance + this.gameState.currentDistance;
+
+    // Actualizar el texto de distancia con la suma total
+    if (Math.abs(parseInt(this.distanceText.text) - totalDistance) >= 1) {
+      this.distanceText.setText(totalDistance + ' m');
+
+      // Pequeña animación de escala al cambiar el número
+      this.tweens.add({
+        targets: this.distanceText,
+        scaleX: { from: 1.2, to: 1 },
+        scaleY: { from: 1.2, to: 1 },
+        duration: 100,
+        ease: 'Sine.easeOut'
+      });
+    }
 
     // Comprobar si el pingüino se ha detenido
     // Comparamos la posición actual con la última posición registrada
@@ -765,19 +873,19 @@ export default class Game extends Phaser.Scene {
    * Finaliza el lanzamiento actual
    */
   endLaunch() {
-    // Actualizar mejor distancia si corresponde
-    if (this.gameState.currentDistance > this.gameState.bestDistance) {
-      this.gameState.bestDistance = this.gameState.currentDistance;
-
-      // Mostrar celebración
-      this.showCelebration();
-    }
-
     // Acumular la distancia actual al total
     this.gameState.totalDistance += this.gameState.currentDistance;
 
-    // Actualizar el texto de distancia total
-    this.totalDistanceText.setText('Total: ' + this.gameState.totalDistance + 'm');
+    // No necesitamos actualizar el texto aquí, ya lo estamos actualizando en tiempo real en updateDistance()
+
+    // Animar actualización del total (opcional, para dar feedback visual)
+    this.tweens.add({
+      targets: this.distanceText,
+      scaleX: { from: 1.3, to: 1 },
+      scaleY: { from: 1.3, to: 1 },
+      duration: 300,
+      ease: 'Back.easeOut'
+    });
 
     // Verificar si hemos alcanzado el número máximo de intentos
     if (this.gameState.launchAttempts >= this.gameState.maxLaunchAttempts) {
@@ -786,31 +894,6 @@ export default class Game extends Phaser.Scene {
       // Preparar para el siguiente lanzamiento
       this.showNextLaunchPrompt();
     }
-  }
-
-  /**
-   * Muestra celebración por nuevo récord
-   */
-  showCelebration() {
-    // Texto de felicitación
-    const celebrationText = this.add.text(this.penguin.x, this.penguin.y - 50, '¡Nuevo récord!', {
-      fontFamily: 'Arial',
-      fontSize: '24px',
-      color: '#ffff00',
-      stroke: '#000000',
-      strokeThickness: 4
-    }).setOrigin(0.5);
-
-    // Animación
-    this.tweens.add({
-      targets: celebrationText,
-      y: celebrationText.y - 100,
-      alpha: 0,
-      duration: 2000,
-      onComplete: () => {
-        celebrationText.destroy();
-      }
-    });
   }
 
   /**
@@ -842,70 +925,56 @@ export default class Game extends Phaser.Scene {
   }
 
   /**
-   * Finaliza el juego después del número máximo de intentos
+   * Finaliza el juego actual
    */
   endGame() {
     this.gameState.currentState = 'ENDED';
 
-    // Mensaje de fin de juego
-    const width = this.cameras.main.width;
-    const height = this.cameras.main.height;
+    // Comprobar si hemos batido el récord
+    if (this.gameState.totalDistance > this.gameState.bestTotalDistance) {
+      // Actualizar mejor distancia total
+      this.gameState.bestTotalDistance = this.gameState.totalDistance;
 
-    // Crear una capa para los resultados
-    const resultsLayer = this.add.container(0, 0).setScrollFactor(0);
+      // Guardar en localStorage
+      this.saveBestDistance(this.gameState.bestTotalDistance);
 
-    // Fondo semi-transparente
-    const bg = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.8)
-      .setScrollFactor(0);
+      // Actualizar el texto de mejor distancia
+      this.bestDistanceText.setText(this.gameState.bestTotalDistance + ' m');
 
-    // Textos de resultados
-    const gameOverText = this.add.text(width / 2, height / 3, 'JUEGO TERMINADO', {
+      // Mostrar mensaje de nueva mejor distancia
+      this.add.text(this.scale.width / 2, this.scale.height / 2 - 100, '¡NUEVO RÉCORD!', {
+        fontFamily: 'Impact',
+        fontSize: '36px',
+        color: '#ffdd00',
+        stroke: '#000000',
+        strokeThickness: 4
+      }).setOrigin(0.5);
+    }
+
+    // Mostrar resultados y mensaje de fin
+    this.add.text(this.scale.width / 2, this.scale.height / 2 - 50, 'JUEGO TERMINADO', {
       fontFamily: 'Arial',
-      fontSize: '36px',
+      fontSize: '32px',
       color: '#ffffff',
       stroke: '#000000',
-      strokeThickness: 4
-    }).setOrigin(0.5).setScrollFactor(0);
+      strokeThickness: 3
+    }).setOrigin(0.5);
 
-    const bestDistanceText = this.add.text(width / 2, height / 2 - 30, `Mejor distancia: ${this.gameState.bestDistance}m`, {
+    this.add.text(this.scale.width / 2, this.scale.height / 2, 'Distancia total: ' + this.gameState.totalDistance + 'm', {
       fontFamily: 'Arial',
-      fontSize: '28px',
-      color: '#ffff00',
+      fontSize: '24px',
+      color: '#ffffff',
       stroke: '#000000',
       strokeThickness: 3
-    }).setOrigin(0.5).setScrollFactor(0);
+    }).setOrigin(0.5);
 
-    const totalDistanceText = this.add.text(width / 2, height / 2 + 30, `Distancia total: ${this.gameState.totalDistance}m`, {
-      fontFamily: 'Arial',
-      fontSize: '28px',
-      color: '#ffff00',
-      stroke: '#000000',
-      strokeThickness: 3
-    }).setOrigin(0.5).setScrollFactor(0);
-
-    // Botón para volver al menú
-    const menuButton = this.add.image(width / 2, height * 2/3, 'button').setScale(2).setScrollFactor(0);
-    const menuText = this.add.text(width / 2, height * 2/3, 'MENÚ PRINCIPAL', {
+    this.add.text(this.scale.width / 2, this.scale.height / 2 + 40, 'Haz clic para volver al menú', {
       fontFamily: 'Arial',
       fontSize: '20px',
-      color: '#ffffff'
-    }).setOrigin(0.5).setScrollFactor(0);
-
-    // Hacer interactivo el botón
-    menuButton.setInteractive();
-    menuButton.on('pointerover', () => {
-      menuButton.setTint(0xaaaaff);
-    });
-    menuButton.on('pointerout', () => {
-      menuButton.clearTint();
-    });
-    menuButton.on('pointerdown', () => {
-      // Volver al menú principal
-      this.scene.start('Menu');
-    });
-
-    // Añadir todo a la capa
-    resultsLayer.add([bg, gameOverText, bestDistanceText, totalDistanceText, menuButton, menuText]);
+      color: '#ffffff',
+      stroke: '#000000',
+      strokeThickness: 3
+    }).setOrigin(0.5);
   }
 
   /**
@@ -927,11 +996,9 @@ export default class Game extends Phaser.Scene {
     this.penguin.setAngle(0);
     this.penguin.setStatic(true);
 
-    // Reiniciamos la distancia actual para el nuevo intento
+    // Reiniciamos solo la distancia actual para el nuevo intento
+    // La distancia total acumulada no se reinicia
     this.gameState.currentDistance = 0;
-
-    // Actualizamos el texto de distancia actual
-    this.distanceText.setText('Distancia: 0m');
 
     // Eliminar todos los textos temporales
     this.children.list
@@ -942,5 +1009,34 @@ export default class Game extends Phaser.Scene {
 
     // Iniciar la selección de ángulo para el nuevo lanzamiento
     this.startAngleSelection();
+  }
+
+  /**
+   * Crea el estado del juego
+   */
+  createGameState() {
+    this.gameState = {
+      currentState: 'READY', // READY, ANGLE_SELECTION, POWER_SELECTION, LAUNCHING, FLYING, ENDED
+      launchAttempts: 0,
+      maxLaunchAttempts: 5,
+      currentDistance: 0, // Distancia del lanzamiento actual
+      totalDistance: 0,   // Distancia acumulada total de esta partida
+      bestTotalDistance: this.loadBestDistance() // Mejor distancia de todas las partidas
+    };
+  }
+
+  /**
+   * Carga la mejor distancia desde localStorage
+   */
+  loadBestDistance() {
+    const stored = localStorage.getItem('yetiSports_bestDistance');
+    return stored ? parseInt(stored, 10) : 0;
+  }
+
+  /**
+   * Guarda la mejor distancia en localStorage
+   */
+  saveBestDistance(distance) {
+    localStorage.setItem('yetiSports_bestDistance', distance.toString());
   }
 }
