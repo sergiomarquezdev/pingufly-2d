@@ -90,19 +90,40 @@ export default class Game extends Phaser.Scene {
   updateCameraFollow() {
     // Solo seguir si el pingüino está en movimiento
     if (this.gameState.currentState === 'FLYING') {
-      // Si el pingüino se mueve hacia la izquierda más allá del límite visible
-      if (this.penguin.x < this.getCameraLeftEdge() + this.cameraLeftBoundary) {
-        // Hacer que la cámara siga al pingüino manteniendo una distancia constante
-        // desde el borde izquierdo de la pantalla
-        this.cameras.main.scrollX = this.penguin.x - this.cameraLeftBoundary;
+      // Calcular la distancia del pingüino desde el borde izquierdo visible
+      const distanceFromEdge = this.penguin.x - this.getCameraLeftEdge();
+
+      // Punto en el que la cámara comienza a seguir (más lejos del borde)
+      const startFollowDistance = this.cameraLeftBoundary + 100;
+
+      // Calcular el factor de interpolación (qué tan rápido sigue la cámara)
+      // 0 = no seguir, 1 = seguir completamente
+      let followFactor = 0;
+
+      if (distanceFromEdge < startFollowDistance) {
+        // Calcular un factor basado en la distancia al borde
+        // Cuanto más cerca del borde, más alto será el factor (más rápido seguirá la cámara)
+        followFactor = Math.max(0, 1 - (distanceFromEdge / startFollowDistance));
+
+        // Aplicar una curva de ease para suavizar aún más el movimiento
+        // Esto da una aceleración gradual al movimiento
+        followFactor = Math.pow(followFactor, 2);
+
+        // Calcular la posición ideal de la cámara (donde debería estar para mantener la distancia deseada)
+        const targetScrollX = this.penguin.x - this.cameraLeftBoundary;
+
+        // Interpolar entre la posición actual y la posición objetivo usando el factor
+        // Esto hace que la cámara se mueva gradualmente hacia la posición deseada
+        const newScrollX = Phaser.Math.Linear(
+          this.cameras.main.scrollX,
+          targetScrollX,
+          followFactor * 0.1 // Multiplicador para controlar la velocidad general de seguimiento
+        );
 
         // Asegurarnos de que la cámara no retroceda si el pingüino rebota hacia la derecha
-        if (this.cameras.main.scrollX > this.initialScrollX) {
-          this.cameras.main.scrollX = this.initialScrollX;
+        if (newScrollX <= this.initialScrollX) {
+          this.cameras.main.scrollX = newScrollX;
         }
-
-        // Eliminar la limitación que impedía ir más allá de x=0
-        // Ahora la cámara puede seguir al pingüino hasta el límite extendido
       }
     }
   }
