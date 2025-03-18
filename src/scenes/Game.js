@@ -16,7 +16,8 @@ export default class Game extends Phaser.Scene {
       launchAttempts: 0,
       maxLaunchAttempts: 5,
       bestDistance: 0,
-      currentDistance: 0
+      currentDistance: 0,
+      totalDistance: 0  // Nueva propiedad para acumular la distancia total
     };
 
     // Ángulo y potencia
@@ -34,6 +35,7 @@ export default class Game extends Phaser.Scene {
     this.powerBar = null;
     this.distanceText = null;
     this.attemptsText = null;
+    this.totalDistanceText = null;
 
     // Punto de inicio del lanzamiento (ahora a la derecha)
     this.launchPositionX = 700;
@@ -209,6 +211,15 @@ export default class Game extends Phaser.Scene {
       strokeThickness: 3
     }).setScrollFactor(0);
 
+    // Texto para la distancia total acumulada
+    this.totalDistanceText = this.add.text(16, 84, 'Total: 0m', {
+      fontFamily: 'Arial',
+      fontSize: '18px',
+      color: '#ffff00',
+      stroke: '#000000',
+      strokeThickness: 3
+    }).setScrollFactor(0);
+
     // Indicador de ángulo (flecha)
     this.angleIndicator = this.add.graphics().setScrollFactor(0);
     this.angleIndicator.setVisible(false);
@@ -232,6 +243,10 @@ export default class Game extends Phaser.Scene {
     this.gameState.currentState = 'READY';
     this.gameState.launchAttempts = 0;
     this.gameState.bestDistance = 0;
+    this.gameState.totalDistance = 0; // Reiniciar la distancia total al comenzar
+
+    // Actualizar texto de distancia total
+    this.totalDistanceText.setText('Total: 0m');
 
     // Mostrar mensaje de inicio
     const width = this.cameras.main.width;
@@ -674,6 +689,9 @@ export default class Game extends Phaser.Scene {
     // Hacer que el pingüino sea dinámico para que la física lo afecte
     this.penguin.setStatic(false);
 
+    // Guardar la distancia anterior como referencia (ya no necesitamos reiniciar aquí)
+    // No reiniciamos la distancia actual al lanzar, solo al resetear para el siguiente intento
+
     // Calcular el vector de velocidad basado en ángulo y potencia
     // Para lanzar hacia la izquierda, invertimos el ángulo
     const invertedAngle = 180 - this.selectedAngle;
@@ -754,6 +772,12 @@ export default class Game extends Phaser.Scene {
       // Mostrar celebración
       this.showCelebration();
     }
+
+    // Acumular la distancia actual al total
+    this.gameState.totalDistance += this.gameState.currentDistance;
+
+    // Actualizar el texto de distancia total
+    this.totalDistanceText.setText('Total: ' + this.gameState.totalDistance + 'm');
 
     // Verificar si hemos alcanzado el número máximo de intentos
     if (this.gameState.launchAttempts >= this.gameState.maxLaunchAttempts) {
@@ -843,7 +867,15 @@ export default class Game extends Phaser.Scene {
       strokeThickness: 4
     }).setOrigin(0.5).setScrollFactor(0);
 
-    const bestDistanceText = this.add.text(width / 2, height / 2, `Mejor distancia: ${this.gameState.bestDistance}m`, {
+    const bestDistanceText = this.add.text(width / 2, height / 2 - 30, `Mejor distancia: ${this.gameState.bestDistance}m`, {
+      fontFamily: 'Arial',
+      fontSize: '28px',
+      color: '#ffff00',
+      stroke: '#000000',
+      strokeThickness: 3
+    }).setOrigin(0.5).setScrollFactor(0);
+
+    const totalDistanceText = this.add.text(width / 2, height / 2 + 30, `Distancia total: ${this.gameState.totalDistance}m`, {
       fontFamily: 'Arial',
       fontSize: '28px',
       color: '#ffff00',
@@ -873,7 +905,7 @@ export default class Game extends Phaser.Scene {
     });
 
     // Añadir todo a la capa
-    resultsLayer.add([bg, gameOverText, bestDistanceText, menuButton, menuText]);
+    resultsLayer.add([bg, gameOverText, bestDistanceText, totalDistanceText, menuButton, menuText]);
   }
 
   /**
@@ -894,6 +926,12 @@ export default class Game extends Phaser.Scene {
     this.penguin.setAngularVelocity(0);
     this.penguin.setAngle(0);
     this.penguin.setStatic(true);
+
+    // Reiniciamos la distancia actual para el nuevo intento
+    this.gameState.currentDistance = 0;
+
+    // Actualizamos el texto de distancia actual
+    this.distanceText.setText('Distancia: 0m');
 
     // Eliminar todos los textos temporales
     this.children.list
