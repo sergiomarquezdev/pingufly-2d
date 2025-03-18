@@ -130,7 +130,7 @@ export default class Game extends Phaser.Scene {
    */
   createCharacters() {
     // Crear el Yeti (por ahora, es un placeholder estático)
-    this.yeti = this.add.image(this.launchPositionX + 50, this.launchPositionY + 20, 'yeti');
+    this.yeti = this.add.image(this.launchPositionX + 30, this.launchPositionY + 20, 'yeti');
 
     // Voltear el Yeti para que mire hacia la izquierda
     this.yeti.setFlipX(true);
@@ -344,37 +344,46 @@ export default class Game extends Phaser.Scene {
       this.penguin.setAngularVelocity(0);
     }
 
-    // Efecto de transición con flash blanco (más corto)
-    this.cameras.main.flash(1000, 255, 255, 255);
+    // Retrasar 200 ms el flash:
+    setTimeout(() => {
+      // Efecto de transición con flash blanco (más corto)
+      this.cameras.main.flash(200, 255, 255, 255);
 
-    // Restablecer la posición de la cámara
-    this.cameras.main.scrollX = this.initialScrollX;
-    // Reiniciar todos los valores del juego
-    this.gameState.currentState = 'READY';
-    this.gameState.launchAttempts = 0;
-    this.gameState.currentDistance = 0;
-    this.gameState.totalDistance = 0;
-    // Actualizar textos de distancia
-    this.distanceText.setText('0 m');
-    // Actualizar la UI de intentos
-    this.updateAttemptsUI();
-    // Eliminar textos existentes de fin de juego o instrucciones
-    this.children.list
-      .filter(child => child.type === 'Text' &&
-        (child.text.includes('JUEGO TERMINADO') ||
-          child.text.includes('Distancia total') ||
-          child.text.includes('Haz clic para') ||
-          child.text.includes('NUEVO RÉCORD')))
-      .forEach(text => text.destroy());
-    // Reiniciar posición del pingüino
-    this.penguin.setPosition(this.launchPositionX, this.launchPositionY);
-    this.penguin.setAngle(0);
-    this.penguin.setStatic(true);
-    // Reanudar físicas
-    this.matter.world.resume();
-    // Iniciar el juego nuevamente
-    this.startGame();
+      // Restablecer la posición de la cámara inmediatamente
+      this.cameras.main.scrollX = this.initialScrollX;
 
+      // Reiniciar todos los valores del juego
+      this.gameState.currentState = 'READY';
+      this.gameState.launchAttempts = 0;
+      this.gameState.currentDistance = 0;
+      this.gameState.totalDistance = 0;
+
+      // Actualizar textos de distancia
+      this.distanceText.setText('0 m');
+
+      // Actualizar la UI de intentos
+      this.updateAttemptsUI();
+
+      // Eliminar textos existentes de fin de juego o instrucciones
+      this.children.list
+        .filter(child => child.type === 'Text' &&
+          (child.text.includes('JUEGO TERMINADO') ||
+            child.text.includes('Distancia total') ||
+            child.text.includes('Haz clic para') ||
+            child.text.includes('NUEVO RÉCORD')))
+        .forEach(text => text.destroy());
+
+      // Reiniciar posición del pingüino
+      this.penguin.setPosition(this.launchPositionX, this.launchPositionY);
+      this.penguin.setAngle(0);
+      this.penguin.setStatic(true);
+
+      // Reanudar físicas
+      this.matter.world.resume();
+
+      // Iniciar el juego nuevamente
+      this.startGame();
+    }, 100);
   }
 
   /**
@@ -659,10 +668,10 @@ export default class Game extends Phaser.Scene {
     this.angleIndicator.lineStyle(2, 0xffffff, 0.7);
     for (let angle = 0; angle <= 90; angle += 15) {
       const markAngle = Phaser.Math.DegToRad(180 + angle);
-      const markStartX = originX + (radius - thickness/2) * Math.cos(markAngle);
-      const markStartY = originY + (radius - thickness/2) * Math.sin(markAngle);
-      const markEndX = originX + (radius + thickness/2) * Math.cos(markAngle);
-      const markEndY = originY + (radius + thickness/2) * Math.sin(markAngle);
+      const markStartX = originX + (radius - thickness / 2) * Math.cos(markAngle);
+      const markStartY = originY + (radius - thickness / 2) * Math.sin(markAngle);
+      const markEndX = originX + (radius + thickness / 2) * Math.cos(markAngle);
+      const markEndY = originY + (radius + thickness / 2) * Math.sin(markAngle);
 
       this.angleIndicator.beginPath();
       this.angleIndicator.moveTo(markStartX, markStartY);
@@ -679,7 +688,7 @@ export default class Game extends Phaser.Scene {
     this.angleIndicator.beginPath();
 
     // Calcular la dirección tangente al arco en el punto actual
-    const tangentAngle = currentRad + Math.PI/2; // 90 grados más que el radio
+    const tangentAngle = currentRad + Math.PI / 2; // 90 grados más que el radio
     const arrowSize = 15;
 
     // Puntos de la flecha
@@ -725,20 +734,23 @@ export default class Game extends Phaser.Scene {
     // Limpiar el gráfico
     this.powerBar.clear();
 
+    // Tamaño del canvas
+    const width = this.scale.width;
+
     // Configuración de la barra
-    const barWidth = 30;
+    const barWidth = 15;
     const barHeight = 150;
-    const barX = this.launchPositionX + 50;
-    const barY = this.launchPositionY - barHeight/2;
+    const barX = width - 35; // Colocado al borde derecho de la pantalla
+    const barY = this.launchPositionY - 40; // Centrado verticalmente en la pantalla
     const padding = 4;
 
     // Dibujar el marco de la barra (fondo)
     this.powerBar.fillStyle(0x333333, 0.9);
-    this.powerBar.fillRect(barX - padding, barY - padding, barWidth + padding*2, barHeight + padding*2);
+    this.powerBar.fillRect(barX - padding, barY - barHeight / 2 - padding, barWidth + padding * 2, barHeight + padding * 2);
 
     // Dibujar el fondo de la barra
     this.powerBar.fillStyle(0x666666, 1);
-    this.powerBar.fillRect(barX, barY, barWidth, barHeight);
+    this.powerBar.fillRect(barX, barY - barHeight / 2, barWidth, barHeight);
 
     // Gradiente de color para la barra (verde-amarillo-rojo)
     const colors = [0x00ff00, 0xffff00, 0xff0000]; // verde, amarillo, rojo
@@ -750,7 +762,7 @@ export default class Game extends Phaser.Scene {
       this.powerBar.fillStyle(colors[i], 1);
       this.powerBar.fillRect(
         barX,
-        barY + barHeight - (i+1) * sectionHeight,
+        barY - barHeight / 2 + (i * sectionHeight),
         barWidth,
         sectionHeight
       );
@@ -763,13 +775,13 @@ export default class Game extends Phaser.Scene {
     this.powerBar.fillStyle(0xaaaaaa, 0.3);
     this.powerBar.fillRect(
       barX,
-      barY + barHeight - fillHeight,
+      barY + barHeight / 2 - fillHeight,
       barWidth,
       fillHeight
     );
 
     // Dibujar el indicador (línea horizontal que muestra la posición actual)
-    const indicatorY = barY + barHeight - fillHeight;
+    const indicatorY = barY + barHeight / 2 - fillHeight;
     this.powerBar.fillStyle(0xffffff, 1);
     this.powerBar.fillRect(
       barX - 10,
@@ -800,7 +812,7 @@ export default class Game extends Phaser.Scene {
     // Añadir marcas de nivel en la barra
     this.powerBar.lineStyle(2, 0xffffff, 0.5);
     for (let i = 0; i <= 10; i++) {
-      const markY = barY + barHeight - (i * barHeight / 10);
+      const markY = barY + barHeight / 2 - (i * barHeight / 10);
       const markWidth = (i % 5 === 0) ? 10 : 5; // Marcas más largas cada 50%
 
       this.powerBar.beginPath();
@@ -847,7 +859,7 @@ export default class Game extends Phaser.Scene {
       this.percentageTexts = [];
     }
 
-    this.powerText = this.add.text(barX + barWidth/2, barY - 20, `${Math.round(this.power * 100)}%`, {
+    this.powerText = this.add.text(barX + barWidth / 2, barY - barHeight / 2 - 20, `${Math.round(this.power * 100)}%`, {
       fontFamily: 'Arial',
       fontSize: '18px',
       color: '#ffffff',
@@ -971,8 +983,8 @@ export default class Game extends Phaser.Scene {
     // Comprobar si el pingüino se ha detenido
     // Comparamos la posición actual con la última posición registrada
     if (Math.abs(this.penguin.x - this.lastPenguinX) < 0.5 &&
-        Math.abs(this.penguin.body.velocity.x) < 0.2 &&
-        Math.abs(this.penguin.body.velocity.y) < 0.2) {
+      Math.abs(this.penguin.body.velocity.x) < 0.2 &&
+      Math.abs(this.penguin.body.velocity.y) < 0.2) {
       this.penguinStoppedFrames++;
 
       // Si ha estado detenido durante varios frames, considerar que ha parado
@@ -1123,8 +1135,8 @@ export default class Game extends Phaser.Scene {
     // Eliminar todos los textos temporales
     this.children.list
       .filter(child => child.type === 'Text' &&
-              (child.text === 'Haz clic para el siguiente lanzamiento' ||
-               child.text.includes('¡Nuevo récord!')))
+        (child.text === 'Haz clic para el siguiente lanzamiento' ||
+          child.text.includes('¡Nuevo récord!')))
       .forEach(text => text.destroy());
 
     // Iniciar la selección de ángulo para el nuevo lanzamiento
