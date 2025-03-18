@@ -37,7 +37,7 @@ export default class Game extends Phaser.Scene {
 
     // Punto de inicio del lanzamiento (ahora a la derecha)
     this.launchPositionX = 650;
-    this.launchPositionY = 480;
+    this.launchPositionY = 510;
 
     // Control de cámara
     this.isCameraFollowing = false;
