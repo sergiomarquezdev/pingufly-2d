@@ -1,7 +1,7 @@
 {
-  "name": "yetisports-game",
+  "name": "pingugo-game",
   "version": "1.0.0",
-  "description": "Remake of Yeti Sports 5: Flamingo Drive using Phaser and Vite",
+  "description": "Pingu GO! Throw your penguin as far as possible!",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,21 +11,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sergiomarquezdev/yetisports-game.git"
+    "url": "git+https://github.com/sergiomarquezdev/pingugo-game.git"
   },
   "keywords": [
     "game",
     "phaser",
     "html5",
     "javascript",
-    "yetisports"
+    "pingugo"
   ],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/sergiomarquezdev/yetisports-game/issues"
+    "url": "https://github.com/sergiomarquezdev/pingugo-game/issues"
   },
-  "homepage": "https://github.com/sergiomarquezdev/yetisports-game#readme",
+  "homepage": "https://github.com/sergiomarquezdev/pingugo-game#readme",
   "dependencies": {
     "phaser": "^3.88.2"
   },

@@ -1,5 +1,5 @@
 /**
- * Configuración principal del juego Yeti Sports 5: Flamingo Drive
+ * Configuración principal del juego Pingu GO!
  * Define los parámetros básicos para la inicialización de Phaser
  */
 const gameConfig = {

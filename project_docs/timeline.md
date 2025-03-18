@@ -1,6 +1,6 @@
-# Yeti Sports 5: Flamingo Drive - Development Timeline
+# Pingu GO! - Development Timeline
 
-This document outlines the development roadmap for the Yeti Sports 5: Flamingo Drive remake, breaking down the process into phases and specific tasks to facilitate implementation.
+This document outlines the development roadmap for the 'Pingu GO!' videogame, breaking down the process into phases and specific tasks to facilitate implementation.
 
 ## Phase 1: Project Setup and Foundation (Week 1)
 
@@ -9,7 +9,7 @@ This document outlines the development roadmap for the Yeti Sports 5: Flamingo D
 - [x] Decide on build tool: **Using Vite** instead of Webpack/Parcel for faster development
 - [x] Initialize project with proper directory structure:
   ```
-  /yetisports-game
+  /pingugo-game
   ├── /src
   │   ├── /scenes
   │   │   ├── Boot.js

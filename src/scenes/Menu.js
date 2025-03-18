@@ -634,7 +634,7 @@ export default class Menu extends Phaser.Scene {
    * Carga la mejor distancia desde localStorage
    */
   loadBestDistance() {
-    const stored = localStorage.getItem('yetiSports_bestDistance');
+    const stored = localStorage.getItem('pinguGo_bestDistance');
     this.bestDistance = stored ? parseInt(stored, 10) : 0;
   }
 

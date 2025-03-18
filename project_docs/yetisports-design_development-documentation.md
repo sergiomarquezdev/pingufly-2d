@@ -1,13 +1,13 @@
-# Design and Development Documentation: Yeti Sports 5: Flamingo Drive Remake (Initial Version - Javascript Web)
+# Design and Development Documentation: Pingu GO! videogame (Initial Version - Javascript Web)
 
 **Date:** March 17, 2025
 **Version:** 1.1 (Adapted for Javascript Web)
-**Product:** Yeti Sports 5: Flamingo Drive Remake
+**Product:** Pingu GO! videogame
 **Audience:** Game Designers, Game Developers
 
 ## 1. Introduction and Product Vision
 
-This document details the functionalities and gameplay of the video game 'Yeti Sports 5: Flamingo Drive' with the aim of serving as a guide for the design and development of an initial remake version. This first version will focus on the core mechanics of the game, omitting for now secondary elements such as giraffes, snakes, and other advanced obstacles.
+This document details the functionalities and gameplay of the video game 'Pingu GO!' with the aim of serving as a guide for the design and development of an initial remake version. This first version will focus on the core mechanics of the game, omitting for now secondary elements such as giraffes, snakes, and other advanced obstacles.
 
 The vision for this first version is to recreate the fundamental experience of launching a penguin as far as possible using a flamingo as a golf club, maintaining the essence and charm of the original game, using web technologies with Javascript for its implementation.
 
@@ -134,7 +134,7 @@ For the development of this remake using Javascript and focusing on a web versio
 
 **Conclusion:**
 
-For the realization of the initial version of 'Yeti Sports 5: Flamingo Drive' with Javascript, using spritesheets for the characters, **Phaser is the most recommended option**. It offers an ideal balance between functionality, performance, ease of use, and a large support community, which will facilitate the work of both the designer and the developer to carry out this project.
+For the realization of the initial version of 'Pingu GO!' with Javascript, using spritesheets for the characters, **Phaser is the most recommended option**. It offers an ideal balance between functionality, performance, ease of use, and a large support community, which will facilitate the work of both the designer and the developer to carry out this project.
 
 ## 11. Next Steps and Future Functionalities
 
@@ -149,6 +149,6 @@ Once the main mechanics are implemented and polished in Javascript, the followin
 
 ## 12. Conclusion
 
-This adapted document provides a specific guide for the development of the 'Yeti Sports 5: Flamingo Drive' remake using Javascript for a web platform compatible with mobile devices. By focusing on the core mechanics and using the appropriate web technologies, we will be able to create a playable experience and expand the game in future iterations.
+This adapted document provides a specific guide for the development of the 'Pingu GO!' remake using Javascript for a web platform compatible with mobile devices. By focusing on the core mechanics and using the appropriate web technologies, we will be able to create a playable experience and expand the game in future iterations.
 
 Please do not hesitate to ask any questions or make suggestions. We are ready to start development!

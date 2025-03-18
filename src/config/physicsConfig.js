@@ -1,5 +1,5 @@
 /**
- * Configuración de física para el juego Yeti Sports 5: Flamingo Drive.
+ * Configuración de física para el juego Pingu GO!
  * Especifica parámetros de física para Matter.js que controlarán
  * el comportamiento del pingüino durante su vuelo.
  */

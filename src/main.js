@@ -1,5 +1,5 @@
 /**
- * Yeti Sports 5: Flamingo Drive
+ * Pingu GO!
  * Punto de entrada principal de la aplicación
  */
 

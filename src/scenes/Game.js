@@ -243,7 +243,7 @@ export default class Game extends Phaser.Scene {
     const titlePosX = 20 + (this.gameState.maxLaunchAttempts * ICON_SPACING) + 15;
 
     // Título del juego justo después de los iconos de intentos (pingüinos)
-    const gameTitle = this.add.text(titlePosX, 15, "YETISPORTS", {
+    const gameTitle = this.add.text(titlePosX, 15, "PINGU GO!", {
       fontFamily: 'Impact',
       fontSize: '20px',
       color: '#ffffff',
@@ -1220,7 +1220,7 @@ export default class Game extends Phaser.Scene {
    * Carga la mejor distancia desde localStorage
    */
   loadBestDistance() {
-    const stored = localStorage.getItem('yetiSports_bestDistance');
+    const stored = localStorage.getItem('pinguGo_bestDistance');
     return stored ? parseInt(stored, 10) : 0;
   }
 
@@ -1228,6 +1228,6 @@ export default class Game extends Phaser.Scene {
    * Guarda la mejor distancia en localStorage
    */
   saveBestDistance(distance) {
-    localStorage.setItem('yetiSports_bestDistance', distance.toString());
+    localStorage.setItem('pinguGo_bestDistance', distance.toString());
   }
 }
