@@ -293,10 +293,88 @@ export default class Game extends Phaser.Scene {
   }
 
   /**
-   * Configura la entrada de usuario (clics/toques)
+   * Configurar la entrada de usuario
    */
   setupInput() {
-    this.input.on('pointerdown', this.handlePlayerInput, this);
+    // Configurar la entrada de clic para seleccionar ángulo y potencia
+    this.input.on('pointerdown', () => {
+      this.handlePlayerInput();
+    });
+
+    // Configurar la tecla Escape para volver al menú
+    this.input.keyboard.on('keydown-ESC', () => {
+      this.backToMenu();
+    });
+
+    // Configurar la tecla R para reiniciar el juego
+    this.input.keyboard.on('keydown-R', () => {
+      this.restartGame();
+    });
+  }
+
+  /**
+   * Vuelve al menú principal
+   */
+  backToMenu() {
+    // Efecto de transición
+    this.cameras.main.fade(500, 0, 0, 0);
+
+    this.cameras.main.once('camerafadeoutcomplete', () => {
+      // Detener las físicas para evitar problemas
+      this.matter.world.pause();
+
+      // Volver a la escena del menú
+      this.scene.start('Menu');
+    });
+  }
+
+  /**
+   * Reinicia el juego actual
+   */
+  restartGame() {
+    // Iniciar algunas acciones de reinicio inmediatamente
+    this.gameState.currentState = 'RESETTING';
+
+    // Detener físicas inmediatamente
+    this.matter.world.pause();
+
+    // Resetear velocidades inmediatamente para detener cualquier movimiento visible
+    if (this.penguin && this.penguin.body) {
+      this.penguin.setVelocity(0, 0);
+      this.penguin.setAngularVelocity(0);
+    }
+
+    // Efecto de transición con flash blanco (más corto)
+    this.cameras.main.flash(1000, 255, 255, 255);
+
+    // Restablecer la posición de la cámara
+    this.cameras.main.scrollX = this.initialScrollX;
+    // Reiniciar todos los valores del juego
+    this.gameState.currentState = 'READY';
+    this.gameState.launchAttempts = 0;
+    this.gameState.currentDistance = 0;
+    this.gameState.totalDistance = 0;
+    // Actualizar textos de distancia
+    this.distanceText.setText('0 m');
+    // Actualizar la UI de intentos
+    this.updateAttemptsUI();
+    // Eliminar textos existentes de fin de juego o instrucciones
+    this.children.list
+      .filter(child => child.type === 'Text' &&
+        (child.text.includes('JUEGO TERMINADO') ||
+          child.text.includes('Distancia total') ||
+          child.text.includes('Haz clic para') ||
+          child.text.includes('NUEVO RÉCORD')))
+      .forEach(text => text.destroy());
+    // Reiniciar posición del pingüino
+    this.penguin.setPosition(this.launchPositionX, this.launchPositionY);
+    this.penguin.setAngle(0);
+    this.penguin.setStatic(true);
+    // Reanudar físicas
+    this.matter.world.resume();
+    // Iniciar el juego nuevamente
+    this.startGame();
+
   }
 
   /**
@@ -315,13 +393,13 @@ export default class Game extends Phaser.Scene {
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
 
-    const startPrompt = this.add.text(width / 2, height / 2, 'Haz clic para comenzar', {
+    const startPrompt = this.add.text(width / 2, 170, 'Haz clic para comenzar', {
       fontFamily: 'Arial',
       fontSize: '32px',
       color: '#ffffff',
       stroke: '#000000',
       strokeThickness: 4
-    }).setOrigin(0.5).setScrollFactor(0);
+    }).setOrigin(0.5).setScrollFactor(0).setName('startPrompt');
 
     // Animar el texto
     this.tweens.add({
@@ -332,8 +410,40 @@ export default class Game extends Phaser.Scene {
       repeat: -1
     });
 
+    // Mostrar mensaje informativo sobre los controles
+    this.showControlsInfo();
+
     // Establecer flag para saber que estamos esperando el primer clic
     this.waitingForFirstClick = true;
+  }
+
+  /**
+   * Muestra información sobre los controles de teclado
+   */
+  showControlsInfo() {
+    const width = this.cameras.main.width;
+
+    // Eliminar mensaje anterior si existe
+    const existingControls = this.children.getByName('controlsInfo');
+    if (existingControls) existingControls.destroy();
+
+    // Crear un contenedor para el mensaje de controles en la parte superior
+    const controlsContainer = this.add.container(width / 2, 0).setScrollFactor(0).setName('controlsInfo');
+
+    // Fondo sutil semi-transparente con forma de píldora
+    const controlsBg = this.add.graphics();
+    controlsBg.fillStyle(0x000000, 0.6);
+    controlsBg.fillRoundedRect(-120, 0, 240, 16, 0, 0, 8, 8);
+
+    // Texto de los controles en una sola línea
+    const controlsText = this.add.text(0, 8, "ESC = Menú | R = Reiniciar", {
+      fontFamily: 'Arial',
+      fontSize: '10px',
+      color: '#ffffff'
+    }).setOrigin(0.5);
+
+    // Añadir todo al contenedor
+    controlsContainer.add([controlsBg, controlsText]);
   }
 
   /**
@@ -348,6 +458,10 @@ export default class Game extends Phaser.Scene {
       this.children.list
         .filter(child => child.type === 'Text' && child.text === 'Haz clic para comenzar')
         .forEach(text => text.destroy());
+
+      // Eliminar el contenedor de controles
+      const controlsInfo = this.children.getByName('controlsInfo');
+      if (controlsInfo) controlsInfo.destroy();
 
       this.startAngleSelection();
       return;
@@ -366,7 +480,10 @@ export default class Game extends Phaser.Scene {
         break;
 
       case 'ENDED':
-        // Si el juego ha terminado, volver al menú
+        // Eliminar el contenedor de controles si existe
+        const controlsInfo = this.children.getByName('controlsInfo');
+        if (controlsInfo) controlsInfo.destroy();
+
         this.resetLaunch();
         break;
     }
@@ -906,7 +1023,7 @@ export default class Game extends Phaser.Scene {
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
 
-    const nextLaunchText = this.add.text(width / 2, height / 2, 'Haz clic para el siguiente lanzamiento', {
+    const nextLaunchText = this.add.text(width / 2, 170, 'Haz clic para el siguiente lanzamiento', {
       fontFamily: 'Arial',
       fontSize: '24px',
       color: '#ffffff',
@@ -922,6 +1039,9 @@ export default class Game extends Phaser.Scene {
       yoyo: true,
       repeat: -1
     });
+
+    // Mostrar mensaje de controles
+    this.showControlsInfo();
   }
 
   /**
