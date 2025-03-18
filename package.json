@@ -1,7 +1,7 @@
 {
-  "name": "pingugo-game",
+  "name": "pingufly-2d",
   "version": "1.0.0",
-  "description": "Pingu GO! Throw your penguin as far as possible!",
+  "description": "PinguFly - Throw your penguin as far as possible!",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,21 +11,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sergiomarquezdev/pingugo-game.git"
+    "url": "git+https://github.com/sergiomarquezdev/pingufly-2d.git"
   },
   "keywords": [
     "game",
     "phaser",
     "html5",
     "javascript",
-    "pingugo"
+    "pingufly"
   ],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/sergiomarquezdev/pingugo-game/issues"
+    "url": "https://github.com/sergiomarquezdev/pingufly-2d/issues"
   },
-  "homepage": "https://github.com/sergiomarquezdev/pingugo-game#readme",
+  "homepage": "https://github.com/sergiomarquezdev/pingufly-2d#readme",
   "dependencies": {
     "phaser": "^3.88.2"
   },

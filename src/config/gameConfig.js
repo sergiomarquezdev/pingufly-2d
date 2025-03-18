@@ -1,5 +1,5 @@
 /**
- * Configuración principal del juego Pingu GO!
+ * Configuración principal del juego PinguFly
  * Define los parámetros básicos para la inicialización de Phaser
  */
 const gameConfig = {

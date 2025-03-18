@@ -1,6 +1,6 @@
-# Pingu GO! - Development Timeline
+# PinguFly - Development Timeline
 
-This document outlines the development roadmap for the 'Pingu GO!' videogame, breaking down the process into phases and specific tasks to facilitate implementation.
+This document outlines the development roadmap for the 'PinguFly' videogame, breaking down the process into phases and specific tasks to facilitate implementation.
 
 ## Phase 1: Project Setup and Foundation (Week 1)
 
@@ -9,7 +9,7 @@ This document outlines the development roadmap for the 'Pingu GO!' videogame, br
 - [x] Decide on build tool: **Using Vite** instead of Webpack/Parcel for faster development
 - [x] Initialize project with proper directory structure:
   ```
-  /pingugo-game
+  /pingufly-2d
   ├── /src
   │   ├── /scenes
   │   │   ├── Boot.js

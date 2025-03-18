@@ -1,5 +1,5 @@
 /**
- * Configuración de física para el juego Pingu GO!
+ * Configuración de física para el juego PinguFly
  * Especifica parámetros de física para Matter.js que controlarán
  * el comportamiento del pingüino durante su vuelo.
  */
