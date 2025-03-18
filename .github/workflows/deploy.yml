@@ -1,0 +1,91 @@
+name: Deploy PinguFly-2D to VPS
+
+on:
+    push:
+        branches:
+            - main
+    workflow_dispatch:
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: 'npm'
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Type check
+              run: npm run check
+
+            - name: Build Astro app
+              run: npm run build
+
+            - name: Create .nojekyll file
+              run: touch ./dist/.nojekyll
+
+            - name: Prepare deployment on server
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.VPS_HOST }}
+                  username: ${{ secrets.VPS_USER }}
+                  key: ${{ secrets.VPS_SSH_KEY }}
+                  script: |
+                      # Backup .env file if it exists
+                      if [ -f /var/www/pingufly-2d/.env ]; then
+                        echo "Backing up .env file"
+                        cp /var/www/pingufly-2d/.env /tmp/pingufly-2d-env-backup
+                      fi
+
+                      # Clean directory but preserve .env
+                      sudo rm -rf /var/www/pingufly-2d/*
+                      sudo mkdir -p /var/www/pingufly-2d
+                      sudo chown -R ${{ secrets.VPS_USER }}:$USER /var/www/pingufly-2d
+                      sudo chmod -R 775 /var/www/pingufly-2d
+
+                      # Restore .env file if backup exists
+                      if [ -f /tmp/pingufly-2d-env-backup ]; then
+                        echo "Restoring .env file"
+                        cp /tmp/pingufly-2d-env-backup /var/www/pingufly-2d/.env
+                        rm /tmp/pingufly-2d-env-backup
+                      fi
+
+            - name: Deploy files via SSH
+              uses: appleboy/scp-action@v0.1.7
+              with:
+                  host: ${{ secrets.VPS_HOST }}
+                  username: ${{ secrets.VPS_USER }}
+                  key: ${{ secrets.VPS_SSH_KEY }}
+                  source: "dist/*"
+                  target: "/var/www/pingufly-2d/"
+                  strip_components: 1
+
+            - name: Restart Nginx
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.VPS_HOST }}
+                  username: ${{ secrets.VPS_USER }}
+                  key: ${{ secrets.VPS_SSH_KEY }}
+                  script: |
+                      sudo systemctl restart nginx
+
+            - name: Verify deployment
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.VPS_HOST }}
+                  username: ${{ secrets.VPS_USER }}
+                  key: ${{ secrets.VPS_SSH_KEY }}
+                  script: |
+                      if [ ! -f /var/www/pingufly-2d/index.html ]; then
+                        echo "Deployment failed: index.html not found"
+                        exit 1
+                      fi
+                      echo "Deployment verified successfully"
