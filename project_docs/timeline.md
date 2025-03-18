@@ -76,47 +76,15 @@ This document outlines the development roadmap for the Yeti Sports 5: Flamingo D
 3. **Physics Refinement**:
    - [x] Fine-tune penguin physics parameters for better flight experience
    - [x] Implement more realistic ground collisions
+   - [x] Add proper character positioning on ground
+   - [x] Extend world boundaries for better gameplay experience
    - [ ] Add rotation to the penguin during flight
 
 4. **UI Polish**:
-   - [ ] Improve angle selection indicator
-   - [ ] Enhance power bar visuals
+   - [x] Improve angle selection indicator with arco circular
+   - [x] Enhance power bar visuals with vertical gradient
+   - [x] Implement better menu layout with proper button spacing
    - [ ] Add sound effects for user interactions
-
-## Changelog:
-
-**March 21, 2025**:
-- Mejorada la interfaz de selección de ángulo y potencia:
-  - Implementado un arco circular para la selección de ángulo con marcadores visuales
-  - Creada una barra vertical de potencia con gradiente de colores (verde-amarillo-rojo)
-  - Añadidas marcas de escala y etiquetas de porcentaje para mejor precisión
-  - Mejorada la retroalimentación visual con indicadores animados
-  - Optimizada la limpieza de elementos UI temporales
-
-**March 20, 2025**:
-- Set up project structure and development environment
-- Configured Vite for Phaser development
-- Created basic config files for game and physics
-- Implemented scene management system with 5 main scenes:
-  - Boot: Initial setup and configuration
-  - Preload: Asset loading with progress tracking
-  - Menu: Main menu with play button and instructions
-  - Game: Core gameplay with angle/power selection system
-  - Results: End-game results display
-
-- Implemented basic gameplay mechanics:
-  - Angle selection with animation
-  - Power selection with interactive bar
-  - Physics-based penguin flight using Matter.js
-  - Distance tracking and scoring system
-  - Multi-attempt game sessions
-
-**Next Development Session Goals**:
-- Implement debug tools for physics visualization
-- Create proper character sprites or find temporary replacements
-- Add rotation to the penguin during flight
-- Test on mobile devices and resolve any responsive issues
-- Enhance remaining UI elements based on new design
 
 ## Phase 2: Core Gameplay Mechanics (Week 2)
 
@@ -153,13 +121,13 @@ This document outlines the development roadmap for the Yeti Sports 5: Flamingo D
 
 ### Days 1-2: Environment Development
 - [x] Design and implement scrolling background with parallax effect:
-  - [x] Sky layer
-  - [ ] Distant hills/mountains layer
+  - [x] Sky layer with gradient and sun
+  - [x] Distant hills/mountains layer with horizon
   - [x] Ground/savanna layer
-- [ ] Create non-interactive environment elements:
-  - [ ] Acacia trees (background)
+- [x] Create non-interactive environment elements:
+  - [x] Acacia trees (background)
   - [ ] Grass tufts and bushes
-  - [ ] Background clouds
+  - [x] Background clouds with movement
 - [x] Implement camera system to follow penguin's flight
 - [x] Create ground collision system for penguin landing
 
@@ -195,7 +163,7 @@ This document outlines the development roadmap for the Yeti Sports 5: Flamingo D
   - [ ] Particle effects for impacts
   - [x] Animation transitions
   - [x] Enhanced angle and power selection UI
-  - [ ] Environmental details
+  - [x] Environmental details (African savanna)
 - [ ] Implement sound effects and background music:
   - [ ] Swing sound
   - [ ] Flying/wind sound
