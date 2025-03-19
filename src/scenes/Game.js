@@ -95,7 +95,7 @@ export default class Game extends Phaser.Scene {
     // Actualizar la distancia si el pingüino está en el aire
     if (this.stateManager.currentState === 'FLYING') {
       // Actualizar la puntuación
-      this.scoreManager.updateDistance(this.characterManager.getPenguinX(), this.launchPositionX);
+      this.scoreManager.updateDistance(this.characterManager.getPenguinCurrentX(), this.launchPositionX);
 
       // Actualizar UI
       this.gameUI.updateDistanceText(this.scoreManager.currentDistance, this.scoreManager.totalDistance);

@@ -24,6 +24,24 @@ export default class CharacterManager {
       }
     };
 
+    // Definimos offsets relativos para cada personaje (respecto a la posición de lanzamiento)
+    // Esto permitirá mantener las posiciones relativas cuando cambie la posición de lanzamiento
+    this.offsets = {
+      yeti: {
+        x: 20,       // Offset X respecto a launchPositionX
+        y: -10       // Offset Y respecto a launchPositionY
+      },
+      flamingo: {
+        x: 8,        // Offset X respecto a launchPositionX
+        y: 0         // Offset Y respecto a launchPositionY
+      },
+      // El pingüino estará en la posición de lanzamiento exacta
+      penguin: {
+        x: 0,
+        y: 0
+      }
+    };
+
     // Referencias a objetos del juego
     this.yeti = null;
     this.penguin = null;
@@ -35,20 +53,67 @@ export default class CharacterManager {
   }
 
   /**
+   * Obtiene la posición X del Yeti
+   */
+  getYetiX() {
+    return this.config.launchPositionX + this.offsets.yeti.x;
+  }
+
+  /**
+   * Obtiene la posición Y del Yeti
+   */
+  getYetiY() {
+    return this.config.launchPositionY + this.offsets.yeti.y;
+  }
+
+  /**
+   * Obtiene la posición X del flamenco
+   */
+  getFlamingoX() {
+    return this.config.launchPositionX + this.offsets.flamingo.x;
+  }
+
+  /**
+   * Obtiene la posición Y del flamenco
+   */
+  getFlamingoY() {
+    return this.config.launchPositionY + this.offsets.flamingo.y;
+  }
+
+  /**
+   * Obtiene la posición X del pingüino
+   */
+  getPenguinX() {
+    return this.config.launchPositionX + this.offsets.penguin.x;
+  }
+
+  /**
+   * Obtiene la posición Y del pingüino
+   */
+  getPenguinY() {
+    return this.config.launchPositionY + this.offsets.penguin.y;
+  }
+
+  /**
    * Crea los personajes del juego
    */
   createCharacters() {
-    const { launchPositionX, launchPositionY } = this.config;
-
     // Crear el Yeti
-    this.yeti = this.scene.add.image(launchPositionX + 20, launchPositionY - 10, 'yeti');
+    this.yeti = this.scene.add.image(
+      this.getYetiX(),
+      this.getYetiY(),
+      'yeti'
+    );
 
     // Voltear el Yeti para que mire hacia la izquierda
     this.yeti.setFlipX(true);
 
     // Crear el flamingo - Reposicionado cerca de la mano del Yeti
-    // Esto lo posiciona a la izquierda del Yeti
-    this.flamingo = this.scene.add.image(launchPositionX + 8, launchPositionY, 'flamingo');
+    this.flamingo = this.scene.add.image(
+      this.getFlamingoX(),
+      this.getFlamingoY(),
+      'flamingo'
+    );
 
     // Voltear el flamingo para que apunte hacia la izquierda
     this.flamingo.setFlipX(true);
@@ -56,7 +121,11 @@ export default class CharacterManager {
     this.flamingo.setAngle(20);
 
     // Crear el pingüino con física
-    this.penguin = this.scene.matter.add.image(launchPositionX, launchPositionY, 'penguin');
+    this.penguin = this.scene.matter.add.image(
+      this.getPenguinX(),
+      this.getPenguinY(),
+      'penguin'
+    );
 
     // Voltear el pingüino para que su "frente" mire hacia la izquierda
     this.penguin.setFlipX(true);
@@ -84,17 +153,17 @@ export default class CharacterManager {
    * Reinicia la posición de los personajes
    */
   resetPositions() {
-    const { launchPositionX, launchPositionY } = this.config;
-
     // Colocar los personajes en sus posiciones iniciales
-    this.yeti.setPosition(launchPositionX + 20, launchPositionY - 10);
+    this.yeti.setPosition(this.getYetiX(), this.getYetiY());
+
     // Reposicionar el flamingo cerca de la mano del Yeti
-    this.flamingo.setPosition(launchPositionX + 8, launchPositionY);
+    this.flamingo.setPosition(this.getFlamingoX(), this.getFlamingoY());
+
     // Restablecer ángulo inicial
     this.flamingo.setAngle(20);
 
     // Restablecer completamente el pingüino y sus propiedades visuales
-    this.penguin.setPosition(launchPositionX, launchPositionY);
+    this.penguin.setPosition(this.getPenguinX(), this.getPenguinY());
     this.penguin.setVelocity(0, 0);
     this.penguin.setAngularVelocity(0);
     this.penguin.setAngle(0);
@@ -116,14 +185,15 @@ export default class CharacterManager {
    * Posiciona los personajes fuera de la pantalla (para animación de entrada)
    */
   positionOffscreen() {
-    const { launchPositionX, launchPositionY } = this.config;
+    const { launchPositionY } = this.config;
+    const offsetY = 200; // Desplazamiento vertical para colocar fuera de pantalla
 
     // Colocar el yeti y el flamingo fuera de la vista inicialmente (por debajo de la pantalla)
-    this.yeti.setPosition(launchPositionX + 20, launchPositionY + 200);
-    this.flamingo.setPosition(launchPositionX + 8, launchPositionY + 200);
+    this.yeti.setPosition(this.getYetiX(), launchPositionY + offsetY);
+    this.flamingo.setPosition(this.getFlamingoX(), launchPositionY + offsetY);
 
     // Establecer el pingüino fuera de pantalla pero con propiedades visuales correctas
-    this.penguin.setPosition(launchPositionX, launchPositionY + 200);
+    this.penguin.setPosition(this.getPenguinX(), launchPositionY + offsetY);
     this.penguin.clearTint();
     this.penguin.setAlpha(1);
     this.penguin.setVisible(true);
@@ -143,6 +213,8 @@ export default class CharacterManager {
    */
   animateEntrance(onComplete = null) {
     const { launchPositionY } = this.config;
+    const offsetY = 200;
+    const bounceY = 10;
 
     // Primero asegurarnos que el pingüino tiene una posición y propiedades correctas
     this.penguin.clearTint();
@@ -152,15 +224,14 @@ export default class CharacterManager {
     // Animar la entrada del yeti y el pingüino desde abajo
     this.scene.tweens.add({
       targets: [this.yeti, this.flamingo, this.penguin],
-      y: { from: launchPositionY + 200, to: launchPositionY - 10 },
+      y: { from: launchPositionY + offsetY, to: launchPositionY - bounceY },
       duration: 500,
       ease: 'Back.easeOut',
       onComplete: () => {
-        // Ajustar la posición final exacta del pingüino
-        this.penguin.setPosition(this.config.launchPositionX, this.config.launchPositionY);
-
-        // Ajustar posición final exacta del flamingo
-        this.flamingo.setPosition(this.config.launchPositionX + 8, this.config.launchPositionY);
+        // Ajustar las posiciones finales exactas
+        this.penguin.setPosition(this.getPenguinX(), this.getPenguinY());
+        this.flamingo.setPosition(this.getFlamingoX(), this.getFlamingoY());
+        this.yeti.setPosition(this.getYetiX(), this.getYetiY());
 
         // Asegurarnos que el pingüino está completamente visible y sin efectos extras
         this.penguin.clearTint();
@@ -274,16 +345,16 @@ export default class CharacterManager {
    * Obtiene la posición X actual del pingüino
    * @returns {number} - La posición X del pingüino
    */
-  getPenguinX() {
-    return this.penguin ? this.penguin.x : this.config.launchPositionX;
+  getPenguinCurrentX() {
+    return this.penguin ? this.penguin.x : this.getPenguinX();
   }
 
   /**
    * Obtiene la posición Y actual del pingüino
    * @returns {number} - La posición Y del pingüino
    */
-  getPenguinY() {
-    return this.penguin ? this.penguin.y : this.config.launchPositionY;
+  getPenguinCurrentY() {
+    return this.penguin ? this.penguin.y : this.getPenguinY();
   }
 
   /**
