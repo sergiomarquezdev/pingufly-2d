@@ -21,14 +21,16 @@ export default class PowerBar {
       barX: config.barX || (scene.scale.width - 35),
       barY: config.barY || 300,
       padding: config.padding || 4,
-      colors: config.colors || [0x00ff00, 0xffff00, 0xff0000] // verde, amarillo, rojo
+      colors: config.colors || [0xff0000, 0xffff00, 0x00ff00, 0xffff00, 0xff0000] // rojo, amarillo, verde, amarillo, rojo
     };
 
     // Valores internos
-    this.power = 0;
+    this.animValue = 0; // Valor de la animación (0-1)
+    this.power = 0;     // Valor real de potencia (0-1)
     this.powerText = null;
     this.percentageTexts = [];
     this.powerAnimation = null;
+    this.direction = -1;  // 1: hacia abajo, -1: hacia arriba
   }
 
   /**
@@ -43,17 +45,22 @@ export default class PowerBar {
       this.powerAnimation.stop();
     }
 
-    // Crear la animación para la barra de potencia
+    // Crear la animación para la barra de potencia con efecto rebote
     this.powerAnimation = this.scene.tweens.addCounter({
       from: 0,
-      to: 100,
-      duration: 1500,
+      to: 1,
+      duration: 500,
       ease: 'Linear',
       repeat: -1,
-      yoyo: true,
+      yoyo: true,  // Rebote de la animación
       onUpdate: () => {
-        // Actualizar la potencia
-        this.power = this.powerAnimation.getValue() / 100;
+        // Obtener el valor de la animación (0-1)
+        this.animValue = this.powerAnimation.getValue();
+
+        // Calcular el poder real (0-1) basado en la distancia al punto central (0.5)
+        // Cuando animValue = 0.5, power = 1.0 (máximo)
+        // Cuando animValue = 0 o 1, power = 0 (mínimo)
+        this.power = 1 - Math.abs(this.animValue - 0.5) * 2;
 
         // Actualizar el gráfico
         this.update();
@@ -123,11 +130,10 @@ export default class PowerBar {
     this.graphics.fillStyle(0x666666, 1);
     this.graphics.fillRect(barX, barY - barHeight / 2, barWidth, barHeight);
 
-    // Gradiente de color para la barra
+    // Dibujar secciones de colores (simétrico desde los bordes hacia el centro)
     const sections = colors.length;
     const sectionHeight = barHeight / sections;
 
-    // Dibujar las secciones de colores
     for (let i = 0; i < sections; i++) {
       this.graphics.fillStyle(colors[i], 1);
       this.graphics.fillRect(
@@ -138,20 +144,11 @@ export default class PowerBar {
       );
     }
 
-    // Posición actual del indicador (con efecto de fill de abajo hacia arriba)
-    const fillHeight = barHeight * this.power;
-
-    // Rellenar la barra desde abajo hasta el nivel actual
-    this.graphics.fillStyle(0xaaaaaa, 0.3);
-    this.graphics.fillRect(
-      barX,
-      barY + barHeight / 2 - fillHeight,
-      barWidth,
-      fillHeight
-    );
+    // Calcular la posición del indicador basado en animValue (no en power)
+    const indicatorPosition = this.animValue;
+    const indicatorY = barY - barHeight / 2 + (indicatorPosition * barHeight);
 
     // Dibujar el indicador (línea horizontal que muestra la posición actual)
-    const indicatorY = barY + barHeight / 2 - fillHeight;
     this.graphics.fillStyle(0xffffff, 1);
     this.graphics.fillRect(
       barX - 10,
@@ -179,21 +176,56 @@ export default class PowerBar {
     this.graphics.closePath();
     this.graphics.fillPath();
 
-    // Añadir marcas de nivel en la barra
-    this.graphics.lineStyle(2, 0xffffff, 0.5);
-    for (let i = 0; i <= 10; i++) {
-      const markY = barY + barHeight / 2 - (i * barHeight / 10);
-      const markWidth = (i % 5 === 0) ? 10 : 5; // Marcas más largas cada 50%
+    // Añadir marcas principales en la barra
+    this.graphics.lineStyle(2, 0xffffff, 0.8);
 
-      this.graphics.beginPath();
-      this.graphics.moveTo(barX - markWidth, markY);
-      this.graphics.lineTo(barX, markY);
-      this.graphics.strokePath();
+    // 0% (Superior)
+    let markY = barY - barHeight / 2;
+    this.graphics.beginPath();
+    this.graphics.moveTo(barX - 10, markY);
+    this.graphics.lineTo(barX + barWidth + 10, markY);
+    this.graphics.strokePath();
 
-      this.graphics.beginPath();
-      this.graphics.moveTo(barX + barWidth, markY);
-      this.graphics.lineTo(barX + barWidth + markWidth, markY);
-      this.graphics.strokePath();
+    // 50% (1/4 desde arriba)
+    markY = barY - barHeight / 2 + barHeight / 4;
+    this.graphics.beginPath();
+    this.graphics.moveTo(barX - 8, markY);
+    this.graphics.lineTo(barX + barWidth + 8, markY);
+    this.graphics.strokePath();
+
+    // 100% (Medio)
+    markY = barY;
+    this.graphics.lineStyle(3, 0xffffff, 1);
+    this.graphics.beginPath();
+    this.graphics.moveTo(barX - 12, markY);
+    this.graphics.lineTo(barX + barWidth + 12, markY);
+    this.graphics.strokePath();
+
+    // 50% (3/4 desde arriba)
+    this.graphics.lineStyle(2, 0xffffff, 0.8);
+    markY = barY - barHeight / 2 + (barHeight * 3 / 4);
+    this.graphics.beginPath();
+    this.graphics.moveTo(barX - 8, markY);
+    this.graphics.lineTo(barX + barWidth + 8, markY);
+    this.graphics.strokePath();
+
+    // 0% (Inferior)
+    markY = barY + barHeight / 2;
+    this.graphics.beginPath();
+    this.graphics.moveTo(barX - 10, markY);
+    this.graphics.lineTo(barX + barWidth + 10, markY);
+    this.graphics.strokePath();
+
+    // Añadir marcas secundarias
+    this.graphics.lineStyle(1, 0xffffff, 0.4);
+    for (let i = 1; i < 10; i++) {
+      if (i !== 2 && i !== 5 && i !== 8) { // Excluir las marcas principales que ya dibujamos
+        markY = barY - barHeight / 2 + (i * barHeight / 10);
+        this.graphics.beginPath();
+        this.graphics.moveTo(barX - 5, markY);
+        this.graphics.lineTo(barX + barWidth + 5, markY);
+        this.graphics.strokePath();
+      }
     }
 
     // Actualizar el texto con el porcentaje
@@ -201,6 +233,7 @@ export default class PowerBar {
       this.powerText.destroy();
     }
 
+    // Mostrar el porcentaje de potencia real
     this.powerText = this.scene.add.text(barX + barWidth / 2, barY - barHeight / 2 - 20, `${Math.round(this.power * 100)}%`, {
       fontFamily: 'Arial',
       fontSize: '18px',
@@ -208,6 +241,59 @@ export default class PowerBar {
       stroke: '#000000',
       strokeThickness: 3
     }).setOrigin(0.5).setScrollFactor(0);
+
+    // Añadir etiquetas de porcentaje a los lados de la barra
+    if (this.percentageTexts.length === 0) {
+      // 0% Superior
+      let text = this.scene.add.text(barX + barWidth + 25, barY - barHeight / 2, "0%", {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: '#ff0000',
+        stroke: '#000000',
+        strokeThickness: 2
+      }).setOrigin(0, 0.5).setScrollFactor(0);
+      this.percentageTexts.push(text);
+
+      // 50% Superior
+      text = this.scene.add.text(barX + barWidth + 25, barY - barHeight / 2 + barHeight / 4, "50%", {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: '#ffff00',
+        stroke: '#000000',
+        strokeThickness: 2
+      }).setOrigin(0, 0.5).setScrollFactor(0);
+      this.percentageTexts.push(text);
+
+      // 100% Medio
+      text = this.scene.add.text(barX + barWidth + 25, barY, "100%", {
+        fontFamily: 'Arial',
+        fontSize: '16px',
+        color: '#00ff00',
+        stroke: '#000000',
+        strokeThickness: 2
+      }).setOrigin(0, 0.5).setScrollFactor(0);
+      this.percentageTexts.push(text);
+
+      // 50% Inferior
+      text = this.scene.add.text(barX + barWidth + 25, barY - barHeight / 2 + barHeight * 3 / 4, "50%", {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: '#ffff00',
+        stroke: '#000000',
+        strokeThickness: 2
+      }).setOrigin(0, 0.5).setScrollFactor(0);
+      this.percentageTexts.push(text);
+
+      // 0% Inferior
+      text = this.scene.add.text(barX + barWidth + 25, barY + barHeight / 2, "0%", {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: '#ff0000',
+        stroke: '#000000',
+        strokeThickness: 2
+      }).setOrigin(0, 0.5).setScrollFactor(0);
+      this.percentageTexts.push(text);
+    }
   }
 
   /**

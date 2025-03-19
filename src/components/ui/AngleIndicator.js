@@ -69,7 +69,7 @@ export default class AngleIndicator {
     this.angleAnimation = this.scene.tweens.addCounter({
       from: this.config.minAngle,
       to: this.config.maxAngle,
-      duration: 600,
+      duration: 300,
       ease: 'Linear',
       repeat: -1,
       yoyo: true,
