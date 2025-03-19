@@ -89,7 +89,7 @@ export default class CharacterManager {
     // Colocar los personajes en sus posiciones iniciales
     this.yeti.setPosition(launchPositionX + 20, launchPositionY - 10);
     // Reposicionar el flamingo cerca de la mano del Yeti
-    this.flamingo.setPosition(launchPositionX, launchPositionY - 40);
+    this.flamingo.setPosition(launchPositionX + 8, launchPositionY);
     // Restablecer ángulo inicial
     this.flamingo.setAngle(20);
 
@@ -120,7 +120,7 @@ export default class CharacterManager {
 
     // Colocar el yeti y el flamingo fuera de la vista inicialmente (por debajo de la pantalla)
     this.yeti.setPosition(launchPositionX + 20, launchPositionY + 200);
-    this.flamingo.setPosition(launchPositionX, launchPositionY + 200);
+    this.flamingo.setPosition(launchPositionX + 8, launchPositionY + 200);
 
     // Establecer el pingüino fuera de pantalla pero con propiedades visuales correctas
     this.penguin.setPosition(launchPositionX, launchPositionY + 200);
