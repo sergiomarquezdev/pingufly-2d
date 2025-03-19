@@ -14,8 +14,8 @@ export default class CharacterManager {
 
     // Propiedades de configuración con valores por defecto
     this.config = {
-      launchPositionX: config.launchPositionX || 700,
-      launchPositionY: config.launchPositionY || 510,
+      launchPositionX: config.launchPositionX || 710,
+      launchPositionY: config.launchPositionY || 540,
       penguinPhysicsConfig: config.penguinPhysicsConfig || {
         frictionAir: 0.005,  // Reducir aún más la fricción del aire para vuelo más lento
         friction: 0.001,     // Fricción casi nula para máximo deslizamiento
@@ -41,14 +41,14 @@ export default class CharacterManager {
     const { launchPositionX, launchPositionY } = this.config;
 
     // Crear el Yeti
-    this.yeti = this.scene.add.image(launchPositionX + 30, launchPositionY + 20, 'yeti');
+    this.yeti = this.scene.add.image(launchPositionX + 10, launchPositionY - 10, 'yeti');
 
     // Voltear el Yeti para que mire hacia la izquierda
     this.yeti.setFlipX(true);
 
     // Crear el flamingo - Reposicionado cerca de la mano del Yeti
     // Esto lo posiciona a la izquierda del Yeti
-    this.flamingo = this.scene.add.image(launchPositionX + 18, launchPositionY + 30, 'flamingo');
+    this.flamingo = this.scene.add.image(launchPositionX + 8, launchPositionY, 'flamingo');
 
     // Voltear el flamingo para que apunte hacia la izquierda
     this.flamingo.setFlipX(true);
@@ -87,9 +87,9 @@ export default class CharacterManager {
     const { launchPositionX, launchPositionY } = this.config;
 
     // Colocar los personajes en sus posiciones iniciales
-    this.yeti.setPosition(launchPositionX + 30, launchPositionY + 20);
+    this.yeti.setPosition(launchPositionX + 20, launchPositionY - 10);
     // Reposicionar el flamingo cerca de la mano del Yeti
-    this.flamingo.setPosition(launchPositionX + 10, launchPositionY - 10);
+    this.flamingo.setPosition(launchPositionX, launchPositionY - 40);
     // Restablecer ángulo inicial
     this.flamingo.setAngle(20);
 
@@ -119,8 +119,8 @@ export default class CharacterManager {
     const { launchPositionX, launchPositionY } = this.config;
 
     // Colocar el yeti y el flamingo fuera de la vista inicialmente (por debajo de la pantalla)
-    this.yeti.setPosition(launchPositionX + 30, launchPositionY + 200);
-    this.flamingo.setPosition(launchPositionX + 10, launchPositionY + 200);
+    this.yeti.setPosition(launchPositionX + 20, launchPositionY + 200);
+    this.flamingo.setPosition(launchPositionX, launchPositionY + 200);
 
     // Establecer el pingüino fuera de pantalla pero con propiedades visuales correctas
     this.penguin.setPosition(launchPositionX, launchPositionY + 200);
@@ -152,7 +152,7 @@ export default class CharacterManager {
     // Animar la entrada del yeti y el pingüino desde abajo
     this.scene.tweens.add({
       targets: [this.yeti, this.flamingo, this.penguin],
-      y: { from: launchPositionY + 200, to: launchPositionY + 20 },
+      y: { from: launchPositionY + 200, to: launchPositionY - 10 },
       duration: 500,
       ease: 'Back.easeOut',
       onComplete: () => {
@@ -160,7 +160,7 @@ export default class CharacterManager {
         this.penguin.setPosition(this.config.launchPositionX, this.config.launchPositionY);
 
         // Ajustar posición final exacta del flamingo
-        this.flamingo.setPosition(this.config.launchPositionX + 18, this.config.launchPositionY + 30);
+        this.flamingo.setPosition(this.config.launchPositionX + 8, this.config.launchPositionY);
 
         // Asegurarnos que el pingüino está completamente visible y sin efectos extras
         this.penguin.clearTint();

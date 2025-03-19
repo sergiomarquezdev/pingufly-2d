@@ -20,8 +20,8 @@ export default class Game extends Phaser.Scene {
     super('Game');
 
     // Punto de inicio del lanzamiento
-    this.launchPositionX = 700;
-    this.launchPositionY = 510;
+    this.launchPositionX = 710;
+    this.launchPositionY = 540;
 
     // Control de cámara
     this.initialCameraX = 400; // Posición inicial X de la cámara
@@ -72,7 +72,7 @@ export default class Game extends Phaser.Scene {
 
     this.powerBar = new PowerBar(this, {
       barX: this.scale.width - 35,
-      barY: this.launchPositionY - 40
+      barY: this.launchPositionY - 65
     });
 
     this.gameOverScreen = new GameOverScreen(this);

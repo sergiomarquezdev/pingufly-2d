@@ -16,8 +16,8 @@ export default class AngleIndicator {
 
     // Propiedades de configuración con valores por defecto
     this.config = {
-      originX: config.originX || scene.launchPositionX || 700,
-      originY: config.originY || scene.launchPositionY || 510,
+      originX: config.originX || scene.launchPositionX || 710,
+      originY: config.originY || scene.launchPositionY || 540,
       radius: config.radius || 80,
       thickness: config.thickness || 10,
       startAngle: config.startAngle || 180, // Ángulo izquierdo (en grados)
