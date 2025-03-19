@@ -46,11 +46,14 @@ export default class CharacterManager {
     // Voltear el Yeti para que mire hacia la izquierda
     this.yeti.setFlipX(true);
 
-    // Crear el flamingo
-    this.flamingo = this.scene.add.image(launchPositionX, launchPositionY + 20, 'flamingo');
+    // Crear el flamingo - Reposicionado cerca de la mano del Yeti
+    // Esto lo posiciona a la izquierda del Yeti
+    this.flamingo = this.scene.add.image(launchPositionX + 18, launchPositionY + 30, 'flamingo');
 
     // Voltear el flamingo para que apunte hacia la izquierda
     this.flamingo.setFlipX(true);
+    // Rotar ligeramente para posición de inicio
+    this.flamingo.setAngle(20);
 
     // Crear el pingüino con física
     this.penguin = this.scene.matter.add.image(launchPositionX, launchPositionY, 'penguin');
@@ -85,7 +88,10 @@ export default class CharacterManager {
 
     // Colocar los personajes en sus posiciones iniciales
     this.yeti.setPosition(launchPositionX + 30, launchPositionY + 20);
-    this.flamingo.setPosition(launchPositionX, launchPositionY + 20);
+    // Reposicionar el flamingo cerca de la mano del Yeti
+    this.flamingo.setPosition(launchPositionX + 10, launchPositionY - 10);
+    // Restablecer ángulo inicial
+    this.flamingo.setAngle(20);
 
     // Restablecer completamente el pingüino y sus propiedades visuales
     this.penguin.setPosition(launchPositionX, launchPositionY);
@@ -112,9 +118,9 @@ export default class CharacterManager {
   positionOffscreen() {
     const { launchPositionX, launchPositionY } = this.config;
 
-    // Colocar el yeti y el pingüino fuera de la vista inicialmente (por debajo de la pantalla)
+    // Colocar el yeti y el flamingo fuera de la vista inicialmente (por debajo de la pantalla)
     this.yeti.setPosition(launchPositionX + 30, launchPositionY + 200);
-    this.flamingo.setPosition(launchPositionX, launchPositionY + 200);
+    this.flamingo.setPosition(launchPositionX + 10, launchPositionY + 200);
 
     // Establecer el pingüino fuera de pantalla pero con propiedades visuales correctas
     this.penguin.setPosition(launchPositionX, launchPositionY + 200);
@@ -153,6 +159,9 @@ export default class CharacterManager {
         // Ajustar la posición final exacta del pingüino
         this.penguin.setPosition(this.config.launchPositionX, this.config.launchPositionY);
 
+        // Ajustar posición final exacta del flamingo
+        this.flamingo.setPosition(this.config.launchPositionX + 18, this.config.launchPositionY + 30);
+
         // Asegurarnos que el pingüino está completamente visible y sin efectos extras
         this.penguin.clearTint();
         this.penguin.setAlpha(1);
@@ -176,10 +185,10 @@ export default class CharacterManager {
    * Anima el golpe del flamingo al pingüino
    */
   animateHit() {
-    // Animar el golpe con el flamingo
+    // Animar el golpe con el flamingo - cambiar a animación hacia abajo
     this.scene.tweens.add({
       targets: this.flamingo,
-      angle: -100, // Ángulo más pronunciado para dar sensación de mayor golpe
+      angle: 90, // Ángulo positivo para que gire hacia abajo
       duration: 200,
       yoyo: true
     });
