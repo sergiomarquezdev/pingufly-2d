@@ -48,6 +48,9 @@ export default class Game extends Phaser.Scene {
 
     // Flag para evitar múltiples reinicios
     this.isResetting = false;
+
+    // Flag para indicar si hay un modal abierto
+    this.isModalOpen = false;
   }
 
   create() {
@@ -377,14 +380,36 @@ export default class Game extends Phaser.Scene {
       // Actualizar la UI de intentos
       this.updateAttemptsUI();
 
-      // Eliminar textos existentes de fin de juego o instrucciones
+      // Eliminar textos existentes de fin de juego, instrucciones, o indicadores de ángulo/potencia
       this.children.list
         .filter(child => child.type === 'Text' &&
           (child.text.includes('JUEGO TERMINADO') ||
             child.text.includes('Distancia total') ||
             child.text.includes('Haz clic para') ||
-            child.text.includes('NUEVO RÉCORD')))
-          .forEach(text => text.destroy());
+            child.text.includes('NUEVO RÉCORD') ||
+            child.text.includes('Ángulo:') ||
+            (this.percentageTexts && this.percentageTexts.includes(child))))
+        .forEach(text => text.destroy());
+
+      // Limpiar específicamente el texto de ángulo si existe
+      if (this.angleText) {
+        this.angleText.destroy();
+        this.angleText = null;
+      }
+
+      // Limpiar el texto de potencia si existe
+      if (this.powerText) {
+        this.powerText.destroy();
+        this.powerText = null;
+      }
+
+      // Limpiar los textos de porcentaje si existen
+      if (this.percentageTexts && this.percentageTexts.length > 0) {
+        this.percentageTexts.forEach(text => {
+          if (text && text.destroy) text.destroy();
+        });
+        this.percentageTexts = [];
+      }
 
       // Reiniciar posición del pingüino
       this.penguin.setPosition(this.launchPositionX, this.launchPositionY);
@@ -472,6 +497,9 @@ export default class Game extends Phaser.Scene {
    * Maneja la entrada del jugador según el estado del juego
    */
   handlePlayerInput() {
+    // Si hay un modal abierto, no procesar ninguna entrada
+    if (this.isModalOpen) return;
+
     // Si estamos esperando el primer clic, comenzar la selección de ángulo
     if (this.waitingForFirstClick) {
       this.waitingForFirstClick = false;
@@ -1091,8 +1119,12 @@ export default class Game extends Phaser.Scene {
   endGame() {
     this.gameState.currentState = 'ENDED';
 
+    // Marcar que hay un modal abierto
+    this.isModalOpen = true;
+
     // Comprobar si hemos batido el récord
-    if (this.gameState.totalDistance > this.gameState.bestTotalDistance) {
+    const isNewRecord = this.gameState.totalDistance > this.gameState.bestTotalDistance;
+    if (isNewRecord) {
       // Actualizar mejor distancia total
       this.gameState.bestTotalDistance = this.gameState.totalDistance;
 
@@ -1101,41 +1133,287 @@ export default class Game extends Phaser.Scene {
 
       // Actualizar el texto de mejor distancia
       this.bestDistanceText.setText(this.gameState.bestTotalDistance + ' m');
-
-      // Mostrar mensaje de nueva mejor distancia
-      this.add.text(this.scale.width / 2, this.scale.height / 2 - 100, '¡NUEVO RÉCORD!', {
-        fontFamily: 'Impact',
-        fontSize: '36px',
-        color: '#ffdd00',
-        stroke: '#000000',
-        strokeThickness: 4
-      }).setOrigin(0.5);
     }
 
-    // Mostrar resultados y mensaje de fin
-    this.add.text(this.scale.width / 2, this.scale.height / 2 - 50, 'JUEGO TERMINADO', {
-      fontFamily: 'Arial',
-      fontSize: '32px',
+    // Crear el fondo oscurecido
+    const width = this.scale.width;
+    const height = this.scale.height;
+
+    // Container principal para toda la modal - aseguramos que siga a la cámara
+    const modalContainer = this.add.container(width / 2, height / 2).setScrollFactor(0).setDepth(100);
+
+    // Calcular altura del panel según si hay récord o no
+    const panelHeight = isNewRecord ? 440 : 380;
+
+    // Fondo oscuro semitransparente que cubre toda la pantalla
+    const modalOverlay = this.add.rectangle(0, 0, width * 2, height * 2, 0x000000, 0.7)
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setInteractive() // Hacer el overlay interactivo
+      .on('pointerdown', (pointer) => {
+        // Capturar todos los clics en el overlay y evitar que se propaguen
+        pointer.event.stopPropagation();
+      });
+
+    modalContainer.add(modalOverlay);
+
+    // Panel principal con borde
+    const panelWidth = 440;
+
+    // Borde exterior (dorado)
+    const outerPanel = this.add.rectangle(0, 0, panelWidth + 6, panelHeight + 6, 0xffdd00, 1)
+      .setOrigin(0.5)
+      .setStrokeStyle(2, 0xffdd00);
+
+    // Panel interior (azul)
+    const innerPanel = this.add.rectangle(0, 0, panelWidth, panelHeight, 0x104080, 0.9)
+      .setOrigin(0.5)
+      .setStrokeStyle(1, 0x1e90ff);
+
+    // Añadir efecto de estrellas en el fondo del panel
+    const starfield = this.add.tileSprite(0, 0, panelWidth, panelHeight, 'sky')
+      .setOrigin(0.5)
+      .setAlpha(0.3)
+      .setTint(0x104080);
+
+    // Añadir los paneles al contenedor
+    modalContainer.add([starfield, outerPanel, innerPanel]);
+
+    // Añadir título "JUEGO TERMINADO"
+    const gameOverText = this.add.text(0, -panelHeight/2 + 50, 'JUEGO TERMINADO', {
+      fontFamily: 'Impact',
+      fontSize: '36px',
       color: '#ffffff',
       stroke: '#000000',
-      strokeThickness: 3
+      strokeThickness: 4,
+      align: 'center'
     }).setOrigin(0.5);
+    modalContainer.add(gameOverText);
 
-    this.add.text(this.scale.width / 2, this.scale.height / 2, 'Distancia total: ' + this.gameState.totalDistance + 'm', {
-      fontFamily: 'Arial',
+    // Contenedor para la información de distancia
+    const infoContainer = this.add.container(0, -panelHeight/2 + 120);
+    modalContainer.add(infoContainer);
+
+    // Añadir texto de distancia total
+    const distanceText = this.add.text(0, 0, 'DISTANCIA TOTAL', {
+      fontFamily: 'Impact',
       fontSize: '24px',
       color: '#ffffff',
-      stroke: '#000000',
-      strokeThickness: 3
+      align: 'center'
     }).setOrigin(0.5);
 
-    this.add.text(this.scale.width / 2, this.scale.height / 2 + 40, 'Haz clic para volver al menú', {
-      fontFamily: 'Arial',
-      fontSize: '20px',
+    const distanceValueText = this.add.text(0, 30, this.gameState.totalDistance + ' m', {
+      fontFamily: 'Impact',
+      fontSize: '48px',
       color: '#ffffff',
-      stroke: '#000000',
-      strokeThickness: 3
+      stroke: '#104080',
+      strokeThickness: 3,
+      align: 'center'
     }).setOrigin(0.5);
+
+    infoContainer.add([distanceText, distanceValueText]);
+
+    let recordContainer = null;
+
+    // Si hay un nuevo récord, mostrar mensaje especial
+    if (isNewRecord) {
+      // Crear un contenedor para el mensaje de récord
+      recordContainer = this.add.container(0, 0);
+      modalContainer.add(recordContainer);
+
+      // Fondo del récord
+      const recordBg = this.add.rectangle(0, 0, 300, 40, 0x000000, 0.4)
+        .setOrigin(0.5)
+        .setStrokeStyle(2, 0xffdd00);
+
+      // Texto del récord
+      const recordText = this.add.text(0, 0, '¡NUEVO RÉCORD!', {
+        fontFamily: 'Impact',
+        fontSize: '32px',
+        color: '#ffdd00',
+        stroke: '#000000',
+        strokeThickness: 3,
+        align: 'center'
+      }).setOrigin(0.5);
+
+      // Añadir al contenedor de récord
+      recordContainer.add([recordBg, recordText]);
+
+      // Animación para el texto de nuevo récord
+      this.tweens.add({
+        targets: recordText,
+        scaleX: 1.1,
+        scaleY: 1.1,
+        duration: 500,
+        yoyo: true,
+        repeat: -1
+      });
+
+      // Añadir brillo alrededor del valor de distancia
+      const glow = this.add.graphics();
+      glow.fillStyle(0xffdd00, 0.2);
+      glow.fillCircle(0, 30, 110);
+      infoContainer.add(glow);
+      infoContainer.sendToBack(glow);
+
+      // Poner el texto de distancia por encima del brillo
+      infoContainer.bringToTop(distanceValueText);
+
+      // Añadir efecto de destello
+      this.tweens.add({
+        targets: glow,
+        alpha: { from: 0.3, to: 0 },
+        duration: 800,
+        yoyo: true,
+        repeat: -1
+      });
+    }
+
+    // Crear los botones y calcular sus posiciones verticales
+    const buttonSpacing = 70;
+    let firstButtonY;
+
+    if (isNewRecord) {
+      firstButtonY = 70;
+      // Posicionar el contenedor del récord
+      recordContainer.setPosition(0, firstButtonY - 40);
+    } else {
+      firstButtonY = 30;
+    }
+
+    // Crear el botón de "Volver a Jugar"
+    const playAgainButton = this.createCustomButton(0, firstButtonY, 240, 60, 'VOLVER A JUGAR', () => {
+      // Eliminar el modal
+      this.isModalOpen = false;
+      modalContainer.destroy();
+      this.restartGame();
+    });
+
+    // Añadir botón para volver al menú principal
+    const menuButton = this.createCustomButton(0, firstButtonY + buttonSpacing, 240, 60, 'MENÚ PRINCIPAL', () => {
+      // Eliminar el modal
+      this.isModalOpen = false;
+      modalContainer.destroy();
+      this.backToMenu();
+    });
+
+    // Asegurarse de que los botones estén dentro del panel
+    const lastButtonBottom = firstButtonY + buttonSpacing + 30; // 30 es la mitad de la altura del botón
+    const buttonContainerY = panelHeight/2 - lastButtonBottom - 30; // 30 es el margen inferior
+
+    const buttonContainer = this.add.container(0, buttonContainerY);
+    buttonContainer.add([playAgainButton, menuButton]);
+    modalContainer.add(buttonContainer);
+
+    // Animar la entrada del modal
+    modalContainer.setScale(0.5);
+    modalContainer.setAlpha(0);
+
+    this.tweens.add({
+      targets: modalContainer,
+      scale: 1,
+      alpha: 1,
+      duration: 400,
+      ease: 'Back.easeOut'
+    });
+  }
+
+  /**
+   * Crea un botón personalizado con estilo consistente con el juego
+   */
+  createCustomButton(x, y, width, height, text, callback) {
+    const buttonContainer = this.add.container(x, y);
+
+    // Crear gradiente para el botón
+    const buttonBg = this.add.graphics();
+    buttonBg.fillStyle(0x1e90ff, 1);
+    buttonBg.fillRect(-width/2, -height/2, width, height);
+
+    // Añadir borde dorado
+    const buttonBorder = this.add.graphics();
+    buttonBorder.lineStyle(3, 0xffdd00, 1);
+    buttonBorder.strokeRect(-width/2, -height/2, width, height);
+
+    // Añadir efecto de brillo en las esquinas
+    const cornerSize = 8;
+
+    // Esquina superior izquierda
+    const topLeftCorner = this.add.graphics();
+    topLeftCorner.fillStyle(0xffffff, 0.8);
+    topLeftCorner.fillRect(-width/2, -height/2, cornerSize, cornerSize);
+
+    // Esquina superior derecha
+    const topRightCorner = this.add.graphics();
+    topRightCorner.fillStyle(0xffffff, 0.8);
+    topRightCorner.fillRect(width/2 - cornerSize, -height/2, cornerSize, cornerSize);
+
+    // Esquina inferior izquierda
+    const bottomLeftCorner = this.add.graphics();
+    bottomLeftCorner.fillStyle(0xffffff, 0.8);
+    bottomLeftCorner.fillRect(-width/2, height/2 - cornerSize, cornerSize, cornerSize);
+
+    // Esquina inferior derecha
+    const bottomRightCorner = this.add.graphics();
+    bottomRightCorner.fillStyle(0xffffff, 0.8);
+    bottomRightCorner.fillRect(width/2 - cornerSize, height/2 - cornerSize, cornerSize, cornerSize);
+
+    // Añadir texto del botón
+    const buttonText = this.add.text(0, 0, text, {
+      fontFamily: 'Impact',
+      fontSize: '24px',
+      color: '#ffffff',
+      stroke: '#104080',
+      strokeThickness: 3,
+      align: 'center'
+    }).setOrigin(0.5);
+
+    // Añadir todos los elementos al contenedor
+    buttonContainer.add([buttonBg, buttonBorder, topLeftCorner, topRightCorner, bottomLeftCorner, bottomRightCorner, buttonText]);
+
+    // Hacer que el botón sea interactivo y detener propagación de eventos
+    buttonContainer.setSize(width, height);
+    buttonContainer.setInteractive({ useHandCursor: true })
+      .on('pointerover', () => {
+        buttonBg.clear();
+        buttonBg.fillStyle(0x3aa3ff, 1);
+        buttonBg.fillRect(-width/2, -height/2, width, height);
+        buttonText.setScale(1.05);
+      })
+      .on('pointerout', () => {
+        buttonBg.clear();
+        buttonBg.fillStyle(0x1e90ff, 1);
+        buttonBg.fillRect(-width/2, -height/2, width, height);
+        buttonText.setScale(1);
+      })
+      .on('pointerdown', (pointer) => {
+        // Detener la propagación del evento
+        pointer.event.stopPropagation();
+
+        buttonBg.clear();
+        buttonBg.fillStyle(0x0c6cbb, 1);
+        buttonBg.fillRect(-width/2, -height/2, width, height);
+        buttonText.setScale(0.95);
+      })
+      .on('pointerup', (pointer) => {
+        // Detener la propagación del evento
+        pointer.event.stopPropagation();
+
+        buttonBg.clear();
+        buttonBg.fillStyle(0x1e90ff, 1);
+        buttonBg.fillRect(-width/2, -height/2, width, height);
+        buttonText.setScale(1);
+
+        // Pequeña animación de flash antes de ejecutar el callback
+        this.tweens.add({
+          targets: buttonContainer,
+          alpha: 0.8,
+          yoyo: true,
+          duration: 100,
+          onComplete: callback
+        });
+      });
+
+    return buttonContainer;
   }
 
   /**
