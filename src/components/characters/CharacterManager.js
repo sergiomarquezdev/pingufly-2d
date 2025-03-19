@@ -41,7 +41,7 @@ export default class CharacterManager {
     const { launchPositionX, launchPositionY } = this.config;
 
     // Crear el Yeti
-    this.yeti = this.scene.add.image(launchPositionX + 10, launchPositionY - 10, 'yeti');
+    this.yeti = this.scene.add.image(launchPositionX + 20, launchPositionY - 10, 'yeti');
 
     // Voltear el Yeti para que mire hacia la izquierda
     this.yeti.setFlipX(true);
