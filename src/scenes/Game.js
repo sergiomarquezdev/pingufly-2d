@@ -504,10 +504,10 @@ export default class Game extends Phaser.Scene {
       case 'ENDED':
         // Prevenir múltiples reinicios debido a clics rápidos
         if (this.isResetting) return;
-        
+
         // Establecer el flag de reinicio
         this.isResetting = true;
-        
+
         // Eliminar el contenedor de controles si existe
         const controlsInfo = this.children.getByName('controlsInfo');
         if (controlsInfo) controlsInfo.destroy();
@@ -1017,7 +1017,7 @@ export default class Game extends Phaser.Scene {
       this.penguinStoppedFrames++;
 
       // Aumentar mucho el tiempo para considerar detenido
-      if (this.penguinStoppedFrames > 120) { // 2 segundos a 60 FPS
+      if (this.penguinStoppedFrames > 60) { // 1 segundos a 60 FPS
         this.endLaunch();
       }
     } else {
@@ -1205,7 +1205,7 @@ export default class Game extends Phaser.Scene {
           onComplete: () => {
             // Iniciar la selección de ángulo solo después de que los personajes hayan entrado
             this.startAngleSelection();
-            
+
             // Restablecer el flag de reinicio para permitir futuros reinicios
             this.isResetting = false;
           }
