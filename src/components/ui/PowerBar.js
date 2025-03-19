@@ -194,24 +194,6 @@ export default class PowerBar {
       this.graphics.moveTo(barX + barWidth, markY);
       this.graphics.lineTo(barX + barWidth + markWidth, markY);
       this.graphics.strokePath();
-
-      // Añadir porcentajes para las marcas principales
-      if (i % 5 === 0) {
-        this.graphics.fillStyle(0xffffff, 1);
-        const percentText = i * 10 + '%';
-        const textX = barX + barWidth + 15;
-        const textY = markY;
-
-        // Añadir texto
-        const percentageText = this.scene.add.text(textX, textY, percentText, {
-          fontFamily: 'Arial',
-          fontSize: '12px',
-          color: '#ffffff'
-        }).setOrigin(0, 0.5).setScrollFactor(0);
-
-        // Almacenar la referencia para poder eliminarla después
-        this.percentageTexts.push(percentageText);
-      }
     }
 
     // Actualizar el texto con el porcentaje

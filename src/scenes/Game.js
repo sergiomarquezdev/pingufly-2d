@@ -9,41 +9,15 @@ import PowerBar from '../components/ui/PowerBar';
 import AngleIndicator from '../components/ui/AngleIndicator';
 import CameraController from '../utils/CameraController';
 import GameOverScreen from '../components/ui/GameOverScreen';
-import StorageManager from '../utils/StorageManager';
 import CharacterManager from '../components/characters/CharacterManager';
+import GameStateManager from '../utils/GameStateManager';
+import ScoreManager from '../utils/ScoreManager';
+import GameUI from '../components/ui/GameUI';
+import LaunchManager from '../components/gameplay/LaunchManager';
 
 export default class Game extends Phaser.Scene {
   constructor() {
     super('Game');
-
-    // Estado del juego
-    this.gameState = {
-      currentState: 'READY', // READY, ANGLE_SELECTION, POWER_SELECTION, LAUNCHING, FLYING, ENDED
-      launchAttempts: 0,
-      maxLaunchAttempts: 5,
-      currentDistance: 0, // Distancia del lanzamiento actual
-      totalDistance: 0,   // Distancia acumulada total de esta partida
-      bestTotalDistance: StorageManager.loadBestDistance() // Mejor distancia de todas las partidas
-    };
-
-    // Ángulo y potencia
-    this.angle = 45; // Ángulo inicial
-    this.power = 0;  // Potencia inicial
-
-    // Componentes
-    this.characterManager = null;
-    this.cameraController = null;
-    this.angleIndicator = null;
-    this.powerBar = null;
-    this.gameOverScreen = null;
-
-    // Elementos del juego
-    this.ground = null;
-    this.distanceText = null;
-    this.attemptsText = null;
-    this.totalDistanceText = null;
-    this.bestDistanceText = null;
-    this.attemptIcons = [];
 
     // Punto de inicio del lanzamiento
     this.launchPositionX = 700;
@@ -52,11 +26,8 @@ export default class Game extends Phaser.Scene {
     // Control de cámara
     this.initialCameraX = 400; // Posición inicial X de la cámara
 
-    // Flag para evitar múltiples reinicios
-    this.isResetting = false;
-
-    // Flag para indicar si hay un modal abierto
-    this.isModalOpen = false;
+    // Flag para indicar si estamos esperando el primer clic
+    this.waitingForFirstClick = false;
   }
 
   create() {
@@ -64,6 +35,12 @@ export default class Game extends Phaser.Scene {
     this.matter.world.setBounds(-10000, 0, 20000, 600);
     // Reducir la gravedad para un vuelo más lento y mayor deslizamiento
     this.matter.world.setGravity(0, 0.3);
+
+    // Inicializar gestores principales
+    this.stateManager = new GameStateManager();
+    this.scoreManager = new ScoreManager(this, {
+      pixelToMeterRatio: 10 // Escala arbitraria para el juego
+    });
 
     // Crear el fondo
     this.createBackground();
@@ -100,8 +77,12 @@ export default class Game extends Phaser.Scene {
 
     this.gameOverScreen = new GameOverScreen(this);
 
-    // Crear la interfaz de usuario
-    this.createUI();
+    // Crear interfaz de usuario
+    this.gameUI = new GameUI(this);
+    this.gameUI.createUI();
+
+    // Inicializar gestor de lanzamiento
+    this.launchManager = new LaunchManager(this);
 
     // Configurar la entrada de usuario
     this.setupInput();
@@ -112,8 +93,12 @@ export default class Game extends Phaser.Scene {
 
   update() {
     // Actualizar la distancia si el pingüino está en el aire
-    if (this.gameState.currentState === 'FLYING') {
-      this.updateDistance();
+    if (this.stateManager.currentState === 'FLYING') {
+      // Actualizar la puntuación
+      this.scoreManager.updateDistance(this.characterManager.getPenguinX(), this.launchPositionX);
+
+      // Actualizar UI
+      this.gameUI.updateDistanceText(this.scoreManager.currentDistance, this.scoreManager.totalDistance);
 
       // Comprobar si el pingüino se ha detenido
       if (this.characterManager.updatePenguinPhysics()) {
@@ -148,100 +133,6 @@ export default class Game extends Phaser.Scene {
     // Propiedades del suelo - reducir la fricción para simular hielo
     this.ground.setFriction(0.001);       // Reducir casi a cero para deslizamiento extremo
     this.ground.setFrictionStatic(0.001); // Fricción estática también casi nula
-  }
-
-  /**
-   * Crea la interfaz de usuario
-   */
-  createUI() {
-    // Tamaño del canvas
-    const width = this.scale.width;
-    const height = this.scale.height;
-
-    // Crear un footer en la parte inferior de la pantalla
-    this.uiFooter = this.add.container(0, height - 30).setScrollFactor(0);
-
-    // Fondo del footer
-    const footerBg = this.add.rectangle(0, 0, width, 30, 0x104080, 0.8)
-      .setOrigin(0, 0)
-      .setStrokeStyle(2, 0xffffff, 0.5);
-
-    // Añadir textura al footer para hacerlo más temático
-    const footerTexture = this.add.tileSprite(0, 0, width, 50, 'ground')
-      .setOrigin(0, 0)
-      .setAlpha(0.3)
-      .setTint(0x88bbff);
-
-    // ===== SECCIÓN DE INTENTOS (IZQUIERDA) =====
-    // Contenedor para los iconos de pingüino
-    const attemptsContainer = this.add.container(20, 20);
-
-    // Crear 5 iconos de pingüino
-    this.attemptIcons = [];
-    const ICON_SPACING = 30;
-
-    for (let i = 0; i < this.gameState.maxLaunchAttempts; i++) {
-      const icon = this.add.image(i * ICON_SPACING, 0, 'penguin')
-        .setOrigin(0.5, 0.75)
-        .setScale(1.3);
-
-      this.attemptIcons.push(icon);
-      attemptsContainer.add(icon);
-    }
-
-    // Calcular posición para el título después de los iconos de pingüino
-    const titlePosX = 20 + (this.gameState.maxLaunchAttempts * ICON_SPACING) + 15;
-
-    // Título del juego justo después de los iconos de intentos (pingüinos)
-    const gameTitle = this.add.text(titlePosX, 15, "PINGUFLY", {
-      fontFamily: 'Impact',
-      fontSize: '20px',
-      color: '#ffffff',
-      stroke: '#104080',
-      strokeThickness: 2,
-    }).setOrigin(0, 0.5);
-
-    // ===== SECCIÓN DE DISTANCIA TOTAL ACUMULADA (CENTRO-DERECHA) =====
-    const distanceLabel = this.add.text(width - 280, 15, "DISTANCE", {
-      fontFamily: 'Impact',
-      fontSize: '16px',
-      color: '#ffffff',
-    }).setOrigin(0.5, 0.5);
-
-    this.distanceText = this.add.text(width - 230, 15, "0 m", {
-      fontFamily: 'Impact',
-      fontSize: '23px',
-      color: '#ffffff',
-      stroke: '#000000',
-      strokeThickness: 2,
-    }).setOrigin(0, 0.5);
-
-    // ===== SECCIÓN DE MEJOR DISTANCIA (RÉCORD) =====
-    const bestLabel = this.add.text(width - 105, 15, "BEST", {
-      fontFamily: 'Impact',
-      fontSize: '16px',
-      color: '#ffdd00',
-    }).setOrigin(0.5, 0.5);
-
-    this.bestDistanceText = this.add.text(width - 75, 15, this.gameState.bestTotalDistance + " m", {
-      fontFamily: 'Impact',
-      fontSize: '23px',
-      color: '#ffdd00',
-      stroke: '#000000',
-      strokeThickness: 2,
-    }).setOrigin(0, 0.5);
-
-    // Añadir todo al footer
-    this.uiFooter.add([
-      footerBg,
-      footerTexture,
-      gameTitle,
-      attemptsContainer,
-      distanceLabel,
-      this.distanceText,
-      bestLabel,
-      this.bestDistanceText
-    ]);
   }
 
   /**
@@ -285,7 +176,7 @@ export default class Game extends Phaser.Scene {
    */
   restartGame() {
     // Iniciar algunas acciones de reinicio inmediatamente
-    this.gameState.currentState = 'RESETTING';
+    this.stateManager.setState('RESETTING');
 
     // Detener físicas inmediatamente
     this.matter.world.pause();
@@ -313,30 +204,18 @@ export default class Game extends Phaser.Scene {
       this.cameraController.setScrollX(this.cameraController.getInitialScrollX());
 
       // Reiniciar todos los valores del juego
-      this.gameState.currentState = 'READY';
-      this.gameState.launchAttempts = 0;
-      this.gameState.currentDistance = 0;
-      this.gameState.totalDistance = 0;
+      this.stateManager.reset();
+      this.scoreManager.resetCurrentDistance();
+      this.scoreManager.resetTotalDistance();
 
       // Actualizar textos de distancia
-      this.distanceText.setText('0 m');
+      this.gameUI.updateDistanceText(0, 0);
 
       // Actualizar la UI de intentos
-      this.updateAttemptsUI();
+      this.gameUI.updateAttemptsUI(0, this.stateManager.getMaxAttempts());
 
-      // Eliminar textos existentes de fin de juego, instrucciones, o indicadores de ángulo/potencia
-      this.children.list
-        .filter(child => child.type === 'Text' &&
-          (child.text.includes('JUEGO TERMINADO') ||
-            child.text.includes('Distancia total') ||
-            child.text.includes('Haz clic para') ||
-            child.text.includes('NUEVO RÉCORD') ||
-            child.text.includes('Ángulo') ||  // Más genérico para incluir cualquier texto con "Ángulo"
-            child.name === 'angleText'))      // Buscar por nombre también
-          .forEach(text => {
-            console.log("Eliminando texto:", text.text);
-            text.destroy();
-          });
+      // Eliminar textos existentes
+      this.cleanupTexts();
 
       // Reiniciar posición del pingüino
       this.characterManager.resetPositions();
@@ -350,16 +229,27 @@ export default class Game extends Phaser.Scene {
   }
 
   /**
+   * Elimina textos temporales de la escena
+   */
+  cleanupTexts() {
+    this.children.list
+      .filter(child => child.type === 'Text' &&
+        (child.text.includes('JUEGO TERMINADO') ||
+          child.text.includes('Distancia total') ||
+          child.text.includes('Haz clic para') ||
+          child.text.includes('NUEVO RÉCORD') ||
+          child.text.includes('Ángulo') ||  // Más genérico para incluir cualquier texto con "Ángulo"
+          child.name === 'angleText'))      // Buscar por nombre también
+        .forEach(text => {
+          text.destroy();
+        });
+  }
+
+  /**
    * Inicia el juego
    */
   startGame() {
-    this.gameState.currentState = 'READY';
-    this.gameState.launchAttempts = 0;
-    this.gameState.currentDistance = 0;
-    this.gameState.totalDistance = 0; // Reiniciar la distancia total al comenzar
-
-    // Actualizar texto de distancia total
-    this.distanceText.setText('0 m');
+    this.stateManager.setState('READY');
 
     // Mostrar mensaje de inicio
     const width = this.cameras.main.width;
@@ -383,39 +273,10 @@ export default class Game extends Phaser.Scene {
     });
 
     // Mostrar mensaje informativo sobre los controles
-    this.showControlsInfo();
+    this.gameUI.showControlsInfo();
 
     // Establecer flag para saber que estamos esperando el primer clic
     this.waitingForFirstClick = true;
-  }
-
-  /**
-   * Muestra información sobre los controles de teclado
-   */
-  showControlsInfo() {
-    const width = this.cameras.main.width;
-
-    // Eliminar mensaje anterior si existe
-    const existingControls = this.children.getByName('controlsInfo');
-    if (existingControls) existingControls.destroy();
-
-    // Crear un contenedor para el mensaje de controles en la parte superior
-    const controlsContainer = this.add.container(width / 2, 0).setScrollFactor(0).setName('controlsInfo');
-
-    // Fondo sutil semi-transparente con forma de píldora
-    const controlsBg = this.add.graphics();
-    controlsBg.fillStyle(0x000000, 0.6);
-    controlsBg.fillRoundedRect(-120, 0, 240, 16, 0, 0, 8, 8);
-
-    // Texto de los controles en una sola línea
-    const controlsText = this.add.text(0, 8, "ESC = Menú | R = Reiniciar", {
-      fontFamily: 'Arial',
-      fontSize: '10px',
-      color: '#ffffff'
-    }).setOrigin(0.5);
-
-    // Añadir todo al contenedor
-    controlsContainer.add([controlsBg, controlsText]);
   }
 
   /**
@@ -423,7 +284,7 @@ export default class Game extends Phaser.Scene {
    */
   handlePlayerInput() {
     // Si hay un modal abierto, no procesar ninguna entrada
-    if (this.isModalOpen) return;
+    if (this.stateManager.isModalOpen) return;
 
     // Si estamos esperando el primer clic, comenzar la selección de ángulo
     if (this.waitingForFirstClick) {
@@ -438,28 +299,28 @@ export default class Game extends Phaser.Scene {
       const controlsInfo = this.children.getByName('controlsInfo');
       if (controlsInfo) controlsInfo.destroy();
 
-      this.startAngleSelection();
+      this.launchManager.startAngleSelection();
       return;
     }
 
     // Basado en el estado actual del juego
-    switch (this.gameState.currentState) {
+    switch (this.stateManager.currentState) {
       case 'ANGLE_SELECTION':
-        this.endAngleSelection();
-        this.startPowerSelection();
+        this.launchManager.endAngleSelection();
+        this.launchManager.startPowerSelection();
         break;
 
       case 'POWER_SELECTION':
-        this.endPowerSelection();
-        this.launchPenguin();
+        this.launchManager.endPowerSelection();
+        this.launchManager.launchPenguin();
         break;
 
       case 'ENDED':
         // Prevenir múltiples reinicios debido a clics rápidos
-        if (this.isResetting) return;
+        if (this.stateManager.isResetting) return;
 
         // Establecer el flag de reinicio
-        this.isResetting = true;
+        this.stateManager.isResetting = true;
 
         // Eliminar el contenedor de controles si existe
         const controlsInfo = this.children.getByName('controlsInfo');
@@ -471,186 +332,15 @@ export default class Game extends Phaser.Scene {
   }
 
   /**
-   * Inicia la selección de ángulo
-   */
-  startAngleSelection() {
-    this.gameState.currentState = 'ANGLE_SELECTION';
-
-    // Antes de iniciar, destruir cualquier objeto gráfico residual que pueda estar causando el problema
-    this.children.list
-      .filter(child =>
-        (child.name && child.name.includes('angle')) ||
-        (child.type === 'Text' && child.text && child.text.includes('Ángulo'))
-      )
-      .forEach(obj => {
-        console.log("Game: Eliminando objeto de ángulo residual:", obj.name || obj.text);
-        obj.destroy();
-      });
-
-    // Asegurarnos que el pingüino esté en estado visible correcto
-    this.characterManager.penguin.clearTint();
-    this.characterManager.penguin.setAlpha(1);
-    this.characterManager.penguin.setVisible(true);
-
-    // Iniciar la selección de ángulo con el componente AngleIndicator
-    this.angleIndicator.startAngleSelection((angle) => {
-      // Actualizar el ángulo del juego cuando cambia en el indicador
-      this.angle = angle;
-    });
-
-    // Mensaje de instrucción
-    this.add.text(400, 100, 'Haz clic para seleccionar el ángulo', {
-      fontFamily: 'Arial',
-      fontSize: '20px',
-      color: '#ffffff',
-      stroke: '#000000',
-      strokeThickness: 3
-    }).setOrigin(0.5).setScrollFactor(0).setName('angleInstructionText');
-  }
-
-  /**
-   * Finaliza la selección de ángulo
-   */
-  endAngleSelection() {
-    // Detener la animación del ángulo usando el componente
-    this.selectedAngle = this.angleIndicator.endAngleSelection();
-
-    // Eliminar el texto de instrucción
-    this.children.list
-      .filter(child => child.name === 'angleInstructionText')
-      .forEach(text => text.destroy());
-  }
-
-  /**
-   * Inicia la selección de potencia
-   */
-  startPowerSelection() {
-    this.gameState.currentState = 'POWER_SELECTION';
-
-    // Iniciar la selección de potencia con el componente PowerBar
-    this.powerBar.startPowerSelection((power) => {
-      // Actualizar la potencia del juego cuando cambia en la barra
-      this.power = power;
-    });
-
-    // Mensaje de instrucción
-    this.add.text(400, 100, 'Haz clic para seleccionar la potencia', {
-      fontFamily: 'Arial',
-      fontSize: '20px',
-      color: '#ffffff',
-      stroke: '#000000',
-      strokeThickness: 3
-    }).setOrigin(0.5).setScrollFactor(0).setName('powerInstructionText');
-  }
-
-  /**
-   * Finaliza la selección de potencia
-   */
-  endPowerSelection() {
-    // Detener la animación de potencia usando el componente
-    this.selectedPower = this.powerBar.endPowerSelection();
-
-    // Eliminar el texto de instrucción
-    this.children.list
-      .filter(child => child.name === 'powerInstructionText')
-      .forEach(text => text.destroy());
-  }
-
-  /**
-   * Lanza al pingüino con el ángulo y potencia seleccionados
-   */
-  launchPenguin() {
-    this.gameState.currentState = 'LAUNCHING';
-
-    // Incrementar contador de intentos
-    this.gameState.launchAttempts++;
-
-    // Actualizar el contador de intentos visual
-    this.updateAttemptsUI();
-
-    // Usar el CharacterManager para lanzar el pingüino
-    this.characterManager.launchPenguin(this.selectedAngle, this.selectedPower);
-
-    // Cambiar inmediatamente al estado FLYING sin esperar a la animación
-    this.gameState.currentState = 'FLYING';
-
-    // Reiniciar distancia actual inmediatamente
-    this.gameState.currentDistance = 0;
-  }
-
-  /**
-   * Actualiza la interfaz gráfica de intentos
-   */
-  updateAttemptsUI() {
-    // Actualizar los iconos de pingüino
-    for (let i = 0; i < this.gameState.maxLaunchAttempts; i++) {
-      if (i < this.gameState.launchAttempts) {
-        // Intento usado - pingüino completo
-        this.attemptIcons[i].setAlpha(0.4);
-        this.attemptIcons[i].setTint(0xaaccff);
-        this.attemptIcons[i].setScale(1.0); // Escala reducida para intentos usados
-      } else {
-        // Intento disponible - pingüino semi-transparente
-        this.attemptIcons[i].setAlpha(1);
-        this.attemptIcons[i].clearTint();
-        this.attemptIcons[i].setScale(1.3); // Mantener escala original
-      }
-    }
-
-    // Animar el icono del intento actual
-    if (this.gameState.launchAttempts > 0 && this.gameState.launchAttempts <= this.gameState.maxLaunchAttempts) {
-      const currentIcon = this.attemptIcons[this.gameState.launchAttempts - 1];
-      this.tweens.add({
-        targets: currentIcon,
-        scaleX: { from: 1.5, to: 1.0 },
-        scaleY: { from: 1.5, to: 1.0 },
-        duration: 300,
-        ease: 'Back.easeOut'
-      });
-    }
-  }
-
-  /**
-   * Actualiza la distancia recorrida por el pingüino
-   */
-  updateDistance() {
-    // Calcular la distancia desde el punto de lanzamiento
-    const distanceInPixels = this.launchPositionX - this.characterManager.getPenguinX();
-
-    // Convertir a metros (escala arbitraria para el juego) y asegurar que sea positiva
-    const distanceInMeters = Math.floor(distanceInPixels / 10);
-
-    // Actualizar la distancia actual (solo si es positiva, para evitar distancias negativas si va a la derecha)
-    this.gameState.currentDistance = Math.max(0, distanceInMeters);
-
-    // Calcular la distancia total (la acumulada hasta ahora + la del lanzamiento actual)
-    const totalDistance = this.gameState.totalDistance + this.gameState.currentDistance;
-
-    // Actualizar el texto de distancia con la suma total
-    if (Math.abs(parseInt(this.distanceText.text) - totalDistance) >= 1) {
-      this.distanceText.setText(totalDistance + ' m');
-
-      // Pequeña animación de escala al cambiar el número
-      this.tweens.add({
-        targets: this.distanceText,
-        scaleX: { from: 1.2, to: 1 },
-        scaleY: { from: 1.2, to: 1 },
-        duration: 100,
-        ease: 'Sine.easeOut'
-      });
-    }
-  }
-
-  /**
    * Finaliza el lanzamiento actual
    */
   endLaunch() {
     // Acumular la distancia actual al total
-    this.gameState.totalDistance += this.gameState.currentDistance;
+    this.scoreManager.addCurrentToTotal();
 
     // Animar actualización del total
     this.tweens.add({
-      targets: this.distanceText,
+      targets: this.gameUI.distanceText,
       scaleX: { from: 1.3, to: 1 },
       scaleY: { from: 1.3, to: 1 },
       duration: 300,
@@ -658,84 +348,45 @@ export default class Game extends Phaser.Scene {
     });
 
     // Verificar si hemos alcanzado el número máximo de intentos
-    if (this.gameState.launchAttempts >= this.gameState.maxLaunchAttempts) {
+    if (this.stateManager.isGameOver()) {
       this.endGame();
     } else {
       // Preparar para el siguiente lanzamiento
-      this.showNextLaunchPrompt();
+      this.gameUI.showNextLaunchPrompt();
+      this.stateManager.setState('ENDED');
     }
-  }
-
-  /**
-   * Muestra mensaje para el siguiente lanzamiento
-   */
-  showNextLaunchPrompt() {
-    this.gameState.currentState = 'ENDED';
-
-    // Mensaje para el siguiente lanzamiento
-    const width = this.cameras.main.width;
-    const height = this.cameras.main.height;
-
-    const nextLaunchText = this.add.text(width / 2, 170, 'Haz clic para el siguiente lanzamiento', {
-      fontFamily: 'Arial',
-      fontSize: '24px',
-      color: '#ffffff',
-      stroke: '#000000',
-      strokeThickness: 3
-    }).setOrigin(0.5).setScrollFactor(0);
-
-    // Animación
-    this.tweens.add({
-      targets: nextLaunchText,
-      alpha: 0.5,
-      duration: 500,
-      yoyo: true,
-      repeat: -1
-    });
-
-    // Mostrar mensaje de controles
-    this.showControlsInfo();
   }
 
   /**
    * Finaliza el juego actual
    */
   endGame() {
-    this.gameState.currentState = 'ENDED';
-
-    // Marcar que hay un modal abierto
-    this.isModalOpen = true;
+    this.stateManager.setState('ENDED');
+    this.stateManager.isModalOpen = true;
 
     // Comprobar si hemos batido el récord
-    const isNewRecord = this.gameState.totalDistance > this.gameState.bestTotalDistance;
+    const isNewRecord = this.scoreManager.checkAndUpdateBestDistance();
+
     if (isNewRecord) {
-      // Actualizar mejor distancia total
-      this.gameState.bestTotalDistance = this.gameState.totalDistance;
-
-      // Guardar en localStorage usando StorageManager
-      StorageManager.saveBestDistance(this.gameState.bestTotalDistance);
-
       // Actualizar el texto de mejor distancia
-      this.bestDistanceText.setText(this.gameState.bestTotalDistance + ' m');
+      this.gameUI.updateBestDistanceText(this.scoreManager.bestTotalDistance);
     }
 
     // Definir los callbacks como funciones de flecha
     const handleRestart = () => {
-      console.log("Game: Reiniciando juego desde endGame");
-      this.isModalOpen = false;
+      this.stateManager.isModalOpen = false;
       this.restartGame();
     };
 
     const handleMainMenu = () => {
-      console.log("Game: Volviendo al menú principal desde endGame");
-      this.isModalOpen = false;
+      this.stateManager.isModalOpen = false;
       this.backToMenu();
     };
 
     // Mostrar la pantalla de fin de juego usando GameOverScreen
     this.gameOverScreen.show({
-      totalDistance: this.gameState.totalDistance,
-      bestDistance: this.gameState.bestTotalDistance,
+      totalDistance: this.scoreManager.totalDistance,
+      bestDistance: this.scoreManager.bestTotalDistance,
       onRestart: handleRestart,
       onMainMenu: handleMainMenu
     });
@@ -763,20 +414,10 @@ export default class Game extends Phaser.Scene {
     }
 
     // Reiniciamos solo la distancia actual para el nuevo intento
-    // La distancia total acumulada no se reinicia
-    this.gameState.currentDistance = 0;
+    this.scoreManager.resetCurrentDistance();
 
     // Eliminar todos los textos temporales
-    this.children.list
-      .filter(child => child.type === 'Text' &&
-        (child.text === 'Haz clic para el siguiente lanzamiento' ||
-          child.text.includes('¡Nuevo récord!') ||
-          child.text.includes('Ángulo') ||  // Más genérico para incluir cualquier texto con "Ángulo"
-          child.name === 'angleText'))      // Buscar por nombre también
-        .forEach(text => {
-          console.log("Eliminando texto en resetLaunch:", text.text);
-          text.destroy();
-        });
+    this.cleanupTexts();
 
     // Añadir mensaje "Preparando el lanzamiento..."
     const width = this.cameras.main.width;
@@ -794,10 +435,10 @@ export default class Game extends Phaser.Scene {
       preparingText.destroy();
 
       // Iniciar la selección de ángulo
-      this.startAngleSelection();
+      this.launchManager.startAngleSelection();
 
       // Restablecer el flag de reinicio para permitir futuros reinicios
-      this.isResetting = false;
+      this.stateManager.isResetting = false;
     });
   }
 }

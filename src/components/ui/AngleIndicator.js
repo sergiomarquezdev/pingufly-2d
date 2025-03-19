@@ -53,7 +53,6 @@ export default class AngleIndicator {
           (child.type === 'Text' && child.text && child.text.includes('Ángulo'))
         )
         .forEach(obj => {
-          console.log("AngleIndicator start: Eliminando objeto residual:", obj.name || obj.text);
           obj.destroy();
         });
     }
@@ -115,7 +114,6 @@ export default class AngleIndicator {
       this.scene.children.list
         .filter(child => child.name && child.name.includes('angle'))
         .forEach(obj => {
-          console.log("AngleIndicator: Eliminando objeto con nombre relacionado con el ángulo:", obj.name);
           obj.destroy();
         });
     }
@@ -129,7 +127,6 @@ export default class AngleIndicator {
   clearTexts() {
     // Limpiar el texto del ángulo si existe
     if (this.angleText) {
-      console.log("AngleIndicator: Eliminando texto del ángulo");
       this.angleText.destroy();
       this.angleText = null;
     }
@@ -140,7 +137,6 @@ export default class AngleIndicator {
         .filter(child => child.type === 'Text' &&
                 (child.text.includes('Ángulo') || child.name === 'angleText'))
         .forEach(text => {
-          console.log("AngleIndicator: Eliminando texto adicional:", text.text);
           text.destroy();
         });
     }
@@ -261,7 +257,6 @@ export default class AngleIndicator {
           (child.type === 'Text' && child.text && child.text.includes('Ángulo'))
         )
         .forEach(obj => {
-          console.log("AngleIndicator destroy: Eliminando objeto residual:", obj.name || obj.text);
           obj.destroy();
         });
     }

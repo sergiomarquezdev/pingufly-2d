@@ -99,13 +99,16 @@ export default class ButtonFactory {
 
         // IMPORTANTE: Asegurarnos de que el callback se ejecute
         if (callback && typeof callback === 'function') {
-          // Ejecutar el callback después de una pequeña animación
-          scene.tweens.add({
-            targets: buttonContainer,
-            alpha: 0.8,
-            yoyo: true,
-            duration: 100,
-            onComplete: () => callback()  // Asegurarnos de que se ejecute como función
+          // Ejecutar el callback inmediatamente y añadir solo un efecto visual
+          // Esto evita problemas si el callback modifica la escena
+          buttonContainer.setAlpha(0.8);
+          scene.time.delayedCall(100, () => {
+            // Solo restauramos la alpha si el botón aún existe
+            if (buttonContainer && buttonContainer.active) {
+              buttonContainer.setAlpha(1);
+            }
+            // Ejecutar el callback
+            callback();
           });
         }
       });

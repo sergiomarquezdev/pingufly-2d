@@ -42,10 +42,13 @@ export default class GameOverScreen {
     const modalOverlay = this.scene.add.rectangle(0, 0, width * 2, height * 2, 0x000000, 0.7)
       .setOrigin(0.5)
       .setScrollFactor(0)
-      .setInteractive() // Hacer el overlay interactivo
+      .setInteractive({ useHandCursor: false }) // Hacer el overlay interactivo
       .on('pointerdown', (pointer) => {
-        // Capturar todos los clics en el overlay y evitar que se propaguen
-        if (pointer.event) pointer.event.stopPropagation();
+        // Capturar los clics en el overlay pero permitir que se propaguen a los botones dentro del modal
+        // Solo detener propagación a elementos fuera del modal
+        if (pointer.event && !this.isClickOnButton(pointer)) {
+          pointer.event.stopPropagation();
+        }
       });
 
     this.container.add(modalOverlay);
@@ -176,7 +179,6 @@ export default class GameOverScreen {
 
     // Funciones de callback para los botones
     const handleRestart = () => {
-      console.log("Botón de reinicio presionado");  // Debug
       this.hide();
       if (onRestart && typeof onRestart === 'function') {
         onRestart();
@@ -184,7 +186,6 @@ export default class GameOverScreen {
     };
 
     const handleMainMenu = () => {
-      console.log("Botón de menú principal presionado");  // Debug
       this.hide();
       if (onMainMenu && typeof onMainMenu === 'function') {
         onMainMenu();
@@ -241,6 +242,59 @@ export default class GameOverScreen {
     if (this.container) {
       this.container.destroy();
       this.container = null;
+
+      // Asegurarnos de que el flag isModalOpen se restablezca correctamente
+      if (this.scene.stateManager) {
+        this.scene.stateManager.isModalOpen = false;
+      }
     }
+  }
+
+  /**
+   * Comprueba si un evento pointer está sobre un botón del modal
+   * @param {Phaser.Input.Pointer} pointer - El objeto pointer del evento
+   * @returns {boolean} - true si el clic está sobre un botón
+   */
+  isClickOnButton(pointer) {
+    // Si no hay contenedor de botones, no está sobre un botón
+    if (!this.container) return false;
+
+    // Buscamos botones en el contenedor (contenedores con useHandCursor)
+    const buttonContainers = this.container.getAll().filter(child =>
+      child instanceof Phaser.GameObjects.Container &&
+      child.input &&
+      child.input.useHandCursor
+    );
+
+    // También buscamos contenedores que puedan contener botones
+    const possibleContainers = this.container.getAll().filter(child =>
+      child instanceof Phaser.GameObjects.Container
+    );
+
+    // Comprobamos si el puntero está sobre algún botón directo
+    for (const button of buttonContainers) {
+      if (button.getBounds().contains(pointer.x, pointer.y)) {
+        return true;
+      }
+    }
+
+    // Comprobamos en contenedores anidados
+    for (const container of possibleContainers) {
+      const nestedButtons = container.getAll().filter(child =>
+        child instanceof Phaser.GameObjects.Container &&
+        child.input &&
+        child.input.useHandCursor
+      );
+
+      for (const button of nestedButtons) {
+        // Calcular la posición global del botón, teniendo en cuenta su contenedor padre
+        const globalBounds = button.getBounds();
+        if (globalBounds.contains(pointer.x, pointer.y)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 }
