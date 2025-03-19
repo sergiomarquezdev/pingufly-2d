@@ -1,224 +1,177 @@
 # PinguFly - Development Timeline
 
-This document outlines the development roadmap for the 'PinguFly' videogame, breaking down the process into phases and specific tasks to facilitate implementation.
+Este documento detalla la hoja de ruta de desarrollo para el videojuego 'PinguFly', dividiendo el proceso en fases y tareas específicas para facilitar la implementación.
 
-## Phase 1: Project Setup and Foundation (Week 1)
+## Fase 1: Configuración y Base del Proyecto
 
-### Days 1-2: Environment Setup and Project Architecture
-- [x] Set up development environment with Node.js and npm
-- [x] Decide on build tool: **Using Vite** instead of Webpack/Parcel for faster development
-- [x] Initialize project with proper directory structure:
-  ```
-  /pingufly-2d
-  ├── /src
-  │   ├── /scenes
-  │   │   ├── Boot.js
-  │   │   ├── Preload.js
-  │   │   ├── Menu.js
-  │   │   ├── Game.js
-  │   │   └── Results.js
-  │   ├── /entities
-  │   │   ├── Yeti.js
-  │   │   ├── Penguin.js
-  │   │   └── Flamingo.js
-  │   ├── /systems
-  │   │   ├── Physics.js
-  │   │   └── InputHandler.js
-  │   ├── /utils
-  │   │   ├── Storage.js
-  │   │   └── ScoreManager.js
-  │   ├── /config
-  │   │   ├── gameConfig.js
-  │   │   └── physicConfig.js
-  │   └── main.js
-  ├── /public
-  │   ├── /assets
-  │   │   ├── /images
-  │   │   ├── /audio
-  │   │   └── /spritesheets
-  │   └── index.html
-  ├── /dist
-  ├── /project_docs
-  └── /tests
-  ```
-- [x] Set up Vite project with Phaser template:
-  - [x] Install Vite using npm
-  - [x] Create Vite project with vanilla JS template
-  - [x] Configure Vite for Phaser (vite.config.js)
-  - [x] Set up development server options
-  - [x] Configure asset handling
-- [x] Implement basic HTML5 template with responsive canvas
-- [x] Install Phaser and set up initial game configuration
-- [x] Create constants file for game settings (physics, visuals, etc.)
-- [ ] Set up version control with Git
+### Configuración del Entorno y Arquitectura del Proyecto
+- ✅ Configurar entorno de desarrollo con Node.js y npm
+- ✅ Decidir herramienta de construcción: **Vite** para un desarrollo más rápido
+- ✅ Inicializar proyecto con estructura de directorios adecuada
+- ✅ Configurar proyecto Vite con plantilla Phaser
+- ✅ Implementar plantilla HTML5 básica con canvas responsivo
+- ✅ Instalar Phaser y configurar el juego inicial
+- ✅ Crear archivo de constantes para configuración del juego (física, visuales, etc.)
+- ✅ Configurar control de versiones con Git
 
-### Days 3-5: Core Game Infrastructure
-- [x] Implement basic game loop and state management
-- [x] Create asset loader with progress tracking (in Preload scene)
-- [x] Develop scene management system (Boot, Preload, Menu, Game, Results scenes)
-- [x] Create responsive layout for different screen sizes
-- [x] Set up basic physics system using Matter.js within Phaser
-- [x] Implement input handler for both mouse and touch controls
-- [ ] Create debug tools for development (FPS counter, physics visualization)
+### Infraestructura Básica del Juego
+- ✅ Implementar bucle básico del juego y gestión de estados
+- ✅ Crear cargador de assets con seguimiento de progreso (en escena Preload)
+- ✅ Desarrollar sistema de gestión de escenas (Boot, Preload, Menu, Game, Results)
+- ✅ Crear diseño responsivo para diferentes tamaños de pantalla
+- ✅ Configurar sistema básico de física usando Matter.js dentro de Phaser
+- ✅ Implementar manejador de entrada para controles de ratón y táctiles
+- ❌ Crear herramientas de depuración (contador FPS, visualización de física)
 
-## Next Steps:
+### Refactorización y Organización del Código
+- ✅ Crear clase GameStateManager para centralizar la gestión de estados del juego
+- ✅ Implementar ScoreManager para manejar puntuaciones y distancias
+- ✅ Desarrollar GameUI para centralizar elementos de interfaz
+- ✅ Crear LaunchManager para gestionar el proceso de lanzamiento
+- ✅ Implementar sistema de offsets para posicionamiento de personajes
+- ✅ Mejorar modularidad y mantenibilidad del código base
 
-1. **Mobile Testing**:
-   - [ ] Test the current implementation on mobile devices
-   - [ ] Verify touch interactions are working properly
-   - [ ] Ensure the game scales correctly on different screen sizes
+## Fase 2: Mecánicas Principales de Juego
 
-2. **Character Assets**:
-   - [ ] Create or find temporary sprites for Yeti, Penguin, and Flamingo
-   - [ ] Implement proper animation system for characters
-   - [ ] Replace placeholder assets with proper character sprites
+### Implementación de Personajes
+- ✅ Implementar posicionamiento base de los personajes (Yeti, Pingüino, Flamenco)
+- ✅ Configurar físicas para el pingüino
+- ✅ Desarrollar sistema de animación básica para el flamenco (giro)
+- ❌ Crear sprites y animaciones finales para el Yeti:
+  - ❌ Animación idle
+  - ❌ Animación de golpeo (para golpear al pingüino)
+- ❌ Crear sprites y animaciones finales para el Pingüino:
+  - ❌ Animación idle
+  - ❌ Animación de vuelo
+  - ❌ Animación de aterrizaje
+- ❌ Implementar animaciones mejoradas para el Flamenco
+- ❌ Configurar escalado de personajes basado en el dispositivo
 
-3. **Physics Refinement**:
-   - [x] Fine-tune penguin physics parameters for better flight experience
-   - [x] Implement more realistic ground collisions
-   - [x] Add proper character positioning on ground
-   - [x] Extend world boundaries for better gameplay experience
-   - [ ] Add rotation to the penguin during flight
+### Mecánicas de Lanzamiento
+- ✅ Implementar mecánica de selección de ángulo:
+  - ✅ Crear indicador visual con flecha
+  - ✅ Implementar movimiento vertical del indicador
+  - ✅ Desarrollar sistema de temporización para selección de ángulo
+- ✅ Implementar mecánica de selección de potencia:
+  - ✅ Crear barra de potencia visual
+  - ✅ Implementar movimiento vertical de la barra de potencia
+  - ✅ Desarrollar sistema de temporización para selección de potencia
+- ✅ Desarrollar secuencia de animación de lanzamiento:
+  - ✅ Animación del golpeo del Yeti/Flamenco
+  - ✅ Reacción del pingüino al ser golpeado
+  - ✅ Cálculo inicial de trayectoria basado en ángulo y potencia
+- ✅ Implementar físicas básicas para el vuelo del pingüino:
+  - ✅ Gravedad y resistencia del aire
+  - ✅ Detección de colisiones con el suelo
+  - ✅ Seguimiento de distancia
 
-4. **UI Polish**:
-   - [x] Improve angle selection indicator with arco circular
-   - [x] Enhance power bar visuals with vertical gradient
-   - [x] Implement better menu layout with proper button spacing
-   - [ ] Add sound effects for user interactions
+## Fase 3: Entorno y Elementos Visuales
 
-## Phase 2: Core Gameplay Mechanics (Week 2)
+### Desarrollo del Entorno
+- ✅ Diseñar e implementar fondo con desplazamiento y efecto parallax:
+  - ✅ Capa de cielo con gradiente y sol
+  - ✅ Capa de colinas/montañas distantes con horizonte
+  - ✅ Capa de suelo/sabana
+- ✅ Crear elementos de entorno no interactivos:
+  - ✅ Árboles de acacia (fondo)
+  - ❌ Mechones de hierba y arbustos
+  - ✅ Nubes en movimiento en el fondo
+- ✅ Implementar sistema de cámara para seguir el vuelo del pingüino
+- ✅ Crear sistema de colisión con el suelo para el aterrizaje del pingüino
 
-### Days 1-2: Character Implementation
-- [ ] Create Yeti character sprite and animations:
-  - Idle animation
-  - Swing animation (for hitting penguin)
-- [ ] Create Penguin character sprite and animations:
-  - Idle animation
-  - Flight animation
-  - Landing animation
-- [ ] Implement Flamingo as part of Yeti's swing animation or separate object
-- [ ] Set up character positioning and scaling based on device
+### Sistemas de UI y Feedback
+- ✅ Diseñar e implementar UI del juego:
+  - ✅ Visualización de puntuación/distancia
+  - ✅ Contador de lanzamientos (intentos restantes)
+  - ✅ Récord de mejor distancia
+- ✅ Crear animaciones de transición entre estados del juego
+- ✅ Implementar sistemas de feedback:
+  - ✅ Indicadores visuales para temporización exitosa
+  - ❌ Marcadores de distancia en el suelo
+  - ❌ Rastro de la trayectoria de vuelo (opcional)
+- ✅ Desarrollar pantalla de resultados con resumen de rendimiento
+- ✅ Crear pantalla de menú principal con instrucciones del juego
+- ✅ Implementar pantalla de Game Over con opciones de reinicio
+- ✅ Corregir bugs en la pantalla de Game Over y mejorar interactividad
 
-### Days 3-5: Launch Mechanics
-- [x] Implement angle selection mechanic:
-  - [x] Create visual arrow indicator
-  - [x] Implement vertical movement of indicator
-  - [x] Develop timing system for angle selection
-- [x] Implement power selection mechanic:
-  - [x] Create visual power bar
-  - [x] Implement horizontal movement of power bar
-  - [x] Develop timing system for power selection
-- [x] Develop launch animation sequence:
-  - [x] Yeti's swing animation
-  - [x] Penguin's reaction to being hit
-  - [x] Initial trajectory calculation based on angle and power
-- [x] Implement basic physics for penguin flight:
-  - [x] Gravity and air resistance
-  - [x] Collision detection with ground
-  - [x] Distance tracking
+## Fase 4: Optimización y Pulido
 
-## Phase 3: Environment and Visuals (Week 3)
+### Optimización de Rendimiento
+- ❌ Implementar atlas de texturas para todos los sprites del juego
+- ❌ Optimizar pipeline de renderizado para dispositivos móviles:
+  - ❌ Reducir llamadas de dibujo con agrupación de sprites
+  - ❌ Implementar culling para objetos fuera de pantalla
+- ✅ Optimizar cálculos físicos:
+  - ✅ Simplificar detección de colisiones donde sea posible
+  - ✅ Extender límites del mundo para trayectorias más realistas
+  - ❌ Implementar object pooling para objetos creados frecuentemente
+- ❌ Implementar carga progresiva de assets
+- ❌ Realizar perfilado de memoria y solucionar fugas
 
-### Days 1-2: Environment Development
-- [x] Design and implement scrolling background with parallax effect:
-  - [x] Sky layer with gradient and sun
-  - [x] Distant hills/mountains layer with horizon
-  - [x] Ground/savanna layer
-- [x] Create non-interactive environment elements:
-  - [x] Acacia trees (background)
-  - [ ] Grass tufts and bushes
-  - [x] Background clouds with movement
-- [x] Implement camera system to follow penguin's flight
-- [x] Create ground collision system for penguin landing
+### Mejoras Finales y Experiencia de Usuario
+- ✅ Mejorar visualización de la barra de potencia
+  - ✅ Eliminar porcentajes redundantes
+  - ✅ Optimizar elementos visuales
+- ❌ Añadir pulido visual:
+  - ❌ Efectos de partículas para impactos
+  - ✅ Transiciones de animación
+  - ✅ UI de selección de ángulo y potencia mejorada
+  - ✅ Detalles ambientales (sabana africana)
+- ❌ Implementar efectos de sonido y música de fondo:
+  - ❌ Sonido de golpeo
+  - ❌ Sonido de vuelo/viento
+  - ❌ Sonido de impacto
+  - ❌ Sonidos de interacción con UI
+- ✅ Crear pantalla de carga con barra de progreso
+- ✅ Implementar persistencia del estado del juego (localStorage):
+  - ✅ Récord de mejor distancia
+  - ❌ Configuración del juego
+- ✅ Añadir panel de tutorial o instrucciones simple
 
-### Days 3-5: UI and Feedback Systems
-- [x] Design and implement game UI:
-  - [x] Score/distance display
-  - [x] Launch counter (remaining attempts)
-  - [x] Best distance record
-- [x] Create transition animations between game states
-- [x] Implement feedback systems:
-  - [x] Visual indicators for successful timing
-  - [ ] Distance markers on the ground
-  - [ ] Flight path trail (optional)
-- [x] Develop results screen with summary of performance
-- [x] Create main menu screen with game instructions
+### Pruebas y Preparación para Despliegue
+- ❌ Realizar pruebas cross-browser (Chrome, Firefox, Safari, Edge)
+- ❌ Probar en varios dispositivos móviles y tamaños de pantalla
+- ❌ Solucionar bugs identificados y problemas de compatibilidad
+- ❌ Preparar sistema de construcción para despliegue en producción
+- ❌ Configurar analytics para seguimiento de métricas de juego
 
-## Phase 4: Optimization and Polish (Week 4)
+## Fase 5: Lanzamiento y Post-Lanzamiento
 
-### Days 1-2: Performance Optimization
-- [ ] Implement texture atlases for all game sprites
-- [ ] Optimize rendering pipeline for mobile devices:
-  - [ ] Reduce draw calls with sprite batching
-  - [ ] Implement culling for off-screen objects
-- [x] Optimize physics calculations:
-  - [x] Simplify collision detection where possible
-  - [x] Extend world bounds for more realistic trajectories
-  - [ ] Implement object pooling for frequently created objects
-- [ ] Implement progressive asset loading
-- [ ] Perform memory profiling and fix leaks
+### Preparación para el Lanzamiento
+- ❌ Realizar pruebas finales de QA
+- ❌ Optimizar assets para producción
+- ❌ Implementar registro y reporte de errores
+- ❌ Crear build de producción
+- ❌ Desplegar en hosting web (Vercel/Cloudflare)
 
-### Days 3-4: Final Polish and UX Improvements
-- [ ] Add visual polish:
-  - [ ] Particle effects for impacts
-  - [x] Animation transitions
-  - [x] Enhanced angle and power selection UI
-  - [x] Environmental details (African savanna)
-- [ ] Implement sound effects and background music:
-  - [ ] Swing sound
-  - [ ] Flying/wind sound
-  - [ ] Impact sound
-  - [ ] UI interaction sounds
-- [x] Create loading screen with progress bar
-- [ ] Implement game state persistence (localStorage):
-  - [ ] Best distance record
-  - [ ] Game settings
-- [x] Add simple tutorial or instructions panel
+### Actualizaciones Post-Lanzamiento
+- ❌ Implementar obstáculos adicionales (jirafas, elefantes, acacias, buitres, serpientes)
+- ❌ Añadir nuevos modos de juego
+- ❌ Implementar sistema de puntuación más complejo
+- ❌ Crear sistema de clasificación
+- ❌ Diseñar niveles o entornos adicionales
 
-### Day 5: Testing and Deployment Preparation
-- [ ] Perform cross-browser testing (Chrome, Firefox, Safari, Edge)
-- [ ] Test on various mobile devices and screen sizes
-- [ ] Fix identified bugs and compatibility issues
-- [ ] Prepare build system for production deployment
-- [ ] Set up analytics for tracking gameplay metrics
+## Notas de Desarrollo
 
-## Phase 5: Launch and Post-Launch (Future)
+### Consideraciones de Rendimiento
+- Mantener 60 FPS en dispositivos de escritorio y móviles
+- Usar cálculos de física simplificados para móviles
+- Implementar ajustes de calidad adaptativos basados en capacidades del dispositivo
+- Monitorizar uso de memoria, especialmente para sesiones de juego largas
 
-### Launch Preparation
-- [ ] Perform final QA testing
-- [ ] Optimize assets for production
-- [ ] Implement error logging and reporting
-- [ ] Create production build
-- [ ] Deploy to web hosting (Vercel/Cloudflare)
+### Recordatorios Técnicos
+- Usar renderizador WebGL de Phaser con fallback a Canvas
+- Implementar object pooling eficiente para proyectiles y partículas
+- Mantener llamadas de dibujo por debajo de 20 por frame para rendimiento móvil óptimo
+- Usar atlas de sprites en lugar de archivos de imagen individuales
+- Asegurar uso consistente de delta time en métodos update
+- Destruir y limpiar recursos adecuadamente al cambiar escenas
 
-### Post-Launch Updates
-- [ ] Implement additional obstacles (giraffes, elephants, acacias, vultures, snakes)
-- [ ] Add new game modes
-- [ ] Implement more complex scoring system
-- [ ] Create leaderboard system
-- [ ] Design additional levels or environments
+### Criterios de Verificación de Hitos
+- El gameplay principal debe ser responsivo e intuitivo
+- Las animaciones de personajes deben ser fluidas y visualmente atractivas
+- La física de vuelo debe sentirse satisfactoria y consistente
+- Los elementos de UI deben ser claros y accesibles en todos los tamaños de pantalla
+- El juego debe mantener un rendimiento estable en todos los dispositivos objetivo
 
-## Development Notes
-
-### Performance Considerations
-- Maintain 60 FPS on both desktop and mobile devices
-- Use simplified physics calculations for mobile
-- Implement adaptive quality settings based on device capabilities
-- Monitor memory usage, especially for long gameplay sessions
-
-### Technical Reminders
-- Use Phaser's WebGL renderer with Canvas fallback
-- Implement efficient object pooling for projectiles and particles
-- Keep draw calls under 20 per frame for optimal mobile performance
-- Use sprite atlases instead of individual image files
-- Ensure consistent delta time usage in update methods
-- Properly destroy and clean up resources when changing scenes
-
-### Milestone Check Criteria
-- Core gameplay must be responsive and intuitive
-- Character animations must be smooth and visually appealing
-- Flight physics must feel satisfying and consistent
-- UI elements must be clear and accessible on all screen sizes
-- Game must maintain stable performance across target devices
-
-This timeline serves as a guideline and may need adjustment as development progresses. Regular testing should be performed throughout each phase to ensure quality and performance targets are being met.
+Esta línea de tiempo sirve como guía y puede necesitar ajustes según avanza el desarrollo. Se deben realizar pruebas regulares durante cada fase para asegurar que se cumplan los objetivos de calidad y rendimiento.

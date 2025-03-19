@@ -62,6 +62,7 @@ This remake focuses on recreating the fundamental experience of the original gam
 * 🏆 Multiple launch attempts per game session
 * 📱 Responsive design that works on various screen sizes
 * 🎨 Appealing visuals with smooth animations
+* 🧩 Modular code architecture for improved maintenance
 
 ## ✨ Features in Detail
 
@@ -90,10 +91,10 @@ The game implements a strategic two-stage launch mechanic:
 - Desktop controls with keyboard shortcuts for improved user experience
 
 ### Game State Management
+- Centralized state management with GameStateManager
 - Clean scene transitions with loading states
-- Pause and resume functionality
 - Game over screen with final scores and options to continue
-- Persistent storage for game settings and high scores
+- Persistent storage for best distances
 
 ## 🚀 Getting Started
 
@@ -152,15 +153,19 @@ npm -v
 
 ## 🛣️ Development Roadmap
 
-- [x] Core game mechanics and physics
-- [x] Basic UI elements and game flow
-- [x] Score tracking and record keeping
-- [x] Responsive design for multiple devices
-- [ ] Advanced obstacles and interactive elements
-- [ ] Sound effects and background music
-- [ ] More elaborate scoring system
-- [ ] Additional levels and environments
-- [ ] Online leaderboards
+- ✅ Core game mechanics and physics
+- ✅ Basic UI elements and game flow
+- ✅ Score tracking and record keeping
+- ✅ Responsive design for multiple devices
+- ✅ Refactored code architecture for better maintainability
+- ✅ Improved positioning system for game characters
+- ✅ Enhanced Game Over screen with restart options
+- ✅ Optimized power and angle selection UI
+- ❌ Final character assets and animations
+- ❌ Sound effects and background music
+- ❌ Performance optimizations for mobile devices
+- ❌ Additional obstacles and interactive elements
+- ❌ Online leaderboards
 
 For a more detailed roadmap, see [timeline.md](project_docs/timeline.md).
 
@@ -176,14 +181,13 @@ For a more detailed roadmap, see [timeline.md](project_docs/timeline.md).
 ├── src/                  # Source code
 │   ├── components/       # Game components
 │   │   ├── characters/   # Character-related components
+│   │   ├── gameplay/     # Gameplay mechanics
 │   │   └── ui/           # User interface components
 │   ├── config/           # Game configuration
-│   ├── entities/         # Game entities
-│   ├── scenes/           # Game scenes (Boot, Preload, Menu, Game, Results)
-│   ├── utils/            # Utility functions
+│   ├── scenes/           # Game scenes (Boot, Preload, Menu, Game)
+│   ├── utils/            # Utility functions and managers
 │   └── main.js           # Entry point
 ├── project_docs/         # Documentation files
-│   ├── pingufly-design_development-documentation.md # Game design documentation
 │   └── timeline.md       # Development timeline
 ├── index.html            # Main HTML file
 ├── package.json          # NPM dependencies
