@@ -34,8 +34,9 @@ export default class Preload extends Phaser.Scene {
     this.load.image('cloud_03', 'assets/images/background/cloud_03.png');
     this.load.image('cloud_04', 'assets/images/background/cloud_04.png');
 
-    // Cargar árboles
-    this.load.image('tree_01', 'assets/images/environment/tree_01.png');
+    // Cargar elementos de entorno
+    this.load.image('tree', 'assets/images/environment/tree.png');
+    this.load.image('rocks', 'assets/images/environment/rocks.png');
 
     // Placeholders temporales para elementos que aún no tienen gráficos personalizados
     this.load.image('ground', 'https://labs.phaser.io/assets/sprites/platform.png');

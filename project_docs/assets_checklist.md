@@ -109,7 +109,6 @@ Este documento enumera los recursos gráficos y de audio esenciales para la prim
   - *Nombre de archivo*: `tree_01.png`
   - *Tamaño*: tree_01.png (1342x1096)
   - *Descripción*: Arbol seco sin hojas
-  
 - [ ] Arbusto pequeño
   - *Nombre de archivo*: `bush.png`
   - *Tamaño recomendado*: 150x150px

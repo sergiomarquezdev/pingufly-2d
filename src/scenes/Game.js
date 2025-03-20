@@ -89,6 +89,54 @@ export default class Game extends Phaser.Scene {
 
     // Iniciar el juego
     this.startGame();
+
+    // Añadir nubes con diferentes velocidades de parallax
+    const cloudCount = 6;
+    this.clouds = [];
+
+    for (let i = 0; i < cloudCount; i++) {
+      const cloudIndex = (i % 4) + 1; // 1-4
+      const cloudKey = `cloud_0${cloudIndex}`;
+
+      // Calcular un scrollFactor aleatorio para cada nube (menor = más lejos/más lento)
+      const scrollFactor = Phaser.Math.FloatBetween(0.2, 0.4);
+
+      // Distribuir las nubes más uniformemente para la inicialización
+      // Algunas visibles y otras esperando fuera de pantalla
+      let x;
+      if (i < 4) {
+        // Distribuir las primeras 4 nubes a lo largo de la pantalla visible
+        // con espaciado proporcional
+        x = (this.scale.width / 5) * (i + 0.5) + Phaser.Math.Between(-50, 50);
+      } else {
+        // El resto de nubes fuera de pantalla a la izquierda (esperando entrar)
+        x = -200 - (i - 3) * 300 + Phaser.Math.Between(-100, 100);
+      }
+
+      const y = Phaser.Math.Between(50, 200);
+      const scale = Phaser.Math.FloatBetween(0.6, 1.2);
+      const speed = Phaser.Math.FloatBetween(0.5, 1.5); // Velocidad variable para cada nube
+
+      // Crear nube
+      const cloud = this.add.image(x, y, cloudKey)
+        .setScale(scale)
+        .setScrollFactor(scrollFactor)
+        .setAlpha(0.9);
+
+      // Guardar propiedades personalizadas para el movimiento
+      cloud.speed = speed;
+
+      // Guardar referencia a la nube
+      this.clouds.push(cloud);
+    }
+
+    // Crear un evento de tiempo para actualizar las nubes
+    this.cloudUpdateEvent = this.time.addEvent({
+      delay: 16, // Aproximadamente 60 FPS
+      callback: this.updateClouds,
+      callbackScope: this,
+      loop: true
+    });
   }
 
   update() {
@@ -124,39 +172,12 @@ export default class Game extends Phaser.Scene {
     this.add.image(200, 100, 'background_sun')
       .setScrollFactor(0.1); // Movimiento muy lento
 
-    // Añadir nubes con diferentes velocidades de parallax
-    const cloudCount = 6;
-    for (let i = 0; i < cloudCount; i++) {
-      const cloudIndex = (i % 4) + 1; // 1-4
-      const cloudKey = `cloud_0${cloudIndex}`;
-      const x = Phaser.Math.Between(-500, this.scale.width + 500);
-      const y = Phaser.Math.Between(50, 200);
-      const scale = Phaser.Math.FloatBetween(0.6, 1.2);
-      const scrollFactor = Phaser.Math.FloatBetween(0.2, 0.4);
-
-      // Crear nube
-      const cloud = this.add.image(x, y, cloudKey)
-        .setScale(scale)
-        .setScrollFactor(scrollFactor)
-        .setAlpha(0.9);
-
-      // Animar nubes con Tween para que se muevan lentamente
-      this.tweens.add({
-        targets: cloud,
-        x: cloud.x + Phaser.Math.Between(200, 400),
-        duration: Phaser.Math.Between(20000, 40000),
-        yoyo: false,
-        repeat: -1,
-        ease: 'Linear'
-      });
-    }
-
     // Añadir montañas en el horizonte (múltiples para crear un rango montañoso)
     const mountainCount = 5;
     for (let i = 0; i < mountainCount; i++) {
       const x = -500 + (i * 600) + Phaser.Math.Between(-100, 100);
       const y = this.scale.height - 50;
-      const scale = Phaser.Math.FloatBetween(0.6, 1);
+      const scale = Phaser.Math.FloatBetween(0.6, 1.4);
 
       this.add.image(x, y, 'background_mountain')
         .setOrigin(0.5, 1)
@@ -164,17 +185,33 @@ export default class Game extends Phaser.Scene {
         .setScrollFactor(0.3); // Movimiento lento para efecto parallax
     }
 
-    // Añadir árboles a diferentes distancias
-    const nearTreeCount = 4;
-    for (let i = 0; i < nearTreeCount; i++) {
-      const x = -800 + (i * 500) + Phaser.Math.Between(-100, 100);
+    // Añadir árboles
+    const treeCount = 4;
+    for (let i = 0; i < treeCount; i++) {
+      const x = -600 + (i * 800) + Phaser.Math.Between(-100, 100);
       const y = this.scale.height - 40; // Muy cerca del suelo
       const scale = Phaser.Math.FloatBetween(0.02, 0.05); // Escala reducida por el tamaño grande del sprite
+      const scrollFactor = Phaser.Math.FloatBetween(0.6, 0.8);
 
-      this.add.image(x, y, 'tree_01')
+      this.add.image(x, y, 'tree')
         .setOrigin(0.5, 1)
         .setScale(scale)
-        .setScrollFactor(0.5); // Movimiento más rápido (más cercano)
+        .setScrollFactor(scrollFactor); // Movimiento más rápido (más cercano)
+    }
+
+    // Añadir rocas dispersas por el terreno
+    const rockCount = 12; // Más rocas para mayor detalle
+    for (let i = 0; i < rockCount; i++) {
+      // Distribuir rocas a lo largo del terreno
+      const x = -1000 + (i * 350) + Phaser.Math.Between(-150, 150);
+      const y = this.scale.height - 35; // En el nivel del suelo
+      const scale = Phaser.Math.FloatBetween(0.5, 1); // Variación de tamaños
+      const scrollFactor = Phaser.Math.FloatBetween(0.5, 0.7);
+
+      this.add.image(x, y, 'rocks')
+        .setOrigin(0.8, 0.8)
+        .setScale(scale)
+        .setScrollFactor(scrollFactor); // Movimiento rápido (están en primer plano)
     }
   }
 
@@ -497,5 +534,79 @@ export default class Game extends Phaser.Scene {
       // Restablecer el flag de reinicio para permitir futuros reinicios
       this.stateManager.isResetting = false;
     });
+  }
+
+  /**
+   * Actualiza la posición de las nubes y recicla las que salen de la pantalla
+   */
+  updateClouds() {
+    const camera = this.cameras.main;
+    const cameraLeftEdge = camera.scrollX;
+    const cameraRightEdge = camera.scrollX + camera.width;
+
+    this.clouds.forEach(cloud => {
+      // Calcular la posición real en el mundo basada en el scrollFactor
+      // Esto es crucial cuando la cámara sigue al pingüino
+      const scrollFactor = cloud.scrollFactor || 0.1;
+
+      // Ajustar la velocidad según el scrollFactor para mantener la coherencia visual
+      // Nubes con menor scrollFactor (más lejanas) deberían moverse más lento
+      const adjustedSpeed = cloud.speed * (scrollFactor * 2);
+
+      // Actualizar posición basada en la velocidad ajustada
+      cloud.x += adjustedSpeed;
+
+      // Calculamos el ancho completo de la nube basado en su escala
+      const cloudWidth = cloud.width * cloud.scale;
+
+      // Calculamos los bordes de la nube teniendo en cuenta su escala
+      const cloudLeftEdge = cloud.x - (cloudWidth * 0.5);
+      const cloudRightEdge = cloud.x + (cloudWidth * 0.5);
+
+      // Margen amplio para asegurar que la nube está completamente fuera de la vista
+      const visibilityMargin = cloudWidth + 300;
+
+      // Verificar si la nube ha salido completamente por la derecha de la vista de la cámara
+      if (cloudLeftEdge > cameraRightEdge + visibilityMargin) {
+        // Posicionar la nube fuera de la vista por la izquierda de la cámara
+        // con una distancia aleatoria para que no aparezcan todas a la vez
+        cloud.x = cameraLeftEdge - visibilityMargin - Phaser.Math.Between(0, 500);
+
+        // Variar un poco la altura y escala para más naturalidad
+        cloud.y = Phaser.Math.Between(50, 200);
+        cloud.setScale(Phaser.Math.FloatBetween(0.6, 1.2));
+
+        // Asignar una nueva velocidad aleatoria
+        cloud.speed = Phaser.Math.FloatBetween(0.5, 1.5);
+      }
+
+      // También verificar si alguna nube se ha quedado muy atrás (a la izquierda)
+      // Esto puede suceder cuando la cámara avanza rápidamente
+      if (cloudRightEdge < cameraLeftEdge - visibilityMargin) {
+        // Reposicionar delante de la cámara para evitar espacios vacíos
+        cloud.x = cameraRightEdge + visibilityMargin + Phaser.Math.Between(0, 300);
+      }
+    });
+  }
+
+  /**
+   * Limpia los recursos cuando la escena es destruida
+   */
+  shutdown() {
+    if (this.cloudUpdateEvent) {
+      this.cloudUpdateEvent.destroy();
+      this.cloudUpdateEvent = null;
+    }
+
+    super.shutdown();
+  }
+
+  /**
+   * Limpia los recursos cuando la escena es destruida
+   * (La API de Phaser llama a este método)
+   */
+  destroy() {
+    this.shutdown();
+    super.destroy();
   }
 }
