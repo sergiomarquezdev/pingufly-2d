@@ -17,10 +17,10 @@ export default class CharacterManager {
       launchPositionX: config.launchPositionX || 710,
       launchPositionY: config.launchPositionY || 540,
       penguinPhysicsConfig: config.penguinPhysicsConfig || {
-        frictionAir: 0.005,  // Reducir aún más la fricción del aire para vuelo más lento
-        friction: 0.001,     // Fricción casi nula para máximo deslizamiento
-        bounce: 0.7,         // Aumentar rebote para más deslizamiento
-        density: 0.001       // Reducir densidad para que sea más ligero
+        frictionAir: 0.005,  // Ajustado: Aumentado ligeramente para un vuelo más controlado
+        friction: 0.0005,     // Ajustado: Aumentado ligeramente para mejor control en hielo
+        bounce: 0.7,        // Ajustado: Reducido ligeramente para vuelos más predecibles
+        density: 0.001       // Ajustado: Incrementado para que no vuele demasiado lejos
       }
     };
 
@@ -50,6 +50,14 @@ export default class CharacterManager {
     // Estado de movimiento del pingüino
     this.lastPenguinX = 0;
     this.penguinStoppedFrames = 0;
+
+    // Control de deslizamiento en hielo
+    this.isOnIce = false;
+    this.lastGroundContact = 0;
+
+    // Agregar un estado para el tracking del movimiento máximo
+    this.maxDistanceReached = false;
+    this.maxDistance = 0;
   }
 
   /**
@@ -173,6 +181,17 @@ export default class CharacterManager {
     this.penguin.setVisible(true);
     this.penguin.setScale(1);
 
+    // Resetear propiedades físicas a sus valores por defecto
+    const { friction, frictionAir, bounce, density } = this.config.penguinPhysicsConfig;
+    this.penguin.setFriction(friction);
+    this.penguin.setFrictionAir(frictionAir);
+    this.penguin.setBounce(bounce);
+    this.penguin.setDensity(density);
+
+    // Resetear estado de deslizamiento
+    this.isOnIce = false;
+    this.lastGroundContact = 0;
+
     // Asegurarnos que no hay efectos residuales
     if (this.scene.tweens) {
       this.scene.tweens.killTweensOf(this.penguin);
@@ -285,25 +304,40 @@ export default class CharacterManager {
     const invertedAngle = 180 - angle;
     const angleRad = Phaser.Math.DegToRad(invertedAngle);
 
-    // Aumentamos el rango de potencia para golpeos más fuertes
-    const minPower = 5;
-    const maxPower = 15;
+    // Ajustar rango de potencia para mantener buen control y distancia adecuada
+    const minPower = 5;  // Reducido ligeramente para mayor control en potencias bajas
+    const maxPower = 15; // Reducido para evitar movimientos demasiado extremos
     const powerNormalized = minPower + power * (maxPower - minPower);
 
-    // Reducir el multiplicador para vuelo más lento pero manteniendo alcance
-    const powerMultiplier = 0.8;
+    // Ajustar multiplicador con un valor más equilibrado
+    const powerMultiplier = 0.8; // Reducido ligeramente para mejor control
     const powerMultiplied = powerNormalized * powerMultiplier;
 
-    // Aplicamos velocidades más bajas para vuelo más lento
+    // Aplicamos velocidades más equilibradas
     const velocityX = powerMultiplied * Math.cos(angleRad);
     const velocityY = -powerMultiplied * Math.sin(angleRad); // Negativo porque en pantalla Y+ es hacia abajo
 
     // Aplicar la velocidad al pingüino
     this.penguin.setVelocity(velocityX, velocityY);
 
+    // Reiniciar estado de deslizamiento
+    this.isOnIce = false;
+    this.lastGroundContact = 0;
+
+    // Reiniciar tracking de distancia
+    this.maxDistanceReached = false;
+    this.maxDistance = 0;
+
     // Comenzar a registrar la última posición X del pingüino
     this.lastPenguinX = this.penguin.x;
     this.penguinStoppedFrames = 0;
+
+    // Restaurar propiedades de física para el lanzamiento
+    const { frictionAir, friction, bounce, density } = this.config.penguinPhysicsConfig;
+    this.penguin.setFrictionAir(frictionAir);
+    this.penguin.setFriction(friction);
+    this.penguin.setBounce(bounce);
+    this.penguin.setDensity(density);
 
     // Animar el golpe del flamingo
     this.animateHit();
@@ -316,24 +350,71 @@ export default class CharacterManager {
    * @returns {boolean} - true si el pingüino se ha detenido, false en caso contrario
    */
   updatePenguinPhysics() {
-    // Añadimos rotación para simular deslizamiento sobre hielo
-    if (this.penguin.body.velocity.x < -1 && this.penguin.y > 550) {
-      // Solo añadir rotación si está en movimiento horizontal y cerca del suelo
-      this.penguin.setAngularVelocity(-0.02);
+    // Detectar si el pingüino está en contacto con el suelo (aproximación)
+    const isNearGround = this.penguin.y > 550;
+
+    // Si está cerca del suelo y moviéndose, consideramos que está deslizando sobre hielo
+    if (isNearGround && Math.abs(this.penguin.body.velocity.x) > 0.05) {
+      if (!this.isOnIce) {
+        // Al tocar hielo por primera vez, preservar momento con fricción adecuada
+        // Valor ligeramente aumentado pero aún muy bajo para buen deslizamiento
+        this.penguin.setFriction(0.0001); // Ajustado para mejor balance
+        this.isOnIce = true;
+        this.lastGroundContact = this.scene.time.now;
+      }
+
+      // Añadimos rotación para simular deslizamiento sobre hielo - más natural
+      if (this.penguin.body.velocity.x < 0) {
+        // Ajustar la rotación según la velocidad para un efecto más realista
+        // Factor reducido ligeramente para movimiento más controlado
+        const rotationFactor = Math.min(Math.abs(this.penguin.body.velocity.x) * 0.008, 0.04);
+        this.penguin.setAngularVelocity(-rotationFactor);
+      }
+
+      // Si está deslizándose muy lentamente, dar un pequeño impulso ocasional para mantener el movimiento
+      if (Math.abs(this.penguin.body.velocity.x) < 0.5 && Math.abs(this.penguin.body.velocity.x) > 0.05) {
+        // Preservar la dirección del movimiento
+        const direction = this.penguin.body.velocity.x < 0 ? -1 : 1;
+        const currentTime = this.scene.time.now;
+
+        // Aplicar micro-impulsos con menos frecuencia para un deslizamiento más natural
+        // Simulamos el deslizamiento sobre hielo con una física más realista
+        if (currentTime - this.lastGroundContact > 600) { // Incrementado para impulsos menos frecuentes
+          this.penguin.setVelocityX(this.penguin.body.velocity.x * 1.05); // Reducido para menor aceleración
+          this.lastGroundContact = currentTime;
+        }
+      }
+    } else if (!isNearGround) {
+      // Restaurar propiedades de física para el vuelo si está en el aire
+      const { frictionAir, friction } = this.config.penguinPhysicsConfig;
+      this.penguin.setFrictionAir(frictionAir);
+      this.penguin.setFriction(friction);
+      this.isOnIce = false;
+
+      // Cuando está en vuelo, mantener un seguimiento de la distancia máxima
+      if (!this.maxDistanceReached && this.penguin.x < this.lastPenguinX) {
+        this.maxDistance = Math.min(this.lastPenguinX - this.getPenguinX(), 5000); // Limitar la distancia máxima
+      }
     }
 
-    // Comprobar si el pingüino se ha detenido - valores extremadamente bajos
-    if (Math.abs(this.penguin.x - this.lastPenguinX) < 0.1 &&
-        Math.abs(this.penguin.body.velocity.x) < 0.02 &&
-        Math.abs(this.penguin.body.velocity.y) < 0.02) {
+    // Umbral de detección más conservador
+    const movementThreshold = 0.02; // Ajustado para mejor detección de parada
+
+    // Comprobar si el pingüino se ha detenido
+    if (Math.abs(this.penguin.x - this.lastPenguinX) < movementThreshold &&
+        Math.abs(this.penguin.body.velocity.x) < movementThreshold &&
+        Math.abs(this.penguin.body.velocity.y) < movementThreshold) {
       this.penguinStoppedFrames++;
 
-      // Aumentar mucho el tiempo para considerar detenido
-      if (this.penguinStoppedFrames > 60) { // 1 segundos a 60 FPS
+      // Tiempo mejorado para considerar detenido (aproximadamente 1 segundo a 60 FPS)
+      // Esto evita que el juego considere demasiado pronto como detenido
+      if (this.penguinStoppedFrames > 55) {
+        // Si llegamos aquí, ya alcanzamos la distancia máxima
+        this.maxDistanceReached = true;
         return true; // El pingüino se ha detenido
       }
     } else {
-      // Si se mueve, reiniciar el contador
+      // Si se mueve, reiniciar el contador y actualizar la última posición
       this.penguinStoppedFrames = 0;
       this.lastPenguinX = this.penguin.x;
     }

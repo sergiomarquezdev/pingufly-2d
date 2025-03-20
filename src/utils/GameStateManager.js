@@ -16,12 +16,19 @@ export default class GameStateManager {
 
         // Flags de control
         this.isResetting = false;
-        this.isModalOpen = false;
+        this._isModalOpen = false; // Cambiado a propiedad privada con getter/setter
 
         // Variables de distancia - serán movidas a ScoreManager en futuros pasos
         this.currentDistance = 0;
         this.totalDistance = 0;
         this.bestTotalDistance = 0;
+    }
+
+    /**
+     * Getter para isModalOpen que siempre devuelve el valor actual
+     */
+    get isModalOpen() {
+        return this._isModalOpen;
     }
 
     /**
@@ -31,6 +38,12 @@ export default class GameStateManager {
      */
     setState(newState) {
         this.currentState = newState;
+
+        // Si cambiamos a READY o RESETTING, asegurar que el modal esté cerrado
+        if (newState === 'READY' || newState === 'RESETTING') {
+            this._isModalOpen = false;
+        }
+
         return this;
     }
 
@@ -59,6 +72,17 @@ export default class GameStateManager {
         this.currentState = 'READY';
         this.launchAttempts = 0;
         this.isResetting = false;
+        this._isModalOpen = false; // Asegurar que el modal está cerrado al reiniciar
+        return this;
+    }
+
+    /**
+     * Establece el estado del modal
+     * @param {Boolean} isOpen - Indica si el modal está abierto o cerrado
+     * @returns {GameStateManager} - Retorna this para encadenamiento
+     */
+    setModalState(isOpen) {
+        this._isModalOpen = isOpen;
         return this;
     }
 

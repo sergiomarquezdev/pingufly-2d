@@ -14,6 +14,10 @@ import GameStateManager from '../utils/GameStateManager';
 import ScoreManager from '../utils/ScoreManager';
 import GameUI from '../components/ui/GameUI';
 import LaunchManager from '../components/gameplay/LaunchManager';
+// Importar los nuevos componentes
+import CloudManager from '../components/environment/CloudManager';
+import BackgroundManager from '../components/environment/BackgroundManager';
+import GroundManager from '../components/environment/GroundManager';
 
 export default class Game extends Phaser.Scene {
   constructor() {
@@ -42,8 +46,16 @@ export default class Game extends Phaser.Scene {
       pixelToMeterRatio: 10 // Escala arbitraria para el juego
     });
 
-    // Crear el fondo
-    this.createBackground();
+    // Inicializar los gestores de entorno
+    this.backgroundManager = new BackgroundManager(this);
+    this.backgroundManager.create();
+
+    this.groundManager = new GroundManager(this);
+    this.groundManager.create();
+
+    // Inicializar el gestor de nubes
+    this.cloudManager = new CloudManager(this);
+    this.cloudManager.create();
 
     // Inicializar gestor de personajes
     this.characterManager = new CharacterManager(this, {
@@ -51,9 +63,6 @@ export default class Game extends Phaser.Scene {
       launchPositionY: this.launchPositionY
     });
     this.characterManager.createCharacters();
-
-    // Crear el suelo
-    this.createGround();
 
     // Inicializar controlador de cámara
     this.cameraController = new CameraController(this, {
@@ -89,144 +98,39 @@ export default class Game extends Phaser.Scene {
 
     // Iniciar el juego
     this.startGame();
-
-    // Añadir nubes con diferentes velocidades de parallax
-    const cloudCount = 6;
-    this.clouds = [];
-
-    for (let i = 0; i < cloudCount; i++) {
-      const cloudIndex = (i % 4) + 1; // 1-4
-      const cloudKey = `cloud_0${cloudIndex}`;
-
-      // Calcular un scrollFactor aleatorio para cada nube (menor = más lejos/más lento)
-      const scrollFactor = Phaser.Math.FloatBetween(0.2, 0.4);
-
-      // Distribuir las nubes más uniformemente para la inicialización
-      // Algunas visibles y otras esperando fuera de pantalla
-      let x;
-      if (i < 4) {
-        // Distribuir las primeras 4 nubes a lo largo de la pantalla visible
-        // con espaciado proporcional
-        x = (this.scale.width / 5) * (i + 0.5) + Phaser.Math.Between(-50, 50);
-      } else {
-        // El resto de nubes fuera de pantalla a la izquierda (esperando entrar)
-        x = -200 - (i - 3) * 300 + Phaser.Math.Between(-100, 100);
-      }
-
-      const y = Phaser.Math.Between(50, 200);
-      const scale = Phaser.Math.FloatBetween(0.6, 1.2);
-      const speed = Phaser.Math.FloatBetween(0.5, 1.5); // Velocidad variable para cada nube
-
-      // Crear nube
-      const cloud = this.add.image(x, y, cloudKey)
-        .setScale(scale)
-        .setScrollFactor(scrollFactor)
-        .setAlpha(0.9);
-
-      // Guardar propiedades personalizadas para el movimiento
-      cloud.speed = speed;
-
-      // Guardar referencia a la nube
-      this.clouds.push(cloud);
-    }
-
-    // Crear un evento de tiempo para actualizar las nubes
-    this.cloudUpdateEvent = this.time.addEvent({
-      delay: 16, // Aproximadamente 60 FPS
-      callback: this.updateClouds,
-      callbackScope: this,
-      loop: true
-    });
   }
 
   update() {
+    // Obtener el estado actual del juego
+    const gameState = this.stateManager.getState();
+
+    // En estado FLYING, actualizar a estado GAME_OVER si el pingüino se detiene
+    if (gameState === 'FLYING') {
+      if (this.characterManager.updatePenguinPhysics()) {
+        this.endLaunch();
+      }
+
+      // Verificar si el pingüino está fuera de los límites del mundo y ajustar la cámara
+      // Esta verificación adicional ayuda con las nubes y el comportamiento de cámara
+      const penguin = this.characterManager.penguin;
+      if (penguin && penguin.x < this.cameraController.getInitialScrollX() - 5000) {
+        // Si el pingüino se ha ido demasiado lejos, forzar la detención del vuelo
+        console.log('Penguin went too far, stopping flight');
+        this.endLaunch();
+      }
+    }
+
     // Actualizar la distancia si el pingüino está en el aire
-    if (this.stateManager.currentState === 'FLYING') {
+    if (gameState === 'FLYING') {
       // Actualizar la puntuación
       this.scoreManager.updateDistance(this.characterManager.getPenguinCurrentX(), this.launchPositionX);
 
       // Actualizar UI
       this.gameUI.updateDistanceText(this.scoreManager.currentDistance, this.scoreManager.totalDistance);
 
-      // Comprobar si el pingüino se ha detenido
-      if (this.characterManager.updatePenguinPhysics()) {
-        this.endLaunch();
-      }
-
       // Gestionar el seguimiento de la cámara basado en la posición del pingüino
       this.cameraController.followTarget(this.characterManager.penguin, true);
     }
-  }
-
-  /**
-   * Crea el fondo y los elementos del entorno
-   */
-  createBackground() {
-    // Añadir cielo como fondo fijo
-    this.add.image(0, 0, 'background_sky')
-      .setOrigin(0, 0)
-      .setScale(1.1)  // Ajustar según necesidad
-      .setScrollFactor(0); // Fijo, no se mueve con la cámara
-
-    // Añadir sol
-    this.add.image(200, 100, 'background_sun')
-      .setScrollFactor(0.1); // Movimiento muy lento
-
-    // Añadir montañas en el horizonte (múltiples para crear un rango montañoso)
-    const mountainCount = 5;
-    for (let i = 0; i < mountainCount; i++) {
-      const x = -500 + (i * 600) + Phaser.Math.Between(-100, 100);
-      const y = this.scale.height - 50;
-      const scale = Phaser.Math.FloatBetween(0.6, 1.4);
-
-      this.add.image(x, y, 'background_mountain')
-        .setOrigin(0.5, 1)
-        .setScale(scale)
-        .setScrollFactor(0.3); // Movimiento lento para efecto parallax
-    }
-
-    // Añadir árboles
-    const treeCount = 4;
-    for (let i = 0; i < treeCount; i++) {
-      const x = -600 + (i * 800) + Phaser.Math.Between(-100, 100);
-      const y = this.scale.height - 40; // Muy cerca del suelo
-      const scale = Phaser.Math.FloatBetween(0.02, 0.05); // Escala reducida por el tamaño grande del sprite
-      const scrollFactor = Phaser.Math.FloatBetween(0.6, 0.8);
-
-      this.add.image(x, y, 'tree')
-        .setOrigin(0.5, 1)
-        .setScale(scale)
-        .setScrollFactor(scrollFactor); // Movimiento más rápido (más cercano)
-    }
-
-    // Añadir rocas dispersas por el terreno
-    const rockCount = 12; // Más rocas para mayor detalle
-    for (let i = 0; i < rockCount; i++) {
-      // Distribuir rocas a lo largo del terreno
-      const x = -1000 + (i * 350) + Phaser.Math.Between(-150, 150);
-      const y = this.scale.height - 35; // En el nivel del suelo
-      const scale = Phaser.Math.FloatBetween(0.5, 1); // Variación de tamaños
-      const scrollFactor = Phaser.Math.FloatBetween(0.5, 0.7);
-
-      this.add.image(x, y, 'rocks')
-        .setOrigin(0.8, 0.8)
-        .setScale(scale)
-        .setScrollFactor(scrollFactor); // Movimiento rápido (están en primer plano)
-    }
-  }
-
-  /**
-   * Crea el suelo y cualquier otra superficie de colisión
-   */
-  createGround() {
-    // Crear suelo físico extendido hacia la izquierda
-    this.ground = this.matter.add.image(0, 580, 'ground');
-    this.ground.setScale(200, 1); // Suelo mucho más ancho para permitir un recorrido extenso en ambas direcciones
-    this.ground.setStatic(true);
-
-    // Propiedades del suelo - reducir la fricción para simular hielo
-    this.ground.setFriction(0.001);       // Reducir casi a cero para deslizamiento extremo
-    this.ground.setFrictionStatic(0.001); // Fricción estática también casi nula
   }
 
   /**
@@ -253,6 +157,11 @@ export default class Game extends Phaser.Scene {
    * Vuelve al menú principal
    */
   backToMenu() {
+    // Asegurarse de que el estado de modal está cerrado
+    if (this.stateManager) {
+      this.stateManager.setModalState(false);
+    }
+
     // Efecto de transición
     this.cameraController.fade({
       callback: () => {
@@ -271,6 +180,9 @@ export default class Game extends Phaser.Scene {
   restartGame() {
     // Iniciar algunas acciones de reinicio inmediatamente
     this.stateManager.setState('RESETTING');
+
+    // Asegurarse de que el modal está cerrado
+    this.stateManager.setModalState(false);
 
     // Detener físicas inmediatamente
     this.matter.world.pause();
@@ -377,8 +289,15 @@ export default class Game extends Phaser.Scene {
    * Maneja la entrada del jugador según el estado del juego
    */
   handlePlayerInput() {
-    // Si hay un modal abierto, no procesar ninguna entrada
-    if (this.stateManager.isModalOpen) return;
+    // Si hay un modal abierto, ignorar completamente la entrada
+    if (this.stateManager.isModalOpen) {
+      return;
+    }
+
+    // Si estamos en proceso de reiniciar, ignorar la entrada
+    if (this.stateManager.isResetting) {
+      return;
+    }
 
     // Si estamos esperando el primer clic, comenzar la selección de ángulo
     if (this.waitingForFirstClick) {
@@ -411,7 +330,9 @@ export default class Game extends Phaser.Scene {
 
       case 'ENDED':
         // Prevenir múltiples reinicios debido a clics rápidos
-        if (this.stateManager.isResetting) return;
+        if (this.stateManager.isResetting) {
+          return;
+        }
 
         // Establecer el flag de reinicio
         this.stateManager.isResetting = true;
@@ -422,6 +343,9 @@ export default class Game extends Phaser.Scene {
 
         this.resetLaunch();
         break;
+
+      default:
+        break;
     }
   }
 
@@ -429,6 +353,12 @@ export default class Game extends Phaser.Scene {
    * Finaliza el lanzamiento actual
    */
   endLaunch() {
+    // Detener el pingüino completamente antes de procesar el final del lanzamiento
+    if (this.characterManager && this.characterManager.penguin) {
+      this.characterManager.penguin.setVelocity(0, 0);
+      this.characterManager.penguin.setAngularVelocity(0);
+    }
+
     // Acumular la distancia actual al total
     this.scoreManager.addCurrentToTotal();
 
@@ -455,8 +385,9 @@ export default class Game extends Phaser.Scene {
    * Finaliza el juego actual
    */
   endGame() {
+    // Cambiar estado y abrir modal
     this.stateManager.setState('ENDED');
-    this.stateManager.isModalOpen = true;
+    this.stateManager.setModalState(true);
 
     // Comprobar si hemos batido el récord
     const isNewRecord = this.scoreManager.checkAndUpdateBestDistance();
@@ -466,23 +397,42 @@ export default class Game extends Phaser.Scene {
       this.gameUI.updateBestDistanceText(this.scoreManager.bestTotalDistance);
     }
 
-    // Definir los callbacks como funciones de flecha
+    // Definir los callbacks para depurar y asegurar ejecución
     const handleRestart = () => {
-      this.stateManager.isModalOpen = false;
-      this.restartGame();
+      // Verificar que podemos reiniciar
+      this.stateManager.setModalState(false);
+
+      // Llamar a restartGame después de un breve retraso
+      this.time.delayedCall(100, () => {
+        this.restartGame();
+      });
     };
 
     const handleMainMenu = () => {
-      this.stateManager.isModalOpen = false;
-      this.backToMenu();
+      // Verificar que podemos ir al menú
+      this.stateManager.setModalState(false);
+
+      // Llamar a backToMenu después de un breve retraso
+      this.time.delayedCall(100, () => {
+        this.backToMenu();
+      });
     };
 
-    // Mostrar la pantalla de fin de juego usando GameOverScreen
-    this.gameOverScreen.show({
-      totalDistance: this.scoreManager.totalDistance,
-      bestDistance: this.scoreManager.bestTotalDistance,
-      onRestart: handleRestart,
-      onMainMenu: handleMainMenu
+    // Desactivar input brevemente para evitar clics accidentales
+    this.input.enabled = false;
+
+    // Después de un breve retraso, mostrar la pantalla de fin de juego
+    this.time.delayedCall(200, () => {
+      // Reactivar input para permitir clics en los botones
+      this.input.enabled = true;
+
+      // Mostrar pantalla de fin de juego con los callbacks
+      this.gameOverScreen.show({
+        totalDistance: this.scoreManager.totalDistance,
+        bestDistance: this.scoreManager.bestTotalDistance,
+        onRestart: handleRestart,
+        onMainMenu: handleMainMenu
+      });
     });
   }
 
@@ -537,67 +487,15 @@ export default class Game extends Phaser.Scene {
   }
 
   /**
-   * Actualiza la posición de las nubes y recicla las que salen de la pantalla
-   */
-  updateClouds() {
-    const camera = this.cameras.main;
-    const cameraLeftEdge = camera.scrollX;
-    const cameraRightEdge = camera.scrollX + camera.width;
-
-    this.clouds.forEach(cloud => {
-      // Calcular la posición real en el mundo basada en el scrollFactor
-      // Esto es crucial cuando la cámara sigue al pingüino
-      const scrollFactor = cloud.scrollFactor || 0.1;
-
-      // Ajustar la velocidad según el scrollFactor para mantener la coherencia visual
-      // Nubes con menor scrollFactor (más lejanas) deberían moverse más lento
-      const adjustedSpeed = cloud.speed * (scrollFactor * 2);
-
-      // Actualizar posición basada en la velocidad ajustada
-      cloud.x += adjustedSpeed;
-
-      // Calculamos el ancho completo de la nube basado en su escala
-      const cloudWidth = cloud.width * cloud.scale;
-
-      // Calculamos los bordes de la nube teniendo en cuenta su escala
-      const cloudLeftEdge = cloud.x - (cloudWidth * 0.5);
-      const cloudRightEdge = cloud.x + (cloudWidth * 0.5);
-
-      // Margen amplio para asegurar que la nube está completamente fuera de la vista
-      const visibilityMargin = cloudWidth + 300;
-
-      // Verificar si la nube ha salido completamente por la derecha de la vista de la cámara
-      if (cloudLeftEdge > cameraRightEdge + visibilityMargin) {
-        // Posicionar la nube fuera de la vista por la izquierda de la cámara
-        // con una distancia aleatoria para que no aparezcan todas a la vez
-        cloud.x = cameraLeftEdge - visibilityMargin - Phaser.Math.Between(0, 500);
-
-        // Variar un poco la altura y escala para más naturalidad
-        cloud.y = Phaser.Math.Between(50, 200);
-        cloud.setScale(Phaser.Math.FloatBetween(0.6, 1.2));
-
-        // Asignar una nueva velocidad aleatoria
-        cloud.speed = Phaser.Math.FloatBetween(0.5, 1.5);
-      }
-
-      // También verificar si alguna nube se ha quedado muy atrás (a la izquierda)
-      // Esto puede suceder cuando la cámara avanza rápidamente
-      if (cloudRightEdge < cameraLeftEdge - visibilityMargin) {
-        // Reposicionar delante de la cámara para evitar espacios vacíos
-        cloud.x = cameraRightEdge + visibilityMargin + Phaser.Math.Between(0, 300);
-      }
-    });
-  }
-
-  /**
    * Limpia los recursos cuando la escena es destruida
    */
   shutdown() {
-    if (this.cloudUpdateEvent) {
-      this.cloudUpdateEvent.destroy();
-      this.cloudUpdateEvent = null;
+    // Limpiar eventos y recursos
+    if (this.cloudManager) {
+      this.cloudManager.destroy();
     }
 
+    // Llamar a shutdown de la clase padre
     super.shutdown();
   }
 
@@ -606,7 +504,12 @@ export default class Game extends Phaser.Scene {
    * (La API de Phaser llama a este método)
    */
   destroy() {
-    this.shutdown();
+    this.launchManager = null;
+    this.stateManager = null;
+    this.characterManager = null;
+    this.cameraController = null;
+    this.scoreManager = null;
+
     super.destroy();
   }
 }

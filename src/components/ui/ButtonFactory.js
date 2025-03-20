@@ -64,9 +64,12 @@ export default class ButtonFactory {
     // Añadir todos los elementos al contenedor
     buttonContainer.add([buttonBg, buttonBorder, topLeftCorner, topRightCorner, bottomLeftCorner, bottomRightCorner, buttonText]);
 
-    // Hacer que el botón sea interactivo y detener propagación de eventos
+    // Flag para prevenir múltiples clicks rápidos
+    let isProcessingClick = false;
+
+    // Hacer que el botón sea interactivo con prioridad alta para recibir eventos primero
     buttonContainer.setSize(width, height);
-    buttonContainer.setInteractive({ useHandCursor: true })
+    buttonContainer.setInteractive({ useHandCursor: true, priority: 1 })
       .on('pointerover', () => {
         buttonBg.clear();
         buttonBg.fillStyle(0x3aa3ff, 1);
@@ -78,10 +81,15 @@ export default class ButtonFactory {
         buttonBg.fillStyle(0x1e90ff, 1);
         buttonBg.fillRect(-width/2, -height/2, width, height);
         buttonText.setScale(1);
+        // Reiniciar el flag cuando el puntero sale del botón
+        isProcessingClick = false;
       })
       .on('pointerdown', (pointer) => {
-        // Detener la propagación del evento
-        if (pointer.event) pointer.event.stopPropagation();
+        // Detener completamente la propagación del evento
+        if (pointer.event) {
+          pointer.event.stopPropagation();
+          pointer.event.preventDefault();
+        }
 
         buttonBg.clear();
         buttonBg.fillStyle(0x0c6cbb, 1);
@@ -89,27 +97,40 @@ export default class ButtonFactory {
         buttonText.setScale(0.95);
       })
       .on('pointerup', (pointer) => {
-        // Detener la propagación del evento
-        if (pointer.event) pointer.event.stopPropagation();
+        // Evitar múltiples clicks rápidos
+        if (isProcessingClick) return;
+        isProcessingClick = true;
+
+        // Detener completamente la propagación del evento
+        if (pointer.event) {
+          pointer.event.stopPropagation();
+          pointer.event.preventDefault();
+        }
 
         buttonBg.clear();
         buttonBg.fillStyle(0x1e90ff, 1);
         buttonBg.fillRect(-width/2, -height/2, width, height);
         buttonText.setScale(1);
 
-        // IMPORTANTE: Asegurarnos de que el callback se ejecute
+        // Ejecutar el callback inmediatamente si es válido
         if (callback && typeof callback === 'function') {
-          // Ejecutar el callback inmediatamente y añadir solo un efecto visual
-          // Esto evita problemas si el callback modifica la escena
+          // Efecto visual de click
           buttonContainer.setAlpha(0.8);
+
+          // Ejecutar el callback directamente sin delay
+          callback();
+
+          // Restaurar el aspecto visual del botón
           scene.time.delayedCall(100, () => {
-            // Solo restauramos la alpha si el botón aún existe
             if (buttonContainer && buttonContainer.active) {
               buttonContainer.setAlpha(1);
+              // Permitir nuevos clicks después del efecto visual
+              isProcessingClick = false;
             }
-            // Ejecutar el callback
-            callback();
           });
+        } else {
+          // Si no hay callback, restablecer el flag
+          isProcessingClick = false;
         }
       });
 
