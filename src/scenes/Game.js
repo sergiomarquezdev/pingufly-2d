@@ -65,7 +65,7 @@ export default class Game extends Phaser.Scene {
     // Inicializar componentes UI
     this.angleIndicator = new AngleIndicator(this, {
       originX: this.launchPositionX,
-      originY: this.launchPositionY,
+      originY: this.launchPositionY + 5,
       minAngle: physicsConfig.angle.min,
       maxAngle: physicsConfig.angle.max
     });
@@ -114,11 +114,68 @@ export default class Game extends Phaser.Scene {
    * Crea el fondo y los elementos del entorno
    */
   createBackground() {
-    // Añadir cielo como fondo
-    this.add.image(400, 300, 'sky').setScale(2).setScrollFactor(0);
+    // Añadir cielo como fondo fijo
+    this.add.image(0, 0, 'background_sky')
+      .setOrigin(0, 0)
+      .setScale(1.1)  // Ajustar según necesidad
+      .setScrollFactor(0); // Fijo, no se mueve con la cámara
 
-    // En una versión más completa, añadiríamos más elementos de fondo
-    // como montañas lejanas, nubes, etc.
+    // Añadir sol
+    this.add.image(200, 100, 'background_sun')
+      .setScrollFactor(0.1); // Movimiento muy lento
+
+    // Añadir nubes con diferentes velocidades de parallax
+    const cloudCount = 6;
+    for (let i = 0; i < cloudCount; i++) {
+      const cloudIndex = (i % 4) + 1; // 1-4
+      const cloudKey = `cloud_0${cloudIndex}`;
+      const x = Phaser.Math.Between(-500, this.scale.width + 500);
+      const y = Phaser.Math.Between(50, 200);
+      const scale = Phaser.Math.FloatBetween(0.6, 1.2);
+      const scrollFactor = Phaser.Math.FloatBetween(0.2, 0.4);
+
+      // Crear nube
+      const cloud = this.add.image(x, y, cloudKey)
+        .setScale(scale)
+        .setScrollFactor(scrollFactor)
+        .setAlpha(0.9);
+
+      // Animar nubes con Tween para que se muevan lentamente
+      this.tweens.add({
+        targets: cloud,
+        x: cloud.x + Phaser.Math.Between(200, 400),
+        duration: Phaser.Math.Between(20000, 40000),
+        yoyo: false,
+        repeat: -1,
+        ease: 'Linear'
+      });
+    }
+
+    // Añadir montañas en el horizonte (múltiples para crear un rango montañoso)
+    const mountainCount = 5;
+    for (let i = 0; i < mountainCount; i++) {
+      const x = -500 + (i * 600) + Phaser.Math.Between(-100, 100);
+      const y = this.scale.height - 50;
+      const scale = Phaser.Math.FloatBetween(0.6, 1);
+
+      this.add.image(x, y, 'background_mountain')
+        .setOrigin(0.5, 1)
+        .setScale(scale)
+        .setScrollFactor(0.3); // Movimiento lento para efecto parallax
+    }
+
+    // Añadir árboles a diferentes distancias
+    const nearTreeCount = 4;
+    for (let i = 0; i < nearTreeCount; i++) {
+      const x = -800 + (i * 500) + Phaser.Math.Between(-100, 100);
+      const y = this.scale.height - 40; // Muy cerca del suelo
+      const scale = Phaser.Math.FloatBetween(0.02, 0.05); // Escala reducida por el tamaño grande del sprite
+
+      this.add.image(x, y, 'tree_01')
+        .setOrigin(0.5, 1)
+        .setScale(scale)
+        .setScrollFactor(0.5); // Movimiento más rápido (más cercano)
+    }
   }
 
   /**

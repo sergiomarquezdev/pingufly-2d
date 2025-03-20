@@ -23,19 +23,25 @@ export default class Preload extends Phaser.Scene {
     // Registrar eventos de carga
     this.registerLoadingEvents();
 
-    // En esta fase inicial del desarrollo, no tenemos assets definitivos.
-    // Usaremos assets básicos para configurar el juego.
+    // Cargar assets de fondo
+    this.load.image('background_sky', 'assets/images/background/background_sky.png');
+    this.load.image('background_sun', 'assets/images/background/background_sun.png');
+    this.load.image('background_mountain', 'assets/images/background/background_mountain.png');
 
-    // Placeholder para fondos (temporales)
-    this.load.image('sky', 'https://labs.phaser.io/assets/skies/space3.png');
+    // Cargar nubes
+    this.load.image('cloud_01', 'assets/images/background/cloud_01.png');
+    this.load.image('cloud_02', 'assets/images/background/cloud_02.png');
+    this.load.image('cloud_03', 'assets/images/background/cloud_03.png');
+    this.load.image('cloud_04', 'assets/images/background/cloud_04.png');
+
+    // Cargar árboles
+    this.load.image('tree_01', 'assets/images/environment/tree_01.png');
+
+    // Placeholders temporales para elementos que aún no tienen gráficos personalizados
     this.load.image('ground', 'https://labs.phaser.io/assets/sprites/platform.png');
-
-    // Placeholder para personajes (temporales)
     this.load.image('yeti', 'https://labs.phaser.io/assets/sprites/phaser-dude.png');
     this.load.image('penguin', 'https://labs.phaser.io/assets/sprites/phaser-ship.png');
     this.load.image('flamingo', 'https://labs.phaser.io/assets/sprites/asteroids_ship.png');
-
-    // Elementos de UI
     this.load.image('button', 'https://labs.phaser.io/assets/sprites/button-bg.png');
 
     // Tiempo mínimo de carga (para simular carga con pocos assets)
