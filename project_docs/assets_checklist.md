@@ -16,13 +16,13 @@ Este documento enumera los recursos gráficos y de audio esenciales para la prim
   - *Descripción*: Una sola pose para el momento del golpe
 
 #### Pingüino
-- [ ] Sprite base del Pingüino
+- [ ] Sprite del pinguino
   - *Nombre de archivo*: `penguin.png`
-  - *Tamaño recomendado*: 120x120px
-  - *Descripción*: Pingüino con colores clásicos (negro y blanco)
-- [ ] Sprite del Pingüino en vuelo
-  - *Nombre de archivo*: `penguin_flying.png`
-  - *Descripción*: Variante con alas extendidas para el vuelo
+  - *Tamaño*: 256x320px
+  - *Tamaño de cada elemento*: 32x32 (cada acción del sprite)
+  - *Descripción*: Pingüino que realiza distintas acciones. Leido de izquierda a derecha, y de arriba hacia abajo, estas son las distinta acciones que realiza:
+  Sprites 1-3: Representan al pingüino mirando a la derecha, con una pose estática (1) y dos frames de caminata (2 y 3).
+Sprites 4-6: Son los equivalentes mirando a la izquierda, con una pose estática (4) y dos frames de caminata (5 y 6).
 
 #### Flamenco
 - [ ] Sprite base del Flamenco
@@ -83,38 +83,12 @@ Este documento enumera los recursos gráficos y de audio esenciales para la prim
   - *Descripción*: Nubes blancas esponjosas de diferentes tamaños
 
 #### Suelo y Decoración
-- [ ] Textura de suelo básica
-  - *Nombre de archivo*: `ground.png`
-  - *Tamaño recomendado*: 1280x130
-  - *Descripción*:
-    **Capas y Estructura:**
-    La imagen muestra un corte transversal del suelo, dividido en tres capas horizontales distintas.
-    La capa superior es de color verde y representa la hierba o vegetación.
-    La capa intermedia es de color marrón claro y representa la tierra superficial.
-    La capa inferior es de un marrón más oscuro, casi negro, y representa el subsuelo.
-    En la parte inferior de la segunda capa, de color marron claro, se muestran pequeñas lineas verticales de color marron oscuro, que simulan las raices de la hierva.
-    En la capa superior, de color verde, se ven pequeñas lineas verticales de diferentes tonalidades de verde, que simulan la hierva.
-    **Colores:**
-    Verde: La capa superior muestra un verde sólido, representando la hierba.
-    Marrón Claro: La capa intermedia es de un marrón claro uniforme, representando la tierra.
-    Marrón Oscuro/Negro: La capa inferior es de un marrón muy oscuro, casi negro, representando el subsuelo profundo.
-    Gris: La parte superior de la imagen muestra un color gris liso.
-    **Estilo y Características:**
-    Plano y Simplificado: La imagen tiene un estilo plano y simplificado, sin detalles complejos ni texturas realistas. Esto le da un aspecto gráfico y caricaturesco.
-    Líneas Verticales: La hierba está representada por líneas verticales finas de diferentes tonos de verde.
-    Capas Distintas: Las capas del suelo están claramente delimitadas por líneas horizontales, lo que facilita la identificación de cada capa.
-    Representación Esquematica: La imagen es una representación esquemática del suelo, diseñada para transmitir la idea de las diferentes capas que lo componen de forma clara y sencilla.
-
 - [X] Árbol
   - *Nombre de archivo*: `tree_01.png`
   - *Tamaño*: tree_01.png (1342x1096)
   - *Descripción*: Arbol seco sin hojas
-- [ ] Arbusto pequeño
-  - *Nombre de archivo*: `bush.png`
-  - *Tamaño recomendado*: 150x150px
-  - *Descripción*: Arbusto redondeado en tonos verdes/amarillentos
 
-- [ ] Piedra
+- [X] Piedra
   - *Nombre de archivo*: `rocks.png`
   - *Tamaño*: 64x64px
   - *Descripción*: Rocas pequeñas en tonos grises
@@ -126,10 +100,6 @@ Este documento enumera los recursos gráficos y de audio esenciales para la prim
   - *Implementado en código*
 - [X] Indicador de ángulo básico
   - *Implementado en código*
-- [ ] Marco simple para información
-  - *Nombre de archivo*: `ui_frame.png`
-  - *Tamaño recomendado*: 400x100px
-  - *Descripción*: Panel simple con bordes para mostrar información
 
 #### Botones Básicos
 - [ ] Botón de inicio/reinicio
@@ -140,16 +110,6 @@ Este documento enumera los recursos gráficos y de audio esenciales para la prim
   - *Nombre de archivo*: `button_menu.png`
   - *Tamaño recomendado*: 80x80px
   - *Descripción*: Botón con icono de casa o menú
-
-## Efectos Visuales Simples
-- [ ] Efecto de polvo al despegar
-  - *Nombre de archivo*: `fx_dust.png`
-  - *Tamaño recomendado*: 64x64px
-  - *Descripción*: Nube simple de polvo
-- [ ] Efecto de impacto
-  - *Nombre de archivo*: `fx_impact.png`
-  - *Tamaño recomendado*: 128x128px
-  - *Descripción*: Impacto simple al aterrizar
 
 ## Recursos de Audio Básicos
 

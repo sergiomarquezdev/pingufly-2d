@@ -38,9 +38,29 @@ export default class Preload extends Phaser.Scene {
     this.load.image('tree', 'assets/images/environment/tree.png');
     this.load.image('rocks', 'assets/images/environment/rocks.png');
 
+    // Cargar sprite sheet del pingüino
+    this.load.spritesheet('penguin_sheet', 'assets/images/characters/penguin_sheet.png', {
+      frameWidth: 32,   // Ancho de cada frame basado en la imagen real
+      frameHeight: 32,  // Alto de cada frame basado en la imagen real
+      spacing: 0,       // Espacio entre frames (si existe)
+      margin: 0         // Margen alrededor de los frames
+    });
+
+    // Verificar si la textura se está cargando correctamente
+    this.load.on('filecomplete-spritesheet-penguin_sheet', () => {
+      // Sprite sheet cargado correctamente
+    });
+
+    this.load.on('fileerror', (key, file, error) => {
+      if (key === 'penguin_sheet') {
+        console.error('❌ Error al cargar el sprite sheet del pingüino:', error);
+      }
+    });
+
     // Placeholders temporales para elementos que aún no tienen gráficos personalizados
     this.load.image('ground', 'https://labs.phaser.io/assets/sprites/platform.png');
     this.load.image('yeti', 'https://labs.phaser.io/assets/sprites/phaser-dude.png');
+    // Mantenemos la imagen estática como fallback
     this.load.image('penguin', 'https://labs.phaser.io/assets/sprites/phaser-ship.png');
     this.load.image('flamingo', 'https://labs.phaser.io/assets/sprites/asteroids_ship.png');
     this.load.image('button', 'https://labs.phaser.io/assets/sprites/button-bg.png');

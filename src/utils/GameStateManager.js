@@ -22,6 +22,49 @@ export default class GameStateManager {
         this.currentDistance = 0;
         this.totalDistance = 0;
         this.bestTotalDistance = 0;
+
+        // Lista de observadores para notificar cambios de estado
+        this.stateObservers = [];
+    }
+
+    /**
+     * Añade un observador que será notificado cuando cambie el estado
+     * @param {Function} observer - Función que recibirá el nuevo estado
+     * @returns {GameStateManager} - Retorna this para encadenamiento
+     */
+    addStateObserver(observer) {
+        if (typeof observer === 'function' && !this.stateObservers.includes(observer)) {
+            this.stateObservers.push(observer);
+        }
+        return this;
+    }
+
+    /**
+     * Elimina un observador de la lista
+     * @param {Function} observer - Función a eliminar
+     * @returns {GameStateManager} - Retorna this para encadenamiento
+     */
+    removeStateObserver(observer) {
+        const index = this.stateObservers.indexOf(observer);
+        if (index > -1) {
+            this.stateObservers.splice(index, 1);
+        }
+        return this;
+    }
+
+    /**
+     * Notifica a todos los observadores sobre el cambio de estado
+     * @param {String} newState - El nuevo estado
+     * @private
+     */
+    _notifyStateChange(newState) {
+        this.stateObservers.forEach(observer => {
+            try {
+                observer(newState);
+            } catch (error) {
+                console.error('Error al notificar cambio de estado:', error);
+            }
+        });
     }
 
     /**
@@ -37,11 +80,17 @@ export default class GameStateManager {
      * @returns {GameStateManager} - Retorna this para encadenamiento
      */
     setState(newState) {
+        const oldState = this.currentState;
         this.currentState = newState;
 
         // Si cambiamos a READY o RESETTING, asegurar que el modal esté cerrado
         if (newState === 'READY' || newState === 'RESETTING') {
             this._isModalOpen = false;
+        }
+
+        // Solo notificar si realmente cambió el estado
+        if (oldState !== newState) {
+            this._notifyStateChange(newState);
         }
 
         return this;
@@ -69,10 +118,17 @@ export default class GameStateManager {
      * @returns {GameStateManager} - Retorna this para encadenamiento
      */
     reset() {
+        const oldState = this.currentState;
         this.currentState = 'READY';
         this.launchAttempts = 0;
         this.isResetting = false;
         this._isModalOpen = false; // Asegurar que el modal está cerrado al reiniciar
+
+        // Notificar el cambio de estado
+        if (oldState !== 'READY') {
+            this._notifyStateChange('READY');
+        }
+
         return this;
     }
 

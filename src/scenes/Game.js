@@ -18,6 +18,10 @@ import LaunchManager from '../components/gameplay/LaunchManager';
 import CloudManager from '../components/environment/CloudManager';
 import BackgroundManager from '../components/environment/BackgroundManager';
 import GroundManager from '../components/environment/GroundManager';
+// Importar configuración de animaciones del pingüino
+import penguinAnimations from '../config/penguinAnimations';
+// import UIManager from '../components/ui/UIManager'; // File doesn't exist
+// import CollisionManager from '../utils/CollisionManager'; // File doesn't exist
 
 export default class Game extends Phaser.Scene {
   constructor() {
@@ -40,38 +44,40 @@ export default class Game extends Phaser.Scene {
     // Reducir la gravedad para un vuelo más lento y mayor deslizamiento
     this.matter.world.setGravity(0, 0.3);
 
-    // Inicializar gestores principales
+    // PASO 1: Inicializar gestores principales
     this.stateManager = new GameStateManager();
     this.scoreManager = new ScoreManager(this, {
       pixelToMeterRatio: 10 // Escala arbitraria para el juego
     });
 
-    // Inicializar los gestores de entorno
+    // PASO 2: Inicializar los gestores de entorno
     this.backgroundManager = new BackgroundManager(this);
     this.backgroundManager.create();
 
     this.groundManager = new GroundManager(this);
     this.groundManager.create();
 
-    // Inicializar el gestor de nubes
     this.cloudManager = new CloudManager(this);
     this.cloudManager.create();
 
-    // Inicializar gestor de personajes
+    // PASO 3: Crear animaciones del pingüino
+    this.createPenguinAnimations();
+
+    // PASO 4: Inicializar gestor de personajes
     this.characterManager = new CharacterManager(this, {
       launchPositionX: this.launchPositionX,
       launchPositionY: this.launchPositionY
     });
     this.characterManager.createCharacters();
 
-    // Inicializar controlador de cámara
+    // PASO 5: Inicializar controlador de cámara
     this.cameraController = new CameraController(this, {
       worldBounds: { x: -10000, y: 0, width: 20000, height: 600 },
       initialCenterX: this.initialCameraX,
       initialCenterY: 300
     });
 
-    // Inicializar componentes UI
+    // PASO 6: Inicializar componentes UI
     this.angleIndicator = new AngleIndicator(this, {
       originX: this.launchPositionX,
       originY: this.launchPositionY + 5,
@@ -86,18 +92,73 @@ export default class Game extends Phaser.Scene {
 
     this.gameOverScreen = new GameOverScreen(this);
 
-    // Crear interfaz de usuario
+    // PASO 7: Crear interfaz de usuario
     this.gameUI = new GameUI(this);
     this.gameUI.createUI();
 
-    // Inicializar gestor de lanzamiento
+    // PASO 8: Inicializar controlador de lanzamiento
     this.launchManager = new LaunchManager(this);
 
-    // Configurar la entrada de usuario
+    // Registrar el CharacterManager como observador del estado del juego
+    this.stateManager.addStateObserver((newState) => {
+      // Cuando cambie el estado del juego, actualizar la animación del pingüino
+      if (this.characterManager) {
+        this.characterManager.setAnimationByState(newState, {
+          // Determinar si es un lanzamiento exitoso
+          success: this.scoreManager && this.scoreManager.currentDistance > 500
+        });
+      }
+    });
+
+    // PASO 9: Configurar la entrada de usuario
     this.setupInput();
 
-    // Iniciar el juego
+    // PASO 10: Iniciar el juego
     this.startGame();
+  }
+
+  /**
+   * Crea las animaciones del pingüino basadas en el sprite sheet
+   */
+  createPenguinAnimations() {
+    // Verificar que el sprite sheet está cargado
+    if (!this.textures.exists('penguin_sheet')) {
+      console.error('❌ El sprite sheet "penguin_sheet" no está cargado');
+      return;
+    }
+
+    try {
+      // Recorrer todas las animaciones definidas y crearlas
+      Object.values(penguinAnimations).forEach(animConfig => {
+        // Verificar si la animación ya existe y eliminarla para evitar duplicados
+        if (this.anims.exists(animConfig.key)) {
+          this.anims.remove(animConfig.key);
+        }
+
+        // Crear la animación
+        this.anims.create({
+          key: animConfig.key,
+          frames: this.anims.generateFrameNumbers('penguin_sheet', {
+            frames: animConfig.frames
+          }),
+          frameRate: animConfig.frameRate,
+          repeat: animConfig.repeat
+        });
+      });
+
+      // Verificar que todas las animaciones se han creado correctamente
+      const animsCreated = Object.keys(this.anims.anims.entries);
+
+      // Verificar si hay alguna animación que no se ha creado
+      const expectedAnims = Object.values(penguinAnimations).map(anim => anim.key);
+      const missingAnims = expectedAnims.filter(key => !animsCreated.includes(key));
+
+      if (missingAnims.length > 0) {
+        console.warn('⚠️ Algunas animaciones no se crearon correctamente:', missingAnims);
+      }
+    } catch (error) {
+      console.error('❌ Error al crear animaciones del pingüino:', error);
+    }
   }
 
   update() {
@@ -106,6 +167,11 @@ export default class Game extends Phaser.Scene {
 
     // En estado FLYING, actualizar a estado GAME_OVER si el pingüino se detiene
     if (gameState === 'FLYING') {
+      // Asegurar que el pingüino no rota en cada frame
+      if (this.characterManager && this.characterManager.penguin) {
+        this.characterManager.penguin.setAngularVelocity(0);
+      }
+
       if (this.characterManager.updatePenguinPhysics()) {
         this.endLaunch();
       }
@@ -115,7 +181,6 @@ export default class Game extends Phaser.Scene {
       const penguin = this.characterManager.penguin;
       if (penguin && penguin.x < this.cameraController.getInitialScrollX() - 5000) {
         // Si el pingüino se ha ido demasiado lejos, forzar la detención del vuelo
-        console.log('Penguin went too far, stopping flight');
         this.endLaunch();
       }
     }
@@ -255,34 +320,115 @@ export default class Game extends Phaser.Scene {
    * Inicia el juego
    */
   startGame() {
-    this.stateManager.setState('READY');
+    try {
+      // Restaurar posiciones de personajes
+      if (this.characterManager && typeof this.characterManager.resetPositions === 'function') {
+        this.characterManager.resetPositions();
+      }
 
-    // Mostrar mensaje de inicio
-    const width = this.cameras.main.width;
-    const height = this.cameras.main.height;
+      // Establecer estado inicial
+      if (this.stateManager && typeof this.stateManager.reset === 'function') {
+        this.stateManager.reset();
+      }
 
-    const startPrompt = this.add.text(width / 2, 170, 'Haz clic para comenzar', {
-      fontFamily: 'Arial',
-      fontSize: '32px',
-      color: '#ffffff',
-      stroke: '#000000',
-      strokeThickness: 4
-    }).setOrigin(0.5).setScrollFactor(0).setName('startPrompt');
+      // Mostrar un botón de prueba para animar el pingüino
+      const animateButton = this.add.text(400, 120, 'Probar Animaciones', {
+        fontSize: '20px',
+        fill: '#ffffff',
+        backgroundColor: '#ff0000',
+        padding: { x: 10, y: 5 }
+      })
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true })
+      .setDepth(1000) // Asegurar que esté por encima de otros elementos
+      .on('pointerdown', () => {
+        // Verificar requisitos básicos
+        if (!this.characterManager || !this.characterManager.penguin || !this.characterManager.penguin.anims) {
+          console.error('❌ No se pueden probar animaciones: objeto pingüino no válido');
+          return;
+        }
 
-    // Animar el texto
-    this.tweens.add({
-      targets: startPrompt,
-      alpha: 0.5,
-      duration: 500,
-      yoyo: true,
-      repeat: -1
-    });
+        // Obtener todas las animaciones disponibles
+        const availableAnims = Object.keys(this.anims.anims.entries);
 
-    // Mostrar mensaje informativo sobre los controles
-    this.gameUI.showControlsInfo();
+        // Crear botones para cada animación
+        this.clearAnimationTestButtons();
 
-    // Establecer flag para saber que estamos esperando el primer clic
-    this.waitingForFirstClick = true;
+        // Contador para posicionar botones en columnas
+        let col = 0;
+        let row = 0;
+        const buttonsPerRow = 3;
+
+        // Crear un contenedor para agrupar todos los botones
+        this.animButtonsContainer = this.add.container(400, 200);
+        this.animButtonsContainer.setDepth(1001);
+
+        // Para cada animación disponible, crear un botón
+        availableAnims.forEach((animKey, index) => {
+          // Calcular posición en la cuadrícula
+          col = index % buttonsPerRow;
+          row = Math.floor(index / buttonsPerRow);
+
+          // Crear botón para la animación
+          const animButton = this.add.text(
+            (col - 1) * 150, // Centrado en 3 columnas (-1, 0, 1)
+            row * 50,
+            animKey,
+            {
+              fontSize: '16px',
+              fill: '#ffffff',
+              backgroundColor: '#0066aa',
+              padding: { x: 10, y: 5 }
+            }
+          )
+          .setOrigin(0.5)
+          .setInteractive({ useHandCursor: true })
+          .on('pointerdown', () => {
+            // Al hacer clic, reproducir la animación
+            this.playTestAnimation(animKey);
+          })
+          .on('pointerover', () => animButton.setBackgroundColor('#0088cc'))
+          .on('pointerout', () => animButton.setBackgroundColor('#0066aa'));
+
+          // Añadir al contenedor
+          this.animButtonsContainer.add(animButton);
+        });
+
+        // Añadir botón para cerrar el panel de pruebas
+        const closeButton = this.add.text(0, (row + 1) * 50 + 20, 'Cerrar Panel', {
+          fontSize: '16px',
+          fill: '#ffffff',
+          backgroundColor: '#aa0000',
+          padding: { x: 10, y: 5 }
+        })
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => {
+          this.clearAnimationTestButtons();
+        })
+        .on('pointerover', () => closeButton.setBackgroundColor('#cc0000'))
+        .on('pointerout', () => closeButton.setBackgroundColor('#aa0000'));
+
+        this.animButtonsContainer.add(closeButton);
+      });
+
+      // Iniciar con el controlador de ángulo
+      if (this.launchManager && typeof this.launchManager.startAngleSelection === 'function') {
+        this.launchManager.startAngleSelection();
+      } else {
+        console.error("Error: No se pudo iniciar la selección de ángulo, launchManager no disponible");
+      }
+
+      // Configurar la cámara para seguir al pingüino cuando se lance
+      if (this.cameraController &&
+          this.characterManager &&
+          this.characterManager.penguin &&
+          typeof this.cameraController.followTarget === 'function') {
+        this.cameraController.followTarget(this.characterManager.penguin, true);
+      }
+    } catch (error) {
+      console.error("Error al iniciar el juego:", error);
+    }
   }
 
   /**
@@ -290,12 +436,12 @@ export default class Game extends Phaser.Scene {
    */
   handlePlayerInput() {
     // Si hay un modal abierto, ignorar completamente la entrada
-    if (this.stateManager.isModalOpen) {
+    if (this.stateManager && this.stateManager.isModalOpen) {
       return;
     }
 
     // Si estamos en proceso de reiniciar, ignorar la entrada
-    if (this.stateManager.isResetting) {
+    if (this.stateManager && this.stateManager.isResetting) {
       return;
     }
 
@@ -312,40 +458,59 @@ export default class Game extends Phaser.Scene {
       const controlsInfo = this.children.getByName('controlsInfo');
       if (controlsInfo) controlsInfo.destroy();
 
-      this.launchManager.startAngleSelection();
+      // Asegurarnos que los componentes existen antes de usarlos
+      if (this.launchManager) {
+        if (typeof this.launchManager.endAngleSelection === 'function') {
+          this.launchManager.endAngleSelection();
+        }
+
+        if (typeof this.launchManager.startPowerSelection === 'function') {
+          this.launchManager.startPowerSelection();
+        }
+      }
+      return;
+    }
+
+    // Verificar que tenemos los componentes necesarios
+    if (!this.stateManager || !this.launchManager) {
+      console.error("Error: Componentes necesarios no inicializados (stateManager o launchManager)");
       return;
     }
 
     // Basado en el estado actual del juego
-    switch (this.stateManager.currentState) {
-      case 'ANGLE_SELECTION':
-        this.launchManager.endAngleSelection();
-        this.launchManager.startPowerSelection();
-        break;
+    try {
+      switch (this.stateManager.currentState) {
+        case 'ANGLE_SELECTION':
+          this.launchManager.endAngleSelection();
+          this.launchManager.startPowerSelection();
+          break;
 
-      case 'POWER_SELECTION':
-        this.launchManager.endPowerSelection();
-        this.launchManager.launchPenguin();
-        break;
+        case 'POWER_SELECTION':
+          this.launchManager.endPowerSelection();
+          this.launchManager.launchPenguin();
+          break;
 
-      case 'ENDED':
-        // Prevenir múltiples reinicios debido a clics rápidos
-        if (this.stateManager.isResetting) {
-          return;
-        }
+        case 'ENDED':
+          // Prevenir múltiples reinicios debido a clics rápidos
+          if (this.stateManager.isResetting) {
+            return;
+          }
 
-        // Establecer el flag de reinicio
-        this.stateManager.isResetting = true;
+          // Establecer el flag de reinicio
+          this.stateManager.isResetting = true;
 
-        // Eliminar el contenedor de controles si existe
-        const controlsInfo = this.children.getByName('controlsInfo');
-        if (controlsInfo) controlsInfo.destroy();
+          // Eliminar el contenedor de controles si existe
+          const controlsInfo = this.children.getByName('controlsInfo');
+          if (controlsInfo) controlsInfo.destroy();
 
-        this.resetLaunch();
-        break;
+          this.resetLaunch();
+          break;
 
-      default:
-        break;
+        default:
+          break;
+      }
+    } catch (error) {
+      console.error("Error en handlePlayerInput:", error);
     }
   }
 
@@ -356,7 +521,8 @@ export default class Game extends Phaser.Scene {
     // Detener el pingüino completamente antes de procesar el final del lanzamiento
     if (this.characterManager && this.characterManager.penguin) {
       this.characterManager.penguin.setVelocity(0, 0);
-      this.characterManager.penguin.setAngularVelocity(0);
+      this.characterManager.penguin.setAngularVelocity(0); // Asegurar que se detiene cualquier rotación
+      this.characterManager.penguin.setAngle(0); // Asegurar que el ángulo vuelve a cero
     }
 
     // Acumular la distancia actual al total
@@ -511,5 +677,33 @@ export default class Game extends Phaser.Scene {
     this.scoreManager = null;
 
     super.destroy();
+  }
+
+  /**
+   * Limpia los botones de prueba de animaciones
+   */
+  clearAnimationTestButtons() {
+    if (this.animButtonsContainer) {
+      this.animButtonsContainer.destroy();
+      this.animButtonsContainer = null;
+    }
+  }
+
+  /**
+   * Reproduce una animación de prueba
+   * @param {string} animKey - Clave de la animación a reproducir
+   */
+  playTestAnimation(animKey) {
+    if (!this.characterManager || !this.characterManager.penguin) {
+      console.error('❌ No se puede reproducir la animación: objeto pingüino no válido');
+      return;
+    }
+
+    try {
+      // Intentar reproducir la animación
+      this.characterManager.penguin.play(animKey);
+    } catch (error) {
+      console.error(`❌ Error al reproducir la animación "${animKey}":`, error);
+    }
   }
 }

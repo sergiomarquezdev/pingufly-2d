@@ -36,15 +36,19 @@ export default class LaunchManager {
             });
 
         // Asegurarnos que el pingüino esté en estado visible correcto
-        this.characterManager.penguin.clearTint();
-        this.characterManager.penguin.setAlpha(1);
-        this.characterManager.penguin.setVisible(true);
+        if (this.characterManager && this.characterManager.penguin) {
+            this.characterManager.penguin.clearTint();
+            this.characterManager.penguin.setAlpha(1);
+            this.characterManager.penguin.setVisible(true);
+        }
 
         // Iniciar la selección de ángulo con el componente AngleIndicator
-        this.angleIndicator.startAngleSelection((angle) => {
-            // Actualizar el ángulo del juego cuando cambia en el indicador
-            this.selectedAngle = angle;
-        });
+        if (this.angleIndicator) {
+            this.angleIndicator.startAngleSelection((angle) => {
+                // Actualizar el ángulo del juego cuando cambia en el indicador
+                this.selectedAngle = angle;
+            });
+        }
 
         // Mensaje de instrucción
         this.scene.add.text(400, 100, 'Haz clic para seleccionar el ángulo', {
@@ -61,7 +65,9 @@ export default class LaunchManager {
      */
     endAngleSelection() {
         // Detener la animación del ángulo usando el componente
-        this.selectedAngle = this.angleIndicator.endAngleSelection();
+        if (this.angleIndicator && typeof this.angleIndicator.endAngleSelection === 'function') {
+            this.selectedAngle = this.angleIndicator.endAngleSelection();
+        }
 
         // Eliminar el texto de instrucción
         this.scene.children.list
@@ -76,10 +82,12 @@ export default class LaunchManager {
         this.stateManager.setState('POWER_SELECTION');
 
         // Iniciar la selección de potencia con el componente PowerBar
-        this.powerBar.startPowerSelection((power) => {
-            // Actualizar la potencia del juego cuando cambia en la barra
-            this.selectedPower = power;
-        });
+        if (this.powerBar && typeof this.powerBar.startPowerSelection === 'function') {
+            this.powerBar.startPowerSelection((power) => {
+                // Actualizar la potencia del juego cuando cambia en la barra
+                this.selectedPower = power;
+            });
+        }
 
         // Mensaje de instrucción
         this.scene.add.text(400, 100, 'Haz clic para seleccionar la potencia', {
@@ -96,7 +104,9 @@ export default class LaunchManager {
      */
     endPowerSelection() {
         // Detener la animación de potencia usando el componente
-        this.selectedPower = this.powerBar.endPowerSelection();
+        if (this.powerBar && typeof this.powerBar.endPowerSelection === 'function') {
+            this.selectedPower = this.powerBar.endPowerSelection();
+        }
 
         // Eliminar el texto de instrucción
         this.scene.children.list
@@ -108,24 +118,31 @@ export default class LaunchManager {
      * Lanza al pingüino con el ángulo y potencia seleccionados
      */
     launchPenguin() {
+        if (!this.stateManager) return;
         this.stateManager.setState('LAUNCHING');
 
         // Incrementar contador de intentos
         this.stateManager.incrementAttempts();
 
         // Actualizar el contador de intentos visual
-        this.scene.gameUI.updateAttemptsUI(
-            this.stateManager.launchAttempts,
-            this.stateManager.maxLaunchAttempts
-        );
+        if (this.scene && this.scene.gameUI) {
+            this.scene.gameUI.updateAttemptsUI(
+                this.stateManager.launchAttempts,
+                this.stateManager.maxLaunchAttempts
+            );
+        }
 
         // Usar el CharacterManager para lanzar el pingüino
-        this.characterManager.launchPenguin(this.selectedAngle, this.selectedPower);
+        if (this.characterManager && typeof this.characterManager.launchPenguin === 'function') {
+            this.characterManager.launchPenguin(this.selectedAngle, this.selectedPower);
+        }
 
         // Cambiar inmediatamente al estado FLYING sin esperar a la animación
         this.stateManager.setState('FLYING');
 
         // Reiniciar distancia actual inmediatamente
-        this.scene.scoreManager.resetCurrentDistance();
+        if (this.scene && this.scene.scoreManager) {
+            this.scene.scoreManager.resetCurrentDistance();
+        }
     }
 }
