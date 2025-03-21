@@ -9,7 +9,7 @@ const penguinAnimations = {
     key: 'penguin_idle',
     frames: [40,41,42],
     frameRate: 5,
-    repeat: -1,
+    repeat: 1,
     flipX: true
   },
 

@@ -26,7 +26,9 @@ export default class GameUI {
         const height = this.scene.scale.height;
 
         // Crear un footer en la parte inferior de la pantalla
-        this.uiFooter = this.scene.add.container(0, height - 30).setScrollFactor(0);
+        this.uiFooter = this.scene.add.container(0, height - 30)
+            .setScrollFactor(0)
+            .setDepth(10); // Configurar una profundidad alta para la UI
 
         // Fondo del footer
         const footerBg = this.scene.add.rectangle(0, 0, width, 30, 0x104080, 0.8)

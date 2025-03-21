@@ -490,17 +490,22 @@ export default class Menu extends Phaser.Scene {
     ];
 
     snowmanPositions.forEach(pos => {
-      this.add.image(pos.x, pos.y, 'snowman')
+      const snowman = this.add.image(pos.x, pos.y, 'snowman')
         .setScale(pos.scale)
         .setDepth(pos.depth);
-    });
 
+      // Recortar 1px de la parte superior para eliminar la línea extraña
+      snowman.setCrop(0, 1, 64, 63);
+    });
 
     // Añadir un pingüino decorativo (usando el sheet)
     const penguinFrame = 0; // Frame inicial
     const pinguin = this.add.sprite(width * 0.8, height * 0.9, 'penguin_sheet', penguinFrame)
       .setScale(1)
       .setDepth(7);
+
+    // Recortar 1px de la parte superior para eliminar la línea extraña
+    pinguin.setCrop(0, 1, 32, 31);
 
     // Animar el pingüino para que parezca moverse ligeramente
     this.tweens.add({

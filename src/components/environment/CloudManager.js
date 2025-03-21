@@ -106,7 +106,8 @@ export default class CloudManager {
       const cloud = this.scene.add.image(x, preferredY, cloudKey)
         .setScale(scale)
         .setScrollFactor(scrollFactor)
-        .setAlpha(0.9);
+        .setAlpha(0.9)
+        .setDepth(-8);
 
       // Guardar propiedades personalizadas
       cloud.speed = speed;

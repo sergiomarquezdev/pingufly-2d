@@ -33,6 +33,14 @@ export default class GroundManager {
     this.ground.setScale(this.config.width, this.config.height);
     this.ground.setStatic(true);
 
+    // Establecer profundidad del suelo para que esté por encima de fondos
+    // pero debajo de los elementos del juego
+    this.ground.setDepth(-1);
+
+    // Hacer el suelo invisible para que no se vea la textura de hierba
+    // pero se mantengan sus propiedades físicas
+    this.ground.setAlpha(0);
+
     // Propiedades del suelo - reducir la fricción para simular hielo
     this.ground.setFriction(this.config.friction);
     this.ground.setFrictionStatic(this.config.frictionStatic);

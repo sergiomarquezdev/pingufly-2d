@@ -112,9 +112,12 @@ export default class AnimationTest extends Phaser.Scene {
     });
 
     // Añadir un muñeco de nieve decorativo
-    this.add.image(width * 0.85, height * 0.9, 'snowman')
+    const snowman = this.add.image(width * 0.85, height * 0.9, 'snowman')
       .setScale(0.5)
       .setDepth(3);
+
+    // Recortar 1px de la parte superior para eliminar la línea extraña
+    snowman.setCrop(0, 1, 64, 63);
   }
 
   /**

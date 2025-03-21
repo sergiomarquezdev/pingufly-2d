@@ -117,7 +117,7 @@ export default class CharacterManager {
       this.getYetiX(),
       this.getYetiY(),
       'yeti'
-    );
+    ).setDepth(5);
 
     // Voltear el Yeti para que mire hacia la izquierda
     this.yeti.setFlipX(true);
@@ -127,7 +127,7 @@ export default class CharacterManager {
       this.getFlamingoX(),
       this.getFlamingoY(),
       'flamingo'
-    );
+    ).setDepth(5);
 
     // Voltear el flamingo para que apunte hacia la izquierda
     this.flamingo.setFlipX(true);
@@ -144,7 +144,10 @@ export default class CharacterManager {
           this.getPenguinY(),
           'penguin_sheet',
           0  // Frame inicial
-        );
+        ).setDepth(5);
+
+        // Recortar 1px de la parte superior para eliminar la línea extraña
+        this.penguin.setCrop(0, 1, 32, 31);
 
         // Configurar el cuerpo circular aquí para evitar problemas
         this.penguin.setBody({
@@ -179,7 +182,7 @@ export default class CharacterManager {
           this.getPenguinX(),
           this.getPenguinY(),
           'penguin'
-        );
+        ).setDepth(5);
       }
     } catch (error) {
       console.error('Error al crear el personaje pingüino:', error);
@@ -190,7 +193,7 @@ export default class CharacterManager {
           this.getPenguinX(),
           this.getPenguinY(),
           'penguin'
-        );
+        ).setDepth(5);
       }
     }
 
@@ -200,23 +203,12 @@ export default class CharacterManager {
     // Ajustar tamaño del sprite
     this.penguin.setScale(1.5);
 
-    // Configurar cuerpo circular para el pingüino si aún no se ha hecho
-    if (this.penguin.body && !this.penguin.body.circleRadius) {
-      this.penguin.setBody({
-        type: 'circle',
-        radius: 12
-      });
-    }
-
     // Configurar propiedades físicas del pingüino
     const { frictionAir, friction, bounce, density } = this.config.penguinPhysicsConfig;
     this.penguin.setFrictionAir(frictionAir);
     this.penguin.setFriction(friction);
     this.penguin.setBounce(bounce);
     this.penguin.setDensity(density);
-
-    // Inicialmente, el pingüino está estático
-    this.penguin.setStatic(true);
 
     return this;
   }
