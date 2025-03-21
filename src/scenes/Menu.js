@@ -16,7 +16,7 @@ export default class Menu extends Phaser.Scene {
     this.bestDistance = 0;
   }
 
-  create() {
+  create(data) {
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
 
@@ -44,6 +44,11 @@ export default class Menu extends Phaser.Scene {
       fontSize: '12px',
       color: '#ffffff'
     }).setOrigin(1, 1);
+
+    // Si venimos de AnimationTest y se solicita mostrar instrucciones
+    if (data && data.showInstructions) {
+      this.showInstructions();
+    }
   }
 
   /**
@@ -548,6 +553,88 @@ export default class Menu extends Phaser.Scene {
       });
     });
 
+    // Botón para ver las animaciones del pingüino
+    const animButtonWidth = 180;
+    const animButtonHeight = 40;
+    const animButtonY = height * 0.65;
+
+    // Crear el fondo del botón
+    const animButtonBg = this.add.graphics();
+    animButtonBg.fillStyle(0x006600, 1);
+    animButtonBg.fillRoundedRect(
+      width / 2 - animButtonWidth / 2,
+      animButtonY - animButtonHeight / 2,
+      animButtonWidth,
+      animButtonHeight,
+      15
+    );
+
+    // Borde del botón
+    const animButtonBorder = this.add.graphics();
+    animButtonBorder.lineStyle(3, 0xffaa00, 1);
+    animButtonBorder.strokeRoundedRect(
+      width / 2 - animButtonWidth / 2,
+      animButtonY - animButtonHeight / 2,
+      animButtonWidth,
+      animButtonHeight,
+      15
+    );
+
+    // Texto del botón
+    const animText = this.add.text(width / 2, animButtonY, 'VER ANIMACIONES', {
+      fontFamily: 'Arial',
+      fontSize: '18px',
+      fontWeight: 'bold',
+      color: '#ffffff',
+      stroke: '#000000',
+      strokeThickness: 2
+    }).setOrigin(0.5);
+
+    // Crear zona interactiva para el botón
+    const animButton = this.add.zone(
+      width / 2,
+      animButtonY,
+      animButtonWidth,
+      animButtonHeight
+    ).setInteractive();
+
+    // Hacer interactivo el botón de animaciones
+    animButton.on('pointerover', () => {
+      animButtonBg.clear();
+      animButtonBg.fillStyle(0x008800, 1);
+      animButtonBg.fillRoundedRect(
+        width / 2 - animButtonWidth / 2,
+        animButtonY - animButtonHeight / 2,
+        animButtonWidth,
+        animButtonHeight,
+        15
+      );
+      animText.setScale(1.1);
+    });
+
+    animButton.on('pointerout', () => {
+      animButtonBg.clear();
+      animButtonBg.fillStyle(0x006600, 1);
+      animButtonBg.fillRoundedRect(
+        width / 2 - animButtonWidth / 2,
+        animButtonY - animButtonHeight / 2,
+        animButtonWidth,
+        animButtonHeight,
+        15
+      );
+      animText.setScale(1.0);
+    });
+
+    animButton.on('pointerdown', () => {
+      // Transición de salida
+      this.cameras.main.fade(300, 0, 0, 0, false, (camera, progress) => {
+        if (progress === 1) {
+          // Iniciar la escena de prueba de animaciones
+          this.scene.start('AnimationTest');
+        }
+      });
+    });
+
     // Añadir todo al contenedor
     instructionsLayer.add([
       bg,
@@ -557,7 +644,11 @@ export default class Menu extends Phaser.Scene {
       closeButtonBg,
       closeButtonBorder,
       closeText,
-      closeButton
+      closeButton,
+      animButtonBg,
+      animButtonBorder,
+      animText,
+      animButton
     ]);
 
     // Animar la entrada de las instrucciones

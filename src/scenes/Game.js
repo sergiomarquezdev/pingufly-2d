@@ -331,87 +331,6 @@ export default class Game extends Phaser.Scene {
         this.stateManager.reset();
       }
 
-      // Mostrar un botón de prueba para animar el pingüino
-      const animateButton = this.add.text(400, 120, 'Probar Animaciones', {
-        fontSize: '20px',
-        fill: '#ffffff',
-        backgroundColor: '#ff0000',
-        padding: { x: 10, y: 5 }
-      })
-      .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true })
-      .setDepth(1000) // Asegurar que esté por encima de otros elementos
-      .on('pointerdown', () => {
-        // Verificar requisitos básicos
-        if (!this.characterManager || !this.characterManager.penguin || !this.characterManager.penguin.anims) {
-          console.error('❌ No se pueden probar animaciones: objeto pingüino no válido');
-          return;
-        }
-
-        // Obtener todas las animaciones disponibles
-        const availableAnims = Object.keys(this.anims.anims.entries);
-
-        // Crear botones para cada animación
-        this.clearAnimationTestButtons();
-
-        // Contador para posicionar botones en columnas
-        let col = 0;
-        let row = 0;
-        const buttonsPerRow = 3;
-
-        // Crear un contenedor para agrupar todos los botones
-        this.animButtonsContainer = this.add.container(400, 200);
-        this.animButtonsContainer.setDepth(1001);
-
-        // Para cada animación disponible, crear un botón
-        availableAnims.forEach((animKey, index) => {
-          // Calcular posición en la cuadrícula
-          col = index % buttonsPerRow;
-          row = Math.floor(index / buttonsPerRow);
-
-          // Crear botón para la animación
-          const animButton = this.add.text(
-            (col - 1) * 150, // Centrado en 3 columnas (-1, 0, 1)
-            row * 50,
-            animKey,
-            {
-              fontSize: '16px',
-              fill: '#ffffff',
-              backgroundColor: '#0066aa',
-              padding: { x: 10, y: 5 }
-            }
-          )
-          .setOrigin(0.5)
-          .setInteractive({ useHandCursor: true })
-          .on('pointerdown', () => {
-            // Al hacer clic, reproducir la animación
-            this.playTestAnimation(animKey);
-          })
-          .on('pointerover', () => animButton.setBackgroundColor('#0088cc'))
-          .on('pointerout', () => animButton.setBackgroundColor('#0066aa'));
-
-          // Añadir al contenedor
-          this.animButtonsContainer.add(animButton);
-        });
-
-        // Añadir botón para cerrar el panel de pruebas
-        const closeButton = this.add.text(0, (row + 1) * 50 + 20, 'Cerrar Panel', {
-          fontSize: '16px',
-          fill: '#ffffff',
-          backgroundColor: '#aa0000',
-          padding: { x: 10, y: 5 }
-        })
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => {
-          this.clearAnimationTestButtons();
-        })
-        .on('pointerover', () => closeButton.setBackgroundColor('#cc0000'))
-        .on('pointerout', () => closeButton.setBackgroundColor('#aa0000'));
-
-        this.animButtonsContainer.add(closeButton);
-      });
-
       // Iniciar con el controlador de ángulo
       if (this.launchManager && typeof this.launchManager.startAngleSelection === 'function') {
         this.launchManager.startAngleSelection();
@@ -677,33 +596,5 @@ export default class Game extends Phaser.Scene {
     this.scoreManager = null;
 
     super.destroy();
-  }
-
-  /**
-   * Limpia los botones de prueba de animaciones
-   */
-  clearAnimationTestButtons() {
-    if (this.animButtonsContainer) {
-      this.animButtonsContainer.destroy();
-      this.animButtonsContainer = null;
-    }
-  }
-
-  /**
-   * Reproduce una animación de prueba
-   * @param {string} animKey - Clave de la animación a reproducir
-   */
-  playTestAnimation(animKey) {
-    if (!this.characterManager || !this.characterManager.penguin) {
-      console.error('❌ No se puede reproducir la animación: objeto pingüino no válido');
-      return;
-    }
-
-    try {
-      // Intentar reproducir la animación
-      this.characterManager.penguin.play(animKey);
-    } catch (error) {
-      console.error(`❌ Error al reproducir la animación "${animKey}":`, error);
-    }
   }
 }

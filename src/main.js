@@ -12,11 +12,12 @@ import Preload from './scenes/Preload';
 import Menu from './scenes/Menu';
 import Game from './scenes/Game';
 import Results from './scenes/Results';
+import AnimationTest from './scenes/AnimationTest';
 
 // Configuración de escenas
 const config = {
   ...gameConfig,
-  scene: [Boot, Preload, Menu, Game, Results]
+  scene: [Boot, Preload, Menu, Game, Results, AnimationTest]
 };
 
 // Crear instancia del juego

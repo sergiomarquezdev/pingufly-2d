@@ -172,26 +172,96 @@ For a more detailed roadmap, see [timeline.md](project_docs/timeline.md).
 ## 📂 Project Structure
 
 ```
-/pingufly-2d
-├── public/               # Static assets
-│   └── assets/           # Game assets (images, audio, spritesheets)
-│       ├── images/       # Image assets
-│       ├── audio/        # Audio assets
-│       └── spritesheets/ # Spritesheet assets
-├── src/                  # Source code
-│   ├── components/       # Game components
-│   │   ├── characters/   # Character-related components
-│   │   ├── gameplay/     # Gameplay mechanics
-│   │   └── ui/           # User interface components
-│   ├── config/           # Game configuration
-│   ├── scenes/           # Game scenes (Boot, Preload, Menu, Game)
-│   ├── utils/            # Utility functions and managers
-│   └── main.js           # Entry point
-├── project_docs/         # Documentation files
-│   └── timeline.md       # Development timeline
-├── index.html            # Main HTML file
-├── package.json          # NPM dependencies
-└── vite.config.js        # Vite configuration
+pingufly-2dº
+├─ .cursor
+│  └─ rules
+│     ├─ advanced-techniques.mdc
+│     ├─ assets-management.mdc
+│     ├─ code-structure.mdc
+│     ├─ dependencies.mdc
+│     ├─ general-principles.mdc
+│     ├─ mobile-optimization.mdc
+│     ├─ naming-conventions.mdc
+│     ├─ performance-optimization.mdc
+│     ├─ phaser-best-practices.mdc
+│     ├─ phaser-optimizations.mdc
+│     ├─ project-structure.mdc
+│     ├─ scene-specific.mdc
+│     ├─ testing-quality.mdc
+│     └─ web-deployment.mdc
+├─ .cursorrules
+├─ assets
+│  └─ images
+│     └─ characters
+├─ index.html
+├─ package.json
+├─ project_docs
+│  ├─ assets_checklist.md
+│  ├─ pingufly-design_development-documentation.md
+│  └─ timeline.md
+├─ public
+│  ├─ assets
+│  │  ├─ audio
+│  │  ├─ images
+│  │  │  ├─ background
+│  │  │  │  ├─ background_mountain.png
+│  │  │  │  ├─ background_sky.png
+│  │  │  │  ├─ background_sun.png
+│  │  │  │  ├─ cloud_01.png
+│  │  │  │  ├─ cloud_02.png
+│  │  │  │  ├─ cloud_03.png
+│  │  │  │  └─ cloud_04.png
+│  │  │  ├─ characters
+│  │  │  │  └─ penguin_sheet.png
+│  │  │  ├─ environment
+│  │  │  │  ├─ rocks.png
+│  │  │  │  └─ tree.png
+│  │  │  ├─ favicon.png
+│  │  │  └─ game-screenshot.png
+│  │  └─ spritesheets
+│  └─ favicon.ico
+├─ README.md
+├─ src
+│  ├─ assets
+│  │  ├─ audio
+│  │  ├─ generated
+│  │  ├─ images
+│  │  └─ spritesheets
+│  ├─ components
+│  │  ├─ characters
+│  │  │  └─ CharacterManager.js
+│  │  ├─ environment
+│  │  │  ├─ BackgroundManager.js
+│  │  │  ├─ CloudManager.js
+│  │  │  └─ GroundManager.js
+│  │  ├─ gameplay
+│  │  │  └─ LaunchManager.js
+│  │  └─ ui
+│  │     ├─ AngleIndicator.js
+│  │     ├─ ButtonFactory.js
+│  │     ├─ GameOverScreen.js
+│  │     ├─ GameUI.js
+│  │     └─ PowerBar.js
+│  ├─ config
+│  │  ├─ gameConfig.js
+│  │  ├─ penguinAnimations.js
+│  │  └─ physicsConfig.js
+│  ├─ entities
+│  ├─ main.js
+│  ├─ scenes
+│  │  ├─ AnimationTest.js
+│  │  ├─ Boot.js
+│  │  ├─ Game.js
+│  │  ├─ Menu.js
+│  │  ├─ Preload.js
+│  │  └─ Results.js
+│  └─ utils
+│     ├─ CameraController.js
+│     ├─ GameStateManager.js
+│     ├─ ScoreManager.js
+│     └─ StorageManager.js
+├─ tests
+└─ vite.config.js
 ```
 
 ## 👥 Contributing
