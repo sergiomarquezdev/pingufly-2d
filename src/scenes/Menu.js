@@ -23,11 +23,8 @@ export default class Menu extends Phaser.Scene {
     // Cargar el récord desde localStorage
     this.loadBestDistance();
 
-    // Fondo del menú
-    this.add.image(width / 2, height / 2, 'sky').setScale(2);
-
-    // Añadir estrellas decorativas
-    this.createStarfield(width, height);
+    // Añadir elementos decorativos de invierno
+    this.createWinterBackground(width, height);
 
     // Crear un contenedor para el menú principal
     this.mainMenuContainer = this.add.container(0, 0);
@@ -61,7 +58,7 @@ export default class Menu extends Phaser.Scene {
       fontSize: '48px',
       fontStyle: 'bold',
       color: '#ffffff',
-      stroke: '#000000',
+      stroke: '#003366',
       strokeThickness: 6
     }).setOrigin(0.5);
 
@@ -70,8 +67,8 @@ export default class Menu extends Phaser.Scene {
       fontFamily: 'Arial',
       fontSize: '32px',
       fontStyle: 'italic',
-      color: '#ffffaa',
-      stroke: '#000000',
+      color: '#e8f4fc',
+      stroke: '#003366',
       strokeThickness: 4
     }).setOrigin(0.5);
 
@@ -79,11 +76,11 @@ export default class Menu extends Phaser.Scene {
     const buttonSpacing = height * 0.12; // Espacio entre botones
     const buttonPanelTop = height * 0.35; // Posición superior del panel de botones
 
-    // Crear un panel decorativo para los botones
+    // Crear un panel decorativo para los botones - Aspecto de bloque de hielo
     const panelWidth = width * 0.8;
     const panelHeight = height * 0.5;
     const buttonPanel = this.add.graphics();
-    buttonPanel.fillStyle(0x000000, 0.5);
+    buttonPanel.fillStyle(0x88c1dd, 0.6);
     buttonPanel.fillRoundedRect(
       width / 2 - panelWidth / 2,
       buttonPanelTop,
@@ -91,7 +88,7 @@ export default class Menu extends Phaser.Scene {
       panelHeight,
       20
     );
-    buttonPanel.lineStyle(3, 0x4444aa, 1);
+    buttonPanel.lineStyle(3, 0x6baed6, 1);
     buttonPanel.strokeRoundedRect(
       width / 2 - panelWidth / 2,
       buttonPanelTop,
@@ -105,7 +102,7 @@ export default class Menu extends Phaser.Scene {
     const buttonY2 = buttonPanelTop + panelHeight * 0.7;
 
     // Botón de jugar - Ocupa la parte superior del panel
-    const startButton = this.createCustomButton(
+    const startButton = this.createIceButton(
       width / 2,
       buttonY1,
       'JUGAR',
@@ -114,7 +111,7 @@ export default class Menu extends Phaser.Scene {
     );
 
     // Botón de instrucciones - Ocupa la parte inferior del panel
-    const instructionsButton = this.createCustomButton(
+    const instructionsButton = this.createIceButton(
       width / 2,
       buttonY2,
       'INSTRUCCIONES',
@@ -135,65 +132,75 @@ export default class Menu extends Phaser.Scene {
   }
 
   /**
-   * Crea un botón personalizado con fondo, texto y efecto de brillo
+   * Crea un botón con aspecto de hielo
    */
-  createCustomButton(x, y, text, width, height) {
+  createIceButton(x, y, text, width, height) {
     // Crear un contenedor para el botón
     const container = this.add.container(x, y);
 
-    // Fondo del botón con gradiente
+    // Fondo del botón con gradiente de hielo
     const background = this.add.graphics();
-    background.fillGradientStyle(0x003366, 0x003366, 0x0088cc, 0x0088cc, 1);
+    background.fillGradientStyle(0x2c85c1, 0x2c85c1, 0x88c1dd, 0x88c1dd, 1);
     background.fillRoundedRect(-width/2, -height/2, width, height, 15);
 
-    // Efecto de brillo interno
+    // Efecto de brillo interno - simula luz reflejada en hielo
     const innerGlow = this.add.graphics();
-    innerGlow.fillStyle(0x66ccff, 0.3);
+    innerGlow.fillStyle(0xe8f4fc, 0.3);
     innerGlow.fillRoundedRect(-width/2 + 5, -height/2 + 5, width - 10, height - 10, 10);
 
-    // Borde exterior del botón
+    // Borde exterior del botón - efecto de hielo pulido
     const outerBorder = this.add.graphics();
     outerBorder.lineStyle(4, 0xffaa00, 1);
     outerBorder.strokeRoundedRect(-width/2, -height/2, width, height, 15);
 
     // Borde interior brillante
     const innerBorder = this.add.graphics();
-    innerBorder.lineStyle(2, 0xffffdd, 0.7);
+    innerBorder.lineStyle(2, 0xffffff, 0.7);
     innerBorder.strokeRoundedRect(-width/2 + 6, -height/2 + 6, width - 12, height - 12, 9);
 
-    // Decoración: pequeñas estrellas en las esquinas
-    const stars = this.add.container(0, 0);
+    // Decoración: pequeños copos de nieve en las esquinas
+    const snowflakes = this.add.container(0, 0);
 
-    // Posiciones de las estrellas (esquinas)
-    const starPositions = [
+    // Posiciones de los copos (esquinas)
+    const flakePositions = [
       { x: -width/2 + 15, y: -height/2 + 15 },
       { x: width/2 - 15, y: -height/2 + 15 },
       { x: -width/2 + 15, y: height/2 - 15 },
       { x: width/2 - 15, y: height/2 - 15 }
     ];
 
-    // Crear estrellas en cada posición
-    starPositions.forEach(pos => {
-      // Estrella central
-      const star = this.add.circle(pos.x, pos.y, 2, 0xffffff, 0.9);
+    // Crear copos de nieve en cada posición
+    flakePositions.forEach(pos => {
+      // Copo central
+      const flake = this.add.circle(pos.x, pos.y, 2, 0xffffff, 0.9);
 
-      // Rayos de la estrella
+      // Rayos del copo de nieve
       const rays = this.add.graphics();
-      rays.lineStyle(1, 0xffffdd, 0.7);
+      rays.lineStyle(1, 0xffffff, 0.7);
       const rayLength = 4;
 
-      rays.beginPath();
-      rays.moveTo(pos.x - rayLength, pos.y);
-      rays.lineTo(pos.x + rayLength, pos.y);
-      rays.moveTo(pos.x, pos.y - rayLength);
-      rays.lineTo(pos.x, pos.y + rayLength);
-      rays.strokePath();
+      // Dibujar 6 rayos para simular un copo de nieve
+      for (let i = 0; i < 3; i++) {
+        const angle = (i * Math.PI) / 3;
+        rays.beginPath();
+        rays.moveTo(pos.x, pos.y);
+        rays.lineTo(
+          pos.x + Math.cos(angle) * rayLength,
+          pos.y + Math.sin(angle) * rayLength
+        );
+        rays.moveTo(pos.x, pos.y);
+        rays.lineTo(
+          pos.x - Math.cos(angle) * rayLength,
+          pos.y - Math.sin(angle) * rayLength
+        );
+        rays.strokePath();
+      }
 
-      stars.add([star, rays]);
+      snowflakes.add([flake, rays]);
 
-      // Animar el brillo de las estrellas
+      // Animar el brillo de los copos
       this.tweens.add({
-        targets: [star, rays],
+        targets: [flake, rays],
         alpha: 0.3,
         duration: Phaser.Math.Between(1000, 2000),
         yoyo: true,
@@ -207,7 +214,7 @@ export default class Menu extends Phaser.Scene {
       fontFamily: 'Arial',
       fontSize: '28px',
       fontWeight: 'bold',
-      color: '#000000',
+      color: '#001a33',
       align: 'center'
     }).setOrigin(0.5).setAlpha(0.5);
 
@@ -218,18 +225,18 @@ export default class Menu extends Phaser.Scene {
       fontWeight: 'bold',
       color: '#ffffff',
       align: 'center',
-      stroke: '#000000',
+      stroke: '#003366',
       strokeThickness: 3
     }).setOrigin(0.5);
 
     // Añadir todos los elementos al contenedor
-    container.add([background, innerGlow, outerBorder, innerBorder, stars, buttonTextShadow, buttonText]);
+    container.add([background, innerGlow, outerBorder, innerBorder, snowflakes, buttonTextShadow, buttonText]);
 
     // Configurar interactividad
     container.setSize(width, height);
     container.setInteractive();
 
-    // Animación de brillo en el borde
+    // Animación de brillo en el borde - efecto de hielo brillante
     this.tweens.add({
       targets: innerBorder,
       alpha: 0.3,
@@ -248,7 +255,7 @@ export default class Menu extends Phaser.Scene {
       glow: innerGlow,
       innerBorder: innerBorder,
       textShadow: buttonTextShadow,
-      stars: stars
+      snowflakes: snowflakes
     };
   }
 
@@ -265,16 +272,16 @@ export default class Menu extends Phaser.Scene {
         ease: 'Sine.easeOut'
       });
 
-      // Efecto de brillo intensificado al pasar el mouse
+      // Efecto de brillo intensificado al pasar el mouse - como hielo brillante
       const glow = startButton.getAt(1); // innerGlow
       glow.clear();
-      glow.fillStyle(0x99ddff, 0.5);
+      glow.fillStyle(0xe8f4fc, 0.5);
       glow.fillRoundedRect(-startButton.width/2 + 5, -startButton.height/2 + 5, startButton.width - 10, startButton.height - 10, 10);
 
       // Cambiar el color del borde
       const border = startButton.getAt(2); // outerBorder
       border.clear();
-      border.lineStyle(4, 0xffcc00, 1);
+      border.lineStyle(4, 0xff8c00, 1);
       border.strokeRoundedRect(-startButton.width/2, -startButton.height/2, startButton.width, startButton.height, 15);
     });
 
@@ -289,7 +296,7 @@ export default class Menu extends Phaser.Scene {
       // Restaurar el brillo normal
       const glow = startButton.getAt(1); // innerGlow
       glow.clear();
-      glow.fillStyle(0x66ccff, 0.3);
+      glow.fillStyle(0xe8f4fc, 0.3);
       glow.fillRoundedRect(-startButton.width/2 + 5, -startButton.height/2 + 5, startButton.width - 10, startButton.height - 10, 10);
 
       // Restaurar el color del borde
@@ -324,13 +331,13 @@ export default class Menu extends Phaser.Scene {
       // Efecto de brillo intensificado al pasar el mouse
       const glow = instructionsButton.getAt(1); // innerGlow
       glow.clear();
-      glow.fillStyle(0x99ddff, 0.5);
+      glow.fillStyle(0xe8f4fc, 0.5);
       glow.fillRoundedRect(-instructionsButton.width/2 + 5, -instructionsButton.height/2 + 5, instructionsButton.width - 10, instructionsButton.height - 10, 10);
 
       // Cambiar el color del borde
       const border = instructionsButton.getAt(2); // outerBorder
       border.clear();
-      border.lineStyle(4, 0xffcc00, 1);
+      border.lineStyle(4, 0xff8c00, 1);
       border.strokeRoundedRect(-instructionsButton.width/2, -instructionsButton.height/2, instructionsButton.width, instructionsButton.height, 15);
     });
 
@@ -345,7 +352,7 @@ export default class Menu extends Phaser.Scene {
       // Restaurar el brillo normal
       const glow = instructionsButton.getAt(1); // innerGlow
       glow.clear();
-      glow.fillStyle(0x66ccff, 0.3);
+      glow.fillStyle(0xe8f4fc, 0.3);
       glow.fillRoundedRect(-instructionsButton.width/2 + 5, -instructionsButton.height/2 + 5, instructionsButton.width - 10, instructionsButton.height - 10, 10);
 
       // Restaurar el color del borde
@@ -384,7 +391,7 @@ export default class Menu extends Phaser.Scene {
       ease: 'Sine.easeInOut'
     });
 
-    // Animación del subtítulo
+    // Animación del subtítulo - ligero movimiento como flotando en el agua
     this.tweens.add({
       targets: subtitle,
       y: subtitle.y + 10,
@@ -393,6 +400,187 @@ export default class Menu extends Phaser.Scene {
       repeat: -1,
       ease: 'Sine.easeInOut'
     });
+  }
+
+  /**
+   * Crea un fondo invernal con elementos del juego
+   */
+  createWinterBackground(width, height) {
+    // Fondo principal con imagen de cielo
+    this.add.image(width / 2, height / 2, 'background_sky').setScale(1.2);
+
+    // Añadir el sol
+    const sun = this.add.image(width * 0.2, height * 0.1, 'background_sun').setScale(0.2);
+
+    // Animar el brillo del sol
+    this.tweens.add({
+      targets: sun,
+      alpha: 0.8,
+      duration: 2000,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut'
+    });
+
+    // Añadir montañas en el fondo
+    this.add.image(width / 2, height * 0.8, 'background_mountain_01').setScale(0.4);
+
+    // Añadir textura de nieve en el suelo
+    const snowGround = this.add.tileSprite(width / 2, height - 20, width, 100, 'snow_texture')
+      .setAlpha(0.8)
+      .setDepth(0);
+
+    // Añadir nubes en diferentes posiciones
+    const clouds = [
+      { key: 'cloud_01', x: width * 0.2, y: height * 0.3, scale: 0.8 },
+      { key: 'cloud_02', x: width * 0.5, y: height * 0.2, scale: 0.6 },
+      { key: 'cloud_03', x: width * 0.8, y: height * 0.25, scale: 0.7 },
+      { key: 'cloud_04', x: width * 0.1, y: height * 0.15, scale: 0.5 }
+    ];
+
+    // Crear y animar cada nube
+    clouds.forEach(cloud => {
+      const cloudSprite = this.add.image(cloud.x, cloud.y, cloud.key)
+        .setScale(cloud.scale)
+        .setAlpha(0.8);
+
+      // Animación de movimiento lento horizontal
+      this.tweens.add({
+        targets: cloudSprite,
+        x: cloudSprite.x + Phaser.Math.Between(50, 100),
+        duration: Phaser.Math.Between(15000, 25000),
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut'
+      });
+    });
+
+    // Añadir un iglú decorativo
+    const igloo = this.add.image(width * 0.2, height * 0.88, 'igloo')
+      .setScale(0.2)
+      .setDepth(1);
+
+    // Añadir árboles nevados en el horizonte
+    const treePositions = [
+      { key: 'snow_tree_01', x: width * 0.14, y: height * 0.91, scale: 0.5, depth: 1 },
+      { key: 'snow_tree_02', x: width * 0.92, y: height * 0.95, scale: 0.35, depth: 1 },
+      { key: 'snow_tree_01', x: width * 0.3, y: height * 0.96, scale: 0.5, depth: 2 },
+      { key: 'snow_tree_02', x: width * 0.7, y: height * 0.92, scale: 0.4, depth: 2 }
+    ];
+
+    treePositions.forEach(pos => {
+      this.add.image(pos.x, pos.y, pos.key)
+        .setScale(pos.scale)
+        .setDepth(pos.depth);
+    });
+
+    // Añadir muñecos de nieve
+    const snowmanPositions = [
+      { x: width * 0.75, y: height * 0.92, scale: 0.6, depth: 2 },
+      { x: width * 0.23, y: height * 0.9, scale: 0.5, depth: 2 }
+    ];
+
+    snowmanPositions.forEach(pos => {
+      this.add.image(pos.x, pos.y, 'snowman')
+        .setScale(pos.scale)
+        .setDepth(pos.depth);
+    });
+
+
+    // Añadir un pingüino decorativo (usando el sheet)
+    const penguinFrame = 0; // Frame inicial
+    const pinguin = this.add.sprite(width * 0.8, height * 0.9, 'penguin_sheet', penguinFrame)
+      .setScale(1)
+      .setDepth(3);
+
+    // Animar el pingüino para que parezca moverse ligeramente
+    this.tweens.add({
+      targets: pinguin,
+      y: pinguin.y - 10,
+      duration: 1200,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut'
+    });
+
+    // Añadir copos de nieve usando el sprite en lugar de crearlos programáticamente
+    this.createSnowflakes(width, height);
+  }
+
+  /**
+   * Crea copos de nieve flotando en la pantalla
+   */
+  createSnowflakes(width, height) {
+    // Grupo para los copos de nieve
+    const snowflakes = this.add.group();
+
+    // Crear 35 copos de nieve con el sprite
+    for (let i = 0; i < 35; i++) {
+      const x = Phaser.Math.Between(0, width);
+      const y = Phaser.Math.Between(-100, height);
+      const scale = Phaser.Math.FloatBetween(0.1, 0.2); // Escalas pequeñas para los copos
+      const rotationSpeed = Phaser.Math.FloatBetween(0.1, 0.3); // Velocidad de rotación
+
+      // Crear un copo de nieve usando el sprite
+      const snowflake = this.add.image(x, y, 'snowflake')
+        .setScale(scale)
+        .setAlpha(Phaser.Math.FloatBetween(0.5, 0.9))
+        .setDepth(4); // Por encima de todo
+
+      snowflakes.add(snowflake);
+
+      // Animación de caída con rotación
+      this.tweens.add({
+        targets: snowflake,
+        y: height + 100, // Caer fuera de la pantalla
+        x: x + Phaser.Math.Between(-100, 100), // Deriva horizontal
+        rotation: snowflake.rotation + rotationSpeed * 10, // Rotación durante la caída
+        duration: Phaser.Math.Between(8000, 20000), // Velocidad variable
+        ease: 'Linear',
+        repeat: -1,
+        onRepeat: () => {
+          // Reiniciar posición cuando se repita
+          snowflake.y = Phaser.Math.Between(-100, -20);
+          snowflake.x = Phaser.Math.Between(0, width);
+          snowflake.alpha = Phaser.Math.FloatBetween(0.5, 0.9);
+          snowflake.rotation = 0;
+        }
+      });
+    }
+
+    // Añadir unos pocos copos grandes en primer plano para dar sensación de profundidad
+    for (let i = 0; i < 5; i++) {
+      const x = Phaser.Math.Between(0, width);
+      const y = Phaser.Math.Between(-100, height);
+      const scale = Phaser.Math.FloatBetween(0.3, 0.5); // Escalas más grandes
+      const rotationSpeed = Phaser.Math.FloatBetween(0.05, 0.15); // Rotación más lenta para copos grandes
+
+      const largeSnowflake = this.add.image(x, y, 'snowflake')
+        .setScale(scale)
+        .setAlpha(Phaser.Math.FloatBetween(0.7, 1))
+        .setDepth(5); // Máxima profundidad, por encima de todo
+
+      snowflakes.add(largeSnowflake);
+
+      // Animación de caída más rápida para copos cercanos (efecto paralaje)
+      this.tweens.add({
+        targets: largeSnowflake,
+        y: height + 100,
+        x: x + Phaser.Math.Between(-150, 150),
+        rotation: largeSnowflake.rotation + rotationSpeed * 10,
+        duration: Phaser.Math.Between(6000, 10000), // Más rápidos que los pequeños
+        ease: 'Linear',
+        repeat: -1,
+        onRepeat: () => {
+          largeSnowflake.y = Phaser.Math.Between(-100, -20);
+          largeSnowflake.x = Phaser.Math.Between(0, width);
+          largeSnowflake.alpha = Phaser.Math.FloatBetween(0.7, 1);
+          largeSnowflake.rotation = 0;
+        }
+      });
+    }
+
+    return snowflakes;
   }
 
   /**
@@ -421,24 +609,36 @@ export default class Menu extends Phaser.Scene {
     const instructionsLayer = this.add.container(0, 0);
 
     // Fondo semi-transparente
-    const bg = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.8);
+    const bg = this.add.rectangle(width / 2, height / 2, width, height, 0x000033, 0.7);
 
-    // Panel decorativo para las instrucciones
+    // Panel decorativo para las instrucciones - Aspecto de hielo similar a los botones
     const panelWidth = width * 0.8;
     const panelHeight = height * 0.8;
     const instructionsPanel = this.add.graphics();
-    instructionsPanel.fillStyle(0x222244, 0.9);
+    // Cambiamos a un color azul glaciar para el panel
+    instructionsPanel.fillGradientStyle(0x2c85c1, 0x2c85c1, 0x88c1dd, 0x88c1dd, 0.9);
     instructionsPanel.fillRoundedRect(width / 2 - panelWidth / 2, height * 0.15, panelWidth, panelHeight, 20);
-    instructionsPanel.lineStyle(4, 0xffaa00, 1);
+    instructionsPanel.lineStyle(4, 0x6baed6, 1);
     instructionsPanel.strokeRoundedRect(width / 2 - panelWidth / 2, height * 0.15, panelWidth, panelHeight, 20);
 
-    // Texto de instrucciones
+    // Añadir detalles de hielo en las esquinas
+    const iceDetails = this.add.graphics();
+    iceDetails.fillStyle(0xe8f4fc, 0.4);
+    iceDetails.fillRoundedRect(
+      width / 2 - panelWidth / 2 + 10,
+      height * 0.15 + 10,
+      panelWidth - 20,
+      panelHeight - 20,
+      15
+    );
+
+    // Texto de instrucciones con estilo de hielo
     const instructionsTitle = this.add.text(width / 2, height * 0.25, 'INSTRUCCIONES', {
       fontFamily: 'Arial',
       fontSize: '32px',
       fontWeight: 'bold',
       color: '#ffffff',
-      stroke: '#000000',
+      stroke: '#003366',
       strokeThickness: 4
     }).setOrigin(0.5);
 
@@ -455,14 +655,14 @@ export default class Menu extends Phaser.Scene {
       lineSpacing: 10
     }).setOrigin(0.5);
 
-    // Botón para cerrar - Usando el mismo estilo de botón personalizado
+    // Botón para cerrar - Usando el mismo estilo de botón de hielo
     const closeButtonY = height * 0.8;
     const closeButtonWidth = panelWidth * 0.4;
     const closeButtonHeight = panelHeight * 0.15;
 
     // Fondo del botón
     const closeButtonBg = this.add.graphics();
-    closeButtonBg.fillStyle(0x0066aa, 1);
+    closeButtonBg.fillGradientStyle(0x2c85c1, 0x2c85c1, 0x88c1dd, 0x88c1dd, 1);
     closeButtonBg.fillRoundedRect(
       width / 2 - closeButtonWidth / 2,
       closeButtonY - closeButtonHeight / 2,
@@ -482,13 +682,24 @@ export default class Menu extends Phaser.Scene {
       15
     );
 
+    // Efecto de brillo interior
+    const closeButtonGlow = this.add.graphics();
+    closeButtonGlow.fillStyle(0xe8f4fc, 0.3);
+    closeButtonGlow.fillRoundedRect(
+      width / 2 - closeButtonWidth / 2 + 5,
+      closeButtonY - closeButtonHeight / 2 + 5,
+      closeButtonWidth - 10,
+      closeButtonHeight - 10,
+      10
+    );
+
     // Texto del botón
     const closeText = this.add.text(width / 2, closeButtonY, 'VOLVER', {
       fontFamily: 'Arial',
       fontSize: '24px',
       fontWeight: 'bold',
       color: '#ffffff',
-      stroke: '#000000',
+      stroke: '#003366',
       strokeThickness: 3
     }).setOrigin(0.5);
 
@@ -503,7 +714,7 @@ export default class Menu extends Phaser.Scene {
     // Hacer interactivo el botón de cerrar
     closeButton.on('pointerover', () => {
       closeButtonBg.clear();
-      closeButtonBg.fillStyle(0x0088cc, 1);
+      closeButtonBg.fillGradientStyle(0x3997d3, 0x3997d3, 0x99d2ee, 0x99d2ee, 1);
       closeButtonBg.fillRoundedRect(
         width / 2 - closeButtonWidth / 2,
         closeButtonY - closeButtonHeight / 2,
@@ -511,12 +722,23 @@ export default class Menu extends Phaser.Scene {
         closeButtonHeight,
         15
       );
+
+      closeButtonGlow.clear();
+      closeButtonGlow.fillStyle(0xe8f4fc, 0.5);
+      closeButtonGlow.fillRoundedRect(
+        width / 2 - closeButtonWidth / 2 + 5,
+        closeButtonY - closeButtonHeight / 2 + 5,
+        closeButtonWidth - 10,
+        closeButtonHeight - 10,
+        10
+      );
+
       closeText.setScale(1.1);
     });
 
     closeButton.on('pointerout', () => {
       closeButtonBg.clear();
-      closeButtonBg.fillStyle(0x0066aa, 1);
+      closeButtonBg.fillGradientStyle(0x2c85c1, 0x2c85c1, 0x88c1dd, 0x88c1dd, 1);
       closeButtonBg.fillRoundedRect(
         width / 2 - closeButtonWidth / 2,
         closeButtonY - closeButtonHeight / 2,
@@ -524,6 +746,17 @@ export default class Menu extends Phaser.Scene {
         closeButtonHeight,
         15
       );
+
+      closeButtonGlow.clear();
+      closeButtonGlow.fillStyle(0xe8f4fc, 0.3);
+      closeButtonGlow.fillRoundedRect(
+        width / 2 - closeButtonWidth / 2 + 5,
+        closeButtonY - closeButtonHeight / 2 + 5,
+        closeButtonWidth - 10,
+        closeButtonHeight - 10,
+        10
+      );
+
       closeText.setScale(1.0);
     });
 
@@ -553,14 +786,14 @@ export default class Menu extends Phaser.Scene {
       });
     });
 
-    // Botón para ver las animaciones del pingüino
+    // Botón para ver las animaciones del pingüino - Mismo estilo de hielo
     const animButtonWidth = 180;
     const animButtonHeight = 40;
     const animButtonY = height * 0.65;
 
     // Crear el fondo del botón
     const animButtonBg = this.add.graphics();
-    animButtonBg.fillStyle(0x006600, 1);
+    animButtonBg.fillGradientStyle(0x2c85c1, 0x2c85c1, 0x88c1dd, 0x88c1dd, 1);
     animButtonBg.fillRoundedRect(
       width / 2 - animButtonWidth / 2,
       animButtonY - animButtonHeight / 2,
@@ -580,13 +813,24 @@ export default class Menu extends Phaser.Scene {
       15
     );
 
+    // Brillo interior
+    const animButtonGlow = this.add.graphics();
+    animButtonGlow.fillStyle(0xe8f4fc, 0.3);
+    animButtonGlow.fillRoundedRect(
+      width / 2 - animButtonWidth / 2 + 5,
+      animButtonY - animButtonHeight / 2 + 5,
+      animButtonWidth - 10,
+      animButtonHeight - 10,
+      10
+    );
+
     // Texto del botón
     const animText = this.add.text(width / 2, animButtonY, 'VER ANIMACIONES', {
       fontFamily: 'Arial',
       fontSize: '18px',
       fontWeight: 'bold',
       color: '#ffffff',
-      stroke: '#000000',
+      stroke: '#003366',
       strokeThickness: 2
     }).setOrigin(0.5);
 
@@ -601,7 +845,7 @@ export default class Menu extends Phaser.Scene {
     // Hacer interactivo el botón de animaciones
     animButton.on('pointerover', () => {
       animButtonBg.clear();
-      animButtonBg.fillStyle(0x008800, 1);
+      animButtonBg.fillGradientStyle(0x3997d3, 0x3997d3, 0x99d2ee, 0x99d2ee, 1);
       animButtonBg.fillRoundedRect(
         width / 2 - animButtonWidth / 2,
         animButtonY - animButtonHeight / 2,
@@ -609,12 +853,23 @@ export default class Menu extends Phaser.Scene {
         animButtonHeight,
         15
       );
+
+      animButtonGlow.clear();
+      animButtonGlow.fillStyle(0xe8f4fc, 0.5);
+      animButtonGlow.fillRoundedRect(
+        width / 2 - animButtonWidth / 2 + 5,
+        animButtonY - animButtonHeight / 2 + 5,
+        animButtonWidth - 10,
+        animButtonHeight - 10,
+        10
+      );
+
       animText.setScale(1.1);
     });
 
     animButton.on('pointerout', () => {
       animButtonBg.clear();
-      animButtonBg.fillStyle(0x006600, 1);
+      animButtonBg.fillGradientStyle(0x2c85c1, 0x2c85c1, 0x88c1dd, 0x88c1dd, 1);
       animButtonBg.fillRoundedRect(
         width / 2 - animButtonWidth / 2,
         animButtonY - animButtonHeight / 2,
@@ -622,6 +877,17 @@ export default class Menu extends Phaser.Scene {
         animButtonHeight,
         15
       );
+
+      animButtonGlow.clear();
+      animButtonGlow.fillStyle(0xe8f4fc, 0.3);
+      animButtonGlow.fillRoundedRect(
+        width / 2 - animButtonWidth / 2 + 5,
+        animButtonY - animButtonHeight / 2 + 5,
+        animButtonWidth - 10,
+        animButtonHeight - 10,
+        10
+      );
+
       animText.setScale(1.0);
     });
 
@@ -635,20 +901,56 @@ export default class Menu extends Phaser.Scene {
       });
     });
 
+    // Añadir algunos copos de nieve flotando en el panel de instrucciones
+    const instructionSnowflakes = [];
+    for (let i = 0; i < 10; i++) {
+      const x = Phaser.Math.Between(width / 2 - panelWidth / 2 + 30, width / 2 + panelWidth / 2 - 30);
+      const y = Phaser.Math.Between(height * 0.2, height * 0.7);
+      const scale = Phaser.Math.FloatBetween(0.08, 0.15); // Escalas más pequeñas para el panel
+      const rotationSpeed = Phaser.Math.FloatBetween(0.1, 0.2);
+
+      const snowflake = this.add.image(x, y, 'snowflake')
+        .setScale(scale)
+        .setAlpha(Phaser.Math.FloatBetween(0.5, 0.8));
+
+      instructionSnowflakes.push(snowflake);
+
+      // Animar los copos con rotación
+      this.tweens.add({
+        targets: snowflake,
+        y: y + Phaser.Math.Between(40, 80),
+        x: x + Phaser.Math.Between(-20, 20),
+        rotation: snowflake.rotation + rotationSpeed * 5,
+        alpha: 0.3,
+        duration: Phaser.Math.Between(3000, 6000),
+        repeat: -1,
+        onRepeat: () => {
+          snowflake.y = Phaser.Math.Between(height * 0.2, height * 0.3);
+          snowflake.x = Phaser.Math.Between(width / 2 - panelWidth / 2 + 30, width / 2 + panelWidth / 2 - 30);
+          snowflake.alpha = Phaser.Math.FloatBetween(0.5, 0.8);
+          snowflake.rotation = 0;
+        }
+      });
+    }
+
     // Añadir todo al contenedor
     instructionsLayer.add([
       bg,
       instructionsPanel,
+      iceDetails,
       instructionsTitle,
       instructionsText,
       closeButtonBg,
+      closeButtonGlow,
       closeButtonBorder,
       closeText,
       closeButton,
       animButtonBg,
+      animButtonGlow,
       animButtonBorder,
       animText,
-      animButton
+      animButton,
+      ...instructionSnowflakes
     ]);
 
     // Animar la entrada de las instrucciones
@@ -659,66 +961,6 @@ export default class Menu extends Phaser.Scene {
       duration: 300,
       ease: 'Power2'
     });
-  }
-
-  /**
-   * Crea un campo de estrellas decorativas
-   */
-  createStarfield(width, height) {
-    // Añadir estrellas aleatorias en el fondo
-    for (let i = 0; i < 50; i++) {
-      const x = Phaser.Math.Between(0, width);
-      const y = Phaser.Math.Between(0, height);
-      const size = Phaser.Math.Between(1, 3);
-      const alpha = Phaser.Math.FloatBetween(0.2, 1);
-
-      const star = this.add.circle(x, y, size, 0xffffff, alpha);
-
-      // Añadir destello a algunas estrellas
-      if (Phaser.Math.Between(0, 10) > 8) {
-        this.tweens.add({
-          targets: star,
-          alpha: 0.1,
-          duration: Phaser.Math.Between(1000, 3000),
-          yoyo: true,
-          repeat: -1,
-          ease: 'Sine.easeInOut'
-        });
-      }
-    }
-
-    // Añadir algunas estrellas más grandes con efecto de destello
-    for (let i = 0; i < 5; i++) {
-      const x = Phaser.Math.Between(0, width);
-      const y = Phaser.Math.Between(0, height);
-
-      // Estrella central
-      const starSize = Phaser.Math.Between(2, 4);
-      const star = this.add.circle(x, y, starSize, 0xffffff, 1);
-
-      // Añadir destellos (líneas que salen de la estrella)
-      const rays = this.add.graphics();
-      rays.lineStyle(1, 0xffffff, 0.8);
-
-      // Dibujar 4 rayos en forma de cruz
-      const rayLength = Phaser.Math.Between(5, 10);
-      rays.beginPath();
-      rays.moveTo(x - rayLength, y);
-      rays.lineTo(x + rayLength, y);
-      rays.moveTo(x, y - rayLength);
-      rays.lineTo(x, y + rayLength);
-      rays.strokePath();
-
-      // Animar el destello
-      this.tweens.add({
-        targets: [star, rays],
-        alpha: 0.2,
-        duration: Phaser.Math.Between(1500, 4000),
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut'
-      });
-    }
   }
 
   /**
@@ -743,22 +985,27 @@ export default class Menu extends Phaser.Scene {
     // Contenedor para el panel
     const recordContainer = this.add.container(width / 2, panelY);
 
-    // Fondo del panel con gradiente
+    // Fondo del panel con gradiente - Estilo de hielo
     const recordPanel = this.add.graphics();
-    recordPanel.fillGradientStyle(0x000044, 0x000044, 0x0066aa, 0x0066aa, 1);
+    recordPanel.fillGradientStyle(0x2c85c1, 0x2c85c1, 0x88c1dd, 0x88c1dd, 1);
     recordPanel.fillRoundedRect(-panelWidth/2, -panelHeight/2, panelWidth, panelHeight, 10);
 
     // Borde brillante
     const panelBorder = this.add.graphics();
-    panelBorder.lineStyle(2, 0xffdd00, 1);
+    panelBorder.lineStyle(2, 0xffaa00, 1);
     panelBorder.strokeRoundedRect(-panelWidth/2, -panelHeight/2, panelWidth, panelHeight, 10);
+
+    // Efecto de brillo interno - mismo estilo que los botones
+    const innerGlow = this.add.graphics();
+    innerGlow.fillStyle(0xe8f4fc, 0.3);
+    innerGlow.fillRoundedRect(-panelWidth/2 + 5, -panelHeight/2 + 5, panelWidth - 10, panelHeight - 10, 5);
 
     // Título "BEST DISTANCE"
     const recordTitle = this.add.text(0, -panelHeight/4, "BEST DISTANCE", {
       fontFamily: 'Impact',
       fontSize: '16px',
-      color: '#ffdd00',
-      stroke: '#000000',
+      color: '#ffffff',
+      stroke: '#003366',
       strokeThickness: 2
     }).setOrigin(0.5);
 
@@ -767,17 +1014,17 @@ export default class Menu extends Phaser.Scene {
       fontFamily: 'Impact',
       fontSize: '20px',
       color: '#ffffff',
-      stroke: '#000000',
+      stroke: '#003366',
       strokeThickness: 2
     }).setOrigin(0.5);
 
     // Añadir todo al contenedor
-    recordContainer.add([recordPanel, panelBorder, recordTitle, recordValue]);
+    recordContainer.add([recordPanel, innerGlow, panelBorder, recordTitle, recordValue]);
 
     // Agregar un brillo animado al borde
     this.tweens.add({
-      targets: panelBorder,
-      alpha: 0.5,
+      targets: innerGlow,
+      alpha: 0.1,
       duration: 1500,
       yoyo: true,
       repeat: -1,

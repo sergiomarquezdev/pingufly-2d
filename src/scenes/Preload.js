@@ -26,17 +26,21 @@ export default class Preload extends Phaser.Scene {
     // Cargar assets de fondo
     this.load.image('background_sky', 'assets/images/background/background_sky.png');
     this.load.image('background_sun', 'assets/images/background/background_sun.png');
-    this.load.image('background_mountain', 'assets/images/background/background_mountain.png');
-
+    this.load.image('background_mountain_01', 'assets/images/background/background_mountain_01.png');
+    this.load.image('background_mountain_02', 'assets/images/background/background_mountain_02.png');
     // Cargar nubes
     this.load.image('cloud_01', 'assets/images/background/cloud_01.png');
     this.load.image('cloud_02', 'assets/images/background/cloud_02.png');
     this.load.image('cloud_03', 'assets/images/background/cloud_03.png');
     this.load.image('cloud_04', 'assets/images/background/cloud_04.png');
 
-    // Cargar elementos de entorno
-    this.load.image('tree', 'assets/images/environment/tree.png');
-    this.load.image('rocks', 'assets/images/environment/rocks.png');
+    // Cargar nuevos elementos de entorno con nieve
+    this.load.image('snow_tree_01', 'assets/images/environment/snow_tree_01.png');
+    this.load.image('snow_tree_02', 'assets/images/environment/snow_tree_02.png');
+    this.load.image('snowman', 'assets/images/environment/snowman.png');
+    this.load.image('snowflake', 'assets/images/environment/snowflake.png');
+    this.load.image('igloo', 'assets/images/environment/igloo.png');
+    this.load.image('snow_texture', 'assets/images/environment/snow_texture.png');
 
     // Cargar sprite sheet del pingüino
     this.load.spritesheet('penguin_sheet', 'assets/images/characters/penguin_sheet.png', {

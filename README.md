@@ -214,7 +214,6 @@ pingufly-2dº
 │  │  │  ├─ characters
 │  │  │  │  └─ penguin_sheet.png
 │  │  │  ├─ environment
-│  │  │  │  ├─ rocks.png
 │  │  │  │  └─ tree.png
 │  │  │  ├─ favicon.png
 │  │  │  └─ game-screenshot.png

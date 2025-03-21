@@ -16,13 +16,11 @@ Este documento enumera los recursos gráficos y de audio esenciales para la prim
   - *Descripción*: Una sola pose para el momento del golpe
 
 #### Pingüino
-- [ ] Sprite del pinguino
+- [X] Sprite del pinguino
   - *Nombre de archivo*: `penguin.png`
   - *Tamaño*: 256x320px
   - *Tamaño de cada elemento*: 32x32 (cada acción del sprite)
-  - *Descripción*: Pingüino que realiza distintas acciones. Leido de izquierda a derecha, y de arriba hacia abajo, estas son las distinta acciones que realiza:
-  Sprites 1-3: Representan al pingüino mirando a la derecha, con una pose estática (1) y dos frames de caminata (2 y 3).
-Sprites 4-6: Son los equivalentes mirando a la izquierda, con una pose estática (4) y dos frames de caminata (5 y 6).
+  - *Descripción*: Pingüino que realiza distintas acciones.
 
 #### Flamenco
 - [ ] Sprite base del Flamenco
@@ -88,11 +86,6 @@ Sprites 4-6: Son los equivalentes mirando a la izquierda, con una pose estática
   - *Tamaño*: tree_01.png (1342x1096)
   - *Descripción*: Arbol seco sin hojas
 
-- [X] Piedra
-  - *Nombre de archivo*: `rocks.png`
-  - *Tamaño*: 64x64px
-  - *Descripción*: Rocas pequeñas en tonos grises
-
 ### Interfaz de Usuario
 
 #### Elementos de HUD
@@ -100,16 +93,6 @@ Sprites 4-6: Son los equivalentes mirando a la izquierda, con una pose estática
   - *Implementado en código*
 - [X] Indicador de ángulo básico
   - *Implementado en código*
-
-#### Botones Básicos
-- [ ] Botón de inicio/reinicio
-  - *Nombre de archivo*: `button_start.png`
-  - *Tamaño recomendado*: 200x80px
-  - *Descripción*: Botón simple con texto "Start" o "Retry"
-- [ ] Botón de volver a menú
-  - *Nombre de archivo*: `button_menu.png`
-  - *Tamaño recomendado*: 80x80px
-  - *Descripción*: Botón con icono de casa o menú
 
 ## Recursos de Audio Básicos
 
