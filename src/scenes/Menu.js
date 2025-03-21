@@ -471,10 +471,10 @@ export default class Menu extends Phaser.Scene {
 
     // Añadir árboles nevados en el horizonte
     const treePositions = [
-      { key: 'snow_tree_01', x: width * 0.14, y: height * 0.91, scale: 0.5, depth: 4 },
-      { key: 'snow_tree_01', x: width * 0.92, y: height * 0.95, scale: 0.35, depth: 4 },
-      { key: 'snow_tree_01', x: width * 0.3, y: height * 0.96, scale: 0.5, depth: 5 },
-      { key: 'snow_tree_01', x: width * 0.7, y: height * 0.92, scale: 0.4, depth: 5 }
+      { key: 'snow_tree', x: width * 0.14, y: height * 0.91, scale: 0.5, depth: 4 },
+      { key: 'snow_tree', x: width * 0.92, y: height * 0.95, scale: 0.35, depth: 4 },
+      { key: 'snow_tree', x: width * 0.3, y: height * 0.96, scale: 0.5, depth: 5 },
+      { key: 'snow_tree', x: width * 0.7, y: height * 0.92, scale: 0.4, depth: 5 }
     ];
 
     treePositions.forEach(pos => {

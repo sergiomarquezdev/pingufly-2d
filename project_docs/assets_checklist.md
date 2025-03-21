@@ -79,7 +79,7 @@ Este documento enumera los recursos gráficos y de audio esenciales para la prim
   - *Resumen*: Textura de nieve suave y difuminada en tonos de azul claro y blanco, para simular la apariencia de nieve recién caída.
 
 - [X] Árbol Nevado
-  - *Nombre de archivo*: `snow_tree_01.png`
+  - *Nombre de archivo*: `snow_tree.png`
   - *Ruta*: `assets/images/environment`
   - *Tamaño*: 95x105px
   - *Descripción detallada*: Imagen de un árbol de coníferas estilizado, cubierto de nieve. El árbol tiene una forma triangular con ramas que se extienden hacia los lados. La nieve se representa en tonos de blanco y azul claro, creando un efecto de volumen y textura. El árbol está dibujado en estilo pixel art, con píxeles visibles y bordes irregulares. El fondo es de color gris neutro.

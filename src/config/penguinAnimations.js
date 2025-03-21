@@ -7,7 +7,7 @@ const penguinAnimations = {
   // Animación para el estado idle (estático)
   idle: {
     key: 'penguin_idle',
-    frames: [40,41,42],
+    frames: [40,41,42,40],
     frameRate: 5,
     repeat: 1,
     flipX: true

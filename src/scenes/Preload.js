@@ -35,7 +35,7 @@ export default class Preload extends Phaser.Scene {
     this.load.image('cloud_04', 'assets/images/background/cloud_04.png');
 
     // Cargar nuevos elementos de entorno con nieve
-    this.load.image('snow_tree_01', 'assets/images/environment/snow_tree_01.png');
+    this.load.image('snow_tree', 'assets/images/environment/snow_tree.png');
     this.load.image('snowman', 'assets/images/environment/snowman.png');
     this.load.image('snowflake', 'assets/images/environment/snowflake.png');
     this.load.image('igloo', 'assets/images/environment/igloo.png');

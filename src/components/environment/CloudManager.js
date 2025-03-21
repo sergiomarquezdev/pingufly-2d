@@ -14,26 +14,54 @@ export default class CloudManager {
     this.scene = scene;
     this.clouds = [];
     this.updateEvent = null;
+    this.animations = []; // Array para almacenar las animaciones de las nubes
 
     // Configuraciones por defecto
     this.config = {
-      cloudCount: config.cloudCount || 6,
-      minScrollFactor: config.minScrollFactor || 0.2,
-      maxScrollFactor: config.maxScrollFactor || 0.4,
-      minSpeed: config.minSpeed || 0.5,
-      maxSpeed: config.maxSpeed || 1.5,
-      minScale: config.minScale || 0.6,
-      maxScale: config.maxScale || 1.2,
+      cloudCount: config.cloudCount || 8,
+      minScrollFactor: config.minScrollFactor || 0.1,
+      maxScrollFactor: config.maxScrollFactor || 0.3,
+      minSpeed: config.minSpeed || 5000,
+      maxSpeed: config.maxSpeed || 18000,
+      minScale: config.minScale || 0.3,
+      maxScale: config.maxScale || 0.9,
       minAltitude: config.minAltitude || 0,
       maxAltitude: config.maxAltitude || 200,
-      visibilityMargin: config.visibilityMargin || 800  // Aumentado de 300 a 800 para mayor margen
+      visibilityMargin: config.visibilityMargin || 800,  // Aumentado de 300 a 800 para mayor margen
     };
+
+    // Detector simple de dispositivo móvil
+    this.isMobile = this.detectMobileDevice();
+
+    // Reducir cantidad de nubes en dispositivos móviles
+    if (this.isMobile) {
+      this.config.cloudCount = Math.floor(this.config.cloudCount * 0.6);
+    }
 
     // Valores de control para depuración
     this.debug = {
       lastCameraX: 0,
       cameraMoveSpeed: 0
     };
+  }
+
+  /**
+   * Detector simple de dispositivo móvil basado en dimensiones de pantalla y user agent
+   */
+  detectMobileDevice() {
+    // Verificar si estamos en un navegador
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      return false;
+    }
+
+    // Detección por user agent
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+
+    // Detección por tamaño de pantalla
+    const smallScreen = window.innerWidth < 768;
+
+    return mobileRegex.test(userAgent) || smallScreen;
   }
 
   /**
@@ -49,76 +77,87 @@ export default class CloudManager {
    * Crea las nubes basadas en la configuración
    */
   createClouds() {
-    const { cloudCount } = this.config;
+    const width = this.scene.cameras.main.width;
+    const height = this.scene.cameras.main.height;
 
-    // Crear mapa de posiciones para evitar solapamientos
-    const cloudPositions = [];
+    // Configuración de nubes para diferentes capas (fondo, medio, primer plano)
+    const cloudConfigs = [
+      { key: 'cloud_01', scale: { min: 0.3, max: 0.5 }, depth: -9, scrollFactor: 0.1, alpha: 0.7, speed: { min: 5000, max: 8000 } },
+      { key: 'cloud_02', scale: { min: 0.4, max: 0.6 }, depth: -8, scrollFactor: 0.2, alpha: 0.75, speed: { min: 8000, max: 12000 } },
+      { key: 'cloud_03', scale: { min: 0.6, max: 0.9 }, depth: -7, scrollFactor: 0.3, alpha: 0.8, speed: { min: 12000, max: 18000 } }
+    ];
 
-    // Anchos de pantalla para mejor distribución
-    const screenWidth = this.scene.scale.width;
-    const halfScreenWidth = screenWidth / 2;
+    // Para dispositivos móviles, usar menos configuraciones y valores más eficientes
+    if (this.isMobile) {
+      // Usar solo 2 tipos de nubes en móviles
+      const mobileCloudConfigs = [
+        { key: 'cloud_01', scale: { min: 0.3, max: 0.5 }, depth: -9, scrollFactor: 0.1, alpha: 0.7, speed: { min: 8000, max: 12000 } },
+        { key: 'cloud_03', scale: { min: 0.6, max: 0.9 }, depth: -7, scrollFactor: 0.3, alpha: 0.8, speed: { min: 15000, max: 22000 } }
+      ];
 
-    for (let i = 0; i < cloudCount; i++) {
-      const cloudIndex = (i % 4) + 1; // 1-4
-      const cloudKey = `cloud_0${cloudIndex}`;
+      // Reemplazar configuración
+      for (let i = 0; i < cloudConfigs.length && i < mobileCloudConfigs.length; i++) {
+        cloudConfigs[i] = mobileCloudConfigs[i];
+      }
+    }
 
-      // Calcular un scrollFactor aleatorio para cada nube
-      // Valores más estables y diferenciados para evitar vibración
-      const scrollFactor = Phaser.Math.FloatBetween(
-        this.config.minScrollFactor,
-        this.config.maxScrollFactor
+    // Crear nubes basadas en la configuración
+    for (let i = 0; i < this.config.cloudCount; i++) {
+      // Elegir configuración de nube aleatoria
+      const configIndex = Phaser.Math.Between(0, cloudConfigs.length - 1);
+      const cloudConfig = cloudConfigs[configIndex];
+
+      // Calcular posición inicial de la nube
+      const x = Phaser.Math.Between(-200, width + 200);
+      const y = Phaser.Math.Between(50, height * 0.5);
+
+      // Escala aleatoria dentro de los límites configurados
+      const scale = Phaser.Math.FloatBetween(
+        cloudConfig.scale.min,
+        cloudConfig.scale.max
       );
 
-      // Calcular posición X estratégica para una distribución más uniforme
-      let x;
-
-      if (i < 3) {
-        // Primeras tres nubes distribuidas uniformemente a lo largo de la pantalla visible
-        // Dividimos la pantalla en tres secciones y posicionamos en cada sección
-        const sectionWidth = screenWidth / 3;
-        const sectionCenter = sectionWidth * (i + 0.5);
-        // Desviación controlada para evitar distribución demasiado uniforme
-        const deviation = Phaser.Math.Between(-sectionWidth * 0.25, sectionWidth * 0.25);
-        x = sectionCenter + deviation;
-      } else if (i < 5) {
-        // Nubes 4 y 5 fuera de pantalla a la izquierda, esperando entrar
-        // Se escalonan para no entrar todas al mismo tiempo
-        x = -300 - (i - 3) * 400;
-      } else {
-        // La última nube muy a la izquierda para crear una entrada más espaciada
-        x = -1200;
-      }
-
-      // Distribuir nubes verticalmente con separación para evitar solapamientos
-      const preferredY = (i % 3) * 60 + Phaser.Math.Between(50, 80);
-
-      // Velocidades ligeramente diferentes para evitar agrupamientos
-      // Nubes más cercanas (mayor scrollFactor) se mueven más rápido naturalmente
-      const baseSpeed = Phaser.Math.FloatBetween(this.config.minSpeed, this.config.maxSpeed);
-      // Ajustar velocidad según posición para crear movimiento natural
-      const speedVariation = (i % 3) * 0.2;
-      const speed = baseSpeed + speedVariation;
-
-      // Escala variada pero no extrema
-      const scale = Phaser.Math.FloatBetween(this.config.minScale, this.config.maxScale);
-
-      // Crear nube
-      const cloud = this.scene.add.image(x, preferredY, cloudKey)
+      // Crear la nube con propiedades específicas
+      const cloud = this.scene.add.image(x, y, cloudConfig.key)
         .setScale(scale)
-        .setScrollFactor(scrollFactor)
-        .setAlpha(0.9)
-        .setDepth(-8);
+        .setAlpha(cloudConfig.alpha)
+        .setDepth(cloudConfig.depth)
+        .setScrollFactor(cloudConfig.scrollFactor);
 
-      // Guardar propiedades personalizadas
-      cloud.speed = speed;
-      // Inicializar el flag de transición como false
-      cloud.isTransitioning = false;
-      // Añadir contador para evitar reciclado prematuro
-      cloud.cyclesAfterReset = 0;
-
-      // Guardar referencia
       this.clouds.push(cloud);
+
+      // Crear animación horizontal para la nube
+      // Móviles: movimiento más lento y menos procesamiento de animación
+      const duration = Phaser.Math.Between(
+        cloudConfig.speed.min,
+        cloudConfig.speed.max
+      );
+
+      const tween = this.scene.tweens.add({
+        targets: cloud,
+        x: width + 400, // Mover fuera de la pantalla a la derecha
+        ease: 'Linear',
+        duration: duration,
+        onComplete: () => {
+          // Cuando la nube salga de la pantalla, reposicionarla a la izquierda
+          cloud.x = -200;
+
+          // Reiniciar la animación con un retraso aleatorio
+          this.scene.tweens.add({
+            targets: cloud,
+            x: width + 400,
+            ease: 'Linear',
+            delay: Phaser.Math.Between(0, 2000),
+            duration: duration,
+            repeat: -1
+          });
+        }
+      });
+
+      this.animations.push(tween);
     }
+
+    return this.clouds;
   }
 
   /**
