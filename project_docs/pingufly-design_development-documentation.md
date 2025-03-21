@@ -1,3 +1,5 @@
+# IMPORTANT: Obsolete - don't use it
+
 # Design and Development Documentation: PinguFly videogame (Initial Version - Javascript Web)
 
 **Date:** March 17, 2025
