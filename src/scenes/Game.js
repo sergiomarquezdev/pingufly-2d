@@ -361,16 +361,14 @@ export default class Game extends Phaser.Scene {
       return;
     }
 
-    // 2. Si hay un modal abierto, verificamos si es la pantalla de Game Over
+    // 2. Si hay un modal abierto (como Game Over), bloquear TODOS los inputs del juego
+    // Los únicos inputs permitidos serán en los botones del modal, y esos son manejados
+    // directamente por GameOverScreen.js en su propia lógica
     if (this.stateManager && this.stateManager.isModalOpen) {
-      // Aquí NO manejamos eventos de la pantalla de Game Over
-      // Sus propios controladores de botones ya manejan sus inputs
-      // Solo permiten eventos si son para los botones, pero ese manejo
-      // ocurre a nivel del contenedor, no aquí
       return;
     }
 
-    // Si hemos llegado hasta aquí, el juego está activo y acepta input
+    // Resto del código para el juego normal...
 
     // Si estamos esperando el primer clic, comenzar la selección de ángulo
     if (this.waitingForFirstClick) {
@@ -418,6 +416,12 @@ export default class Game extends Phaser.Scene {
           break;
 
         case 'ENDED':
+          // IMPORTANTE: Si el modal está activo, no se debe procesar este código
+          // Esto evita que un clic en el fondo reinicie el juego cuando hay un modal
+          if (this.stateManager.isModalOpen) {
+            return;
+          }
+
           // Prevenir múltiples reinicios debido a clics rápidos
           if (this.stateManager.isResetting) {
             return;
@@ -478,12 +482,10 @@ export default class Game extends Phaser.Scene {
    * Finaliza el juego actual
    */
   endGame() {
+    console.log('Finalizando juego y mostrando Game Over');
+
     // Cambiar el estado a ENDED para indicar que el juego ha finalizado
     this.stateManager.setState('ENDED');
-
-    // Desactivar input mientras preparamos la pantalla de fin de juego
-    // para evitar interacciones no deseadas
-    this.input.enabled = false;
 
     // Comprobar si hemos batido el récord
     const isNewRecord = this.scoreManager.checkAndUpdateBestDistance();
@@ -495,34 +497,37 @@ export default class Game extends Phaser.Scene {
 
     // Callbacks para las acciones de los botones
     const handleRestart = () => {
-      // Esto se ejecutará cuando se haga clic en el botón "Volver a jugar"
+      console.log('Game: handleRestart llamado desde GameOverScreen');
 
       // Cerrar el modal explícitamente antes de reiniciar
       this.stateManager.setModalState(false);
 
-      // El GameOverScreen ya se habrá ocultado por su propio método handleRestart
+      // Reactivar input general del juego (aunque debería estar ya activo)
+      this.input.enabled = true;
 
       // Llamar a restartGame para preparar un nuevo lanzamiento
-      this.restartGame();
+      this.time.delayedCall(100, () => {
+        this.restartGame();
+      });
     };
 
     const handleMainMenu = () => {
-      // Esto se ejecutará cuando se haga clic en el botón "Menú principal"
+      console.log('Game: handleMainMenu llamado desde GameOverScreen');
 
       // Cerrar el modal explícitamente antes de ir al menú
       this.stateManager.setModalState(false);
 
-      // El GameOverScreen ya se habrá ocultado por su propio método handleMainMenu
+      // Reactivar input general del juego (aunque debería estar ya activo)
+      this.input.enabled = true;
 
       // Volver al menú principal
-      this.backToMenu();
+      this.time.delayedCall(100, () => {
+        this.backToMenu();
+      });
     };
 
-    // Reactivamos el input justo antes de mostrar la pantalla de Game Over
-    this.input.enabled = true;
-
-    // Mostramos la pantalla de Game Over con los callbacks configurados
-    // e inmediatamente después activamos el estado modal
+    // PASO 1: Mostrar el GameOverScreen primero
+    // Esto crea todos los botones interactivos y configura los callbacks
     this.gameOverScreen.show({
       totalDistance: this.scoreManager.totalDistance,
       bestDistance: this.scoreManager.bestTotalDistance,
@@ -530,11 +535,11 @@ export default class Game extends Phaser.Scene {
       onMainMenu: handleMainMenu
     });
 
-    // IMPORTANTE: Activar el estado modal en el siguiente frame
-    // para asegurarnos de que todo está correctamente inicializado
-    this.time.delayedCall(1, () => {
-      this.stateManager.setModalState(true);
-    });
+    // PASO 2: Activar el estado modal
+    // Esto hará que handlePlayerInput() ignore los clics fuera del modal
+    this.stateManager.setModalState(true);
+
+    console.log('Game Over modal activado. Estado modal:', this.stateManager.isModalOpen);
   }
 
   /**
