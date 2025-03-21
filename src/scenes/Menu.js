@@ -466,8 +466,8 @@ export default class Menu extends Phaser.Scene {
 
     // Añadir un iglú decorativo
     const igloo = this.add.image(width * 0.2, height * 0.88, 'igloo')
-      .setScale(0.2)
-      .setDepth(3);
+      .setScale(0.3)
+      .setDepth(8);
 
     // Añadir árboles nevados en el horizonte
     const treePositions = [
@@ -486,7 +486,7 @@ export default class Menu extends Phaser.Scene {
     // Añadir muñecos de nieve
     const snowmanPositions = [
       { x: width * 0.75, y: height * 0.92, scale: 0.6, depth: 6 },
-      { x: width * 0.23, y: height * 0.9, scale: 0.5, depth: 6 }
+      { x: width * 0.26, y: height * 0.92, scale: 0.5, depth: 6 }
     ];
 
     snowmanPositions.forEach(pos => {
@@ -500,7 +500,7 @@ export default class Menu extends Phaser.Scene {
 
     // Añadir un pingüino decorativo (usando el sheet)
     const penguinFrame = 0; // Frame inicial
-    const pinguin = this.add.sprite(width * 0.8, height * 0.9, 'penguin_sheet', penguinFrame)
+    const pinguin = this.add.sprite(width * 0.2, height * 0.93, 'penguin_sheet', penguinFrame)
       .setScale(1)
       .setDepth(7);
 
@@ -510,8 +510,8 @@ export default class Menu extends Phaser.Scene {
     // Animar el pingüino para que parezca moverse ligeramente
     this.tweens.add({
       targets: pinguin,
-      y: pinguin.y - 10,
-      duration: 1200,
+      y: pinguin.y - 35,
+      duration: 7000,
       yoyo: true,
       repeat: -1,
       ease: 'Sine.easeInOut'

@@ -190,7 +190,7 @@ export default class BackgroundManager {
     const height = this.scene.cameras.main.height;
 
     // Configurar límites de generación (principalmente hacia la izquierda)
-    const rightLimit = width + 100; // 100px a la derecha de la pantalla inicial
+    const rightLimit = width + 200; // 200px a la derecha de la pantalla inicial
     const leftLimit = -10000; // Límite izquierdo del mundo
     const worldWidth = Math.abs(leftLimit) + rightLimit;
 
@@ -205,8 +205,8 @@ export default class BackgroundManager {
 
     // Crear solo 1-2 árboles en la pantalla inicial
     for (let i = 0; i < initialAreaTreeCount; i++) {
-      const x = width * Phaser.Math.FloatBetween(0.15, 0.8);
-      const y = height * Phaser.Math.FloatBetween(0.91, 0.94);
+      const x = width * Phaser.Math.FloatBetween(0.15, 0.65);
+      const y = height * Phaser.Math.FloatBetween(0.89, 0.91);
       const scale = Phaser.Math.FloatBetween(0.35, 0.5);
 
       const tree = this.scene.add.image(x, y, 'snow_tree')
@@ -424,7 +424,7 @@ export default class BackgroundManager {
     const height = this.scene.cameras.main.height;
 
     // Configurar límites de generación (principalmente hacia la izquierda)
-    const rightLimit = width + 50; // Solo un poco a la derecha de la pantalla inicial
+    const rightLimit = width + 100; // Solo un poco a la derecha de la pantalla inicial
     const leftLimit = -9000; // No llegar al extremo izquierdo
 
     // Cantidad de muñecos de nieve a generar
@@ -433,8 +433,8 @@ export default class BackgroundManager {
     // Posiciones predefinidas para muñecos de nieve interesantes
     const snowmanPositions = [
       // Algunos cerca del inicio para contexto
-      { x: width * 0.75, y: height * 0.92, scale: 0.6 },
-      { x: width * 0.2, y: height * 0.9, scale: 0.5 },
+      { x: width * 0.6, y: height * 0.9, scale: 0.6 },
+      { x: width * 0.25, y: height * 0.88, scale: 0.5 },
 
       // Distribuidos a lo largo del recorrido (principalmente a la izquierda)
       { x: -500, y: height * 0.92, scale: 0.55 },
@@ -497,7 +497,7 @@ export default class BackgroundManager {
     // Posiciones estratégicas para los iglús
     const iglooPositions = [
       // Uno cerca del inicio para contexto
-      { x: width * 0.2, y: height * 0.88, scale: 0.2, depth: -7 },
+      { x: width * 0.2, y: height * 0.88, scale: 0.3, depth: -7 },
 
       // Distribuidos en puntos clave del recorrido
       { x: -1500, y: height * 0.87, scale: 0.25, depth: -7 },
