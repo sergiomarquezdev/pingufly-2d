@@ -28,6 +28,8 @@ export default class Menu extends Phaser.Scene {
 
     // Crear un contenedor para el menú principal
     this.mainMenuContainer = this.add.container(0, 0);
+    // Configurar una profundidad muy alta para el menú principal para que esté por encima de todo
+    this.mainMenuContainer.setDepth(10);
 
     // Agregar elementos al contenedor del menú principal
     this.createMainMenu(width, height);
@@ -406,11 +408,15 @@ export default class Menu extends Phaser.Scene {
    * Crea un fondo invernal con elementos del juego
    */
   createWinterBackground(width, height) {
-    // Fondo principal con imagen de cielo
-    this.add.image(width / 2, height / 2, 'background_sky').setScale(1.2);
+    // Fondo principal con imagen de cielo - depth más bajo
+    this.add.image(width / 2, height / 2, 'background_sky')
+      .setScale(1.2)
+      .setDepth(0);
 
-    // Añadir el sol
-    const sun = this.add.image(width * 0.2, height * 0.1, 'background_sun').setScale(0.2);
+    // Añadir el sol - depth bajo
+    const sun = this.add.image(width * 0.2, height * 0.1, 'background_sun')
+      .setScale(0.2)
+      .setDepth(1);
 
     // Animar el brillo del sol
     this.tweens.add({
@@ -422,15 +428,17 @@ export default class Menu extends Phaser.Scene {
       ease: 'Sine.easeInOut'
     });
 
-    // Añadir montañas en el fondo
-    this.add.image(width / 2, height * 0.8, 'background_mountain_01').setScale(0.4);
+    // Añadir montañas en el fondo - depth bajo
+    this.add.image(width / 2, height * 0.8, 'background_mountain_01')
+      .setScale(0.4)
+      .setDepth(1);
 
     // Añadir textura de nieve en el suelo
     const snowGround = this.add.tileSprite(width / 2, height - 20, width, 100, 'snow_texture')
       .setAlpha(0.8)
-      .setDepth(0);
+      .setDepth(1);
 
-    // Añadir nubes en diferentes posiciones
+    // Añadir nubes en diferentes posiciones - depth bajo-medio
     const clouds = [
       { key: 'cloud_01', x: width * 0.2, y: height * 0.3, scale: 0.8 },
       { key: 'cloud_02', x: width * 0.5, y: height * 0.2, scale: 0.6 },
@@ -442,7 +450,8 @@ export default class Menu extends Phaser.Scene {
     clouds.forEach(cloud => {
       const cloudSprite = this.add.image(cloud.x, cloud.y, cloud.key)
         .setScale(cloud.scale)
-        .setAlpha(0.8);
+        .setAlpha(0.8)
+        .setDepth(2);
 
       // Animación de movimiento lento horizontal
       this.tweens.add({
@@ -458,14 +467,14 @@ export default class Menu extends Phaser.Scene {
     // Añadir un iglú decorativo
     const igloo = this.add.image(width * 0.2, height * 0.88, 'igloo')
       .setScale(0.2)
-      .setDepth(1);
+      .setDepth(3);
 
     // Añadir árboles nevados en el horizonte
     const treePositions = [
-      { key: 'snow_tree_01', x: width * 0.14, y: height * 0.91, scale: 0.5, depth: 1 },
-      { key: 'snow_tree_02', x: width * 0.92, y: height * 0.95, scale: 0.35, depth: 1 },
-      { key: 'snow_tree_01', x: width * 0.3, y: height * 0.96, scale: 0.5, depth: 2 },
-      { key: 'snow_tree_02', x: width * 0.7, y: height * 0.92, scale: 0.4, depth: 2 }
+      { key: 'snow_tree_01', x: width * 0.14, y: height * 0.91, scale: 0.5, depth: 4 },
+      { key: 'snow_tree_02', x: width * 0.92, y: height * 0.95, scale: 0.35, depth: 4 },
+      { key: 'snow_tree_01', x: width * 0.3, y: height * 0.96, scale: 0.5, depth: 5 },
+      { key: 'snow_tree_02', x: width * 0.7, y: height * 0.92, scale: 0.4, depth: 5 }
     ];
 
     treePositions.forEach(pos => {
@@ -476,8 +485,8 @@ export default class Menu extends Phaser.Scene {
 
     // Añadir muñecos de nieve
     const snowmanPositions = [
-      { x: width * 0.75, y: height * 0.92, scale: 0.6, depth: 2 },
-      { x: width * 0.23, y: height * 0.9, scale: 0.5, depth: 2 }
+      { x: width * 0.75, y: height * 0.92, scale: 0.6, depth: 6 },
+      { x: width * 0.23, y: height * 0.9, scale: 0.5, depth: 6 }
     ];
 
     snowmanPositions.forEach(pos => {
@@ -491,7 +500,7 @@ export default class Menu extends Phaser.Scene {
     const penguinFrame = 0; // Frame inicial
     const pinguin = this.add.sprite(width * 0.8, height * 0.9, 'penguin_sheet', penguinFrame)
       .setScale(1)
-      .setDepth(3);
+      .setDepth(7);
 
     // Animar el pingüino para que parezca moverse ligeramente
     this.tweens.add({
@@ -525,7 +534,7 @@ export default class Menu extends Phaser.Scene {
       const snowflake = this.add.image(x, y, 'snowflake')
         .setScale(scale)
         .setAlpha(Phaser.Math.FloatBetween(0.5, 0.9))
-        .setDepth(4); // Por encima de todo
+        .setDepth(8); // Por encima de los elementos decorativos pero debajo del menú
 
       snowflakes.add(snowflake);
 
@@ -558,7 +567,7 @@ export default class Menu extends Phaser.Scene {
       const largeSnowflake = this.add.image(x, y, 'snowflake')
         .setScale(scale)
         .setAlpha(Phaser.Math.FloatBetween(0.7, 1))
-        .setDepth(5); // Máxima profundidad, por encima de todo
+        .setDepth(9); // Máxima profundidad entre los elementos decorativos, pero por debajo del menú
 
       snowflakes.add(largeSnowflake);
 
@@ -607,6 +616,8 @@ export default class Menu extends Phaser.Scene {
 
     // Crear una capa de instrucciones
     const instructionsLayer = this.add.container(0, 0);
+    // Configurar la profundidad del panel de instrucciones para que esté por encima de todo
+    instructionsLayer.setDepth(11);
 
     // Fondo semi-transparente
     const bg = this.add.rectangle(width / 2, height / 2, width, height, 0x000033, 0.7);
@@ -655,112 +666,78 @@ export default class Menu extends Phaser.Scene {
       lineSpacing: 10
     }).setOrigin(0.5);
 
-    // Botón para cerrar - Usando el mismo estilo de botón de hielo
-    const closeButtonY = height * 0.8;
-    const closeButtonWidth = panelWidth * 0.4;
-    const closeButtonHeight = panelHeight * 0.15;
+    // --------- NUEVO BOTÓN DE FLECHA PARA VOLVER ---------
+    // Posición en la esquina superior izquierda del panel
+    const backArrowX = width / 2 - panelWidth / 2 + 45;
+    const backArrowY = height * 0.15 + 35;
+    const buttonRadius = 20;
 
-    // Fondo del botón
-    const closeButtonBg = this.add.graphics();
-    closeButtonBg.fillGradientStyle(0x2c85c1, 0x2c85c1, 0x88c1dd, 0x88c1dd, 1);
-    closeButtonBg.fillRoundedRect(
-      width / 2 - closeButtonWidth / 2,
-      closeButtonY - closeButtonHeight / 2,
-      closeButtonWidth,
-      closeButtonHeight,
-      15
-    );
+    // Crear círculo con gradiente usando graphics
+    const backButtonBg = this.add.graphics();
+    backButtonBg.fillGradientStyle(0x2c85c1, 0x2c85c1, 0x88c1dd, 0x88c1dd, 0.9);
+    backButtonBg.fillCircle(backArrowX, backArrowY, buttonRadius);
+    backButtonBg.lineStyle(3, 0xffaa00, 1);
+    backButtonBg.strokeCircle(backArrowX, backArrowY, buttonRadius);
 
-    // Borde del botón
-    const closeButtonBorder = this.add.graphics();
-    closeButtonBorder.lineStyle(4, 0xffaa00, 1);
-    closeButtonBorder.strokeRoundedRect(
-      width / 2 - closeButtonWidth / 2,
-      closeButtonY - closeButtonHeight / 2,
-      closeButtonWidth,
-      closeButtonHeight,
-      15
-    );
+    // Efecto de brillo interno
+    const backButtonGlow = this.add.graphics();
+    backButtonGlow.fillStyle(0xe8f4fc, 0.3);
+    backButtonGlow.fillCircle(backArrowX, backArrowY, buttonRadius - 5);
 
-    // Efecto de brillo interior
-    const closeButtonGlow = this.add.graphics();
-    closeButtonGlow.fillStyle(0xe8f4fc, 0.3);
-    closeButtonGlow.fillRoundedRect(
-      width / 2 - closeButtonWidth / 2 + 5,
-      closeButtonY - closeButtonHeight / 2 + 5,
-      closeButtonWidth - 10,
-      closeButtonHeight - 10,
-      10
-    );
+    // Crear icono de flecha
+    const arrowGraphic = this.add.graphics();
+    arrowGraphic.fillStyle(0xffffff, 1);
+    arrowGraphic.lineStyle(3, 0xffffff, 1);
 
-    // Texto del botón
-    const closeText = this.add.text(width / 2, closeButtonY, 'VOLVER', {
-      fontFamily: 'Arial',
-      fontSize: '24px',
-      fontWeight: 'bold',
-      color: '#ffffff',
-      stroke: '#003366',
-      strokeThickness: 3
-    }).setOrigin(0.5);
+    // Dibujar triángulo para la punta de la flecha
+    arrowGraphic.beginPath();
+    arrowGraphic.moveTo(backArrowX - 8, backArrowY);
+    arrowGraphic.lineTo(backArrowX - 2, backArrowY - 8);
+    arrowGraphic.lineTo(backArrowX - 2, backArrowY + 8);
+    arrowGraphic.closePath();
+    arrowGraphic.fillPath();
+
+    // Dibujar línea horizontal para la flecha
+    arrowGraphic.moveTo(backArrowX - 2, backArrowY);
+    arrowGraphic.lineTo(backArrowX + 10, backArrowY);
+    arrowGraphic.strokePath();
 
     // Crear una zona interactiva para el botón
-    const closeButton = this.add.zone(
-      width / 2,
-      closeButtonY,
-      closeButtonWidth,
-      closeButtonHeight
-    ).setInteractive();
+    const backArrowButton = this.add.circle(backArrowX, backArrowY, buttonRadius)
+      .setInteractive();
 
-    // Hacer interactivo el botón de cerrar
-    closeButton.on('pointerover', () => {
-      closeButtonBg.clear();
-      closeButtonBg.fillGradientStyle(0x3997d3, 0x3997d3, 0x99d2ee, 0x99d2ee, 1);
-      closeButtonBg.fillRoundedRect(
-        width / 2 - closeButtonWidth / 2,
-        closeButtonY - closeButtonHeight / 2,
-        closeButtonWidth,
-        closeButtonHeight,
-        15
-      );
+    // Hacer interactivo el botón de flecha
+    backArrowButton.on('pointerover', () => {
+      backButtonBg.clear();
+      backButtonBg.fillGradientStyle(0x3997d3, 0x3997d3, 0x99d2ee, 0x99d2ee, 0.9);
+      backButtonBg.fillCircle(backArrowX, backArrowY, buttonRadius);
+      backButtonBg.lineStyle(3, 0xffaa00, 1);
+      backButtonBg.strokeCircle(backArrowX, backArrowY, buttonRadius);
 
-      closeButtonGlow.clear();
-      closeButtonGlow.fillStyle(0xe8f4fc, 0.5);
-      closeButtonGlow.fillRoundedRect(
-        width / 2 - closeButtonWidth / 2 + 5,
-        closeButtonY - closeButtonHeight / 2 + 5,
-        closeButtonWidth - 10,
-        closeButtonHeight - 10,
-        10
-      );
+      backButtonGlow.clear();
+      backButtonGlow.fillStyle(0xe8f4fc, 0.5);
+      backButtonGlow.fillCircle(backArrowX, backArrowY, buttonRadius - 5);
 
-      closeText.setScale(1.1);
+      arrowGraphic.setAlpha(0.8);
+      arrowGraphic.setScale(1.01);
     });
 
-    closeButton.on('pointerout', () => {
-      closeButtonBg.clear();
-      closeButtonBg.fillGradientStyle(0x2c85c1, 0x2c85c1, 0x88c1dd, 0x88c1dd, 1);
-      closeButtonBg.fillRoundedRect(
-        width / 2 - closeButtonWidth / 2,
-        closeButtonY - closeButtonHeight / 2,
-        closeButtonWidth,
-        closeButtonHeight,
-        15
-      );
+    backArrowButton.on('pointerout', () => {
+      backButtonBg.clear();
+      backButtonBg.fillGradientStyle(0x2c85c1, 0x2c85c1, 0x88c1dd, 0x88c1dd, 0.9);
+      backButtonBg.fillCircle(backArrowX, backArrowY, buttonRadius);
+      backButtonBg.lineStyle(3, 0xffaa00, 1);
+      backButtonBg.strokeCircle(backArrowX, backArrowY, buttonRadius);
 
-      closeButtonGlow.clear();
-      closeButtonGlow.fillStyle(0xe8f4fc, 0.3);
-      closeButtonGlow.fillRoundedRect(
-        width / 2 - closeButtonWidth / 2 + 5,
-        closeButtonY - closeButtonHeight / 2 + 5,
-        closeButtonWidth - 10,
-        closeButtonHeight - 10,
-        10
-      );
+      backButtonGlow.clear();
+      backButtonGlow.fillStyle(0xe8f4fc, 0.3);
+      backButtonGlow.fillCircle(backArrowX, backArrowY, buttonRadius - 5);
 
-      closeText.setScale(1.0);
+      arrowGraphic.setAlpha(1);
+      arrowGraphic.setScale(1);
     });
 
-    closeButton.on('pointerdown', () => {
+    backArrowButton.on('pointerdown', () => {
       // Hacer visible el menú principal pero con alpha 0
       this.mainMenuContainer.setVisible(true);
       this.mainMenuContainer.setAlpha(0);
@@ -786,10 +763,11 @@ export default class Menu extends Phaser.Scene {
       });
     });
 
-    // Botón para ver las animaciones del pingüino - Mismo estilo de hielo
-    const animButtonWidth = 180;
-    const animButtonHeight = 40;
-    const animButtonY = height * 0.65;
+    // ----- MOVER EL BOTÓN VER ANIMACIONES A LA POSICIÓN INFERIOR -----
+    // Usar la posición que antes era para el botón VOLVER
+    const animButtonY = height * 0.8;
+    const animButtonWidth = panelWidth * 0.4;
+    const animButtonHeight = panelHeight * 0.15;
 
     // Crear el fondo del botón
     const animButtonBg = this.add.graphics();
@@ -827,11 +805,11 @@ export default class Menu extends Phaser.Scene {
     // Texto del botón
     const animText = this.add.text(width / 2, animButtonY, 'VER ANIMACIONES', {
       fontFamily: 'Arial',
-      fontSize: '18px',
+      fontSize: '22px',
       fontWeight: 'bold',
       color: '#ffffff',
       stroke: '#003366',
-      strokeThickness: 2
+      strokeThickness: 3
     }).setOrigin(0.5);
 
     // Crear zona interactiva para el botón
@@ -940,11 +918,10 @@ export default class Menu extends Phaser.Scene {
       iceDetails,
       instructionsTitle,
       instructionsText,
-      closeButtonBg,
-      closeButtonGlow,
-      closeButtonBorder,
-      closeText,
-      closeButton,
+      backButtonBg,
+      backButtonGlow,
+      arrowGraphic,
+      backArrowButton,
       animButtonBg,
       animButtonGlow,
       animButtonBorder,
@@ -984,6 +961,8 @@ export default class Menu extends Phaser.Scene {
 
     // Contenedor para el panel
     const recordContainer = this.add.container(width / 2, panelY);
+    // Al ser parte del mainMenuContainer, heredará su depth, pero por si acaso lo configuramos también
+    recordContainer.setDepth(10);
 
     // Fondo del panel con gradiente - Estilo de hielo
     const recordPanel = this.add.graphics();
