@@ -102,7 +102,7 @@ export default class AnimationTest extends Phaser.Scene {
     // Añadir árboles nevados en los bordes
     const treePositions = [
       { key: 'snow_tree_01', x: width * 0.1, y: height * 0.9, scale: 0.5, depth: 3 },
-      { key: 'snow_tree_02', x: width * 0.9, y: height * 0.93, scale: 0.4, depth: 3 }
+      { key: 'snow_tree_01', x: width * 0.9, y: height * 0.93, scale: 0.4, depth: 3 }
     ];
 
     treePositions.forEach(pos => {

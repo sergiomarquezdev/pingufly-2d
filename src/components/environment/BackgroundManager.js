@@ -121,9 +121,9 @@ export default class BackgroundManager {
     // Posiciones base para los árboles, similar al menú pero adaptado al juego
     const baseTreePositions = [
       { key: 'snow_tree_01', xRatio: 0.14, yRatio: 0.91, scale: 0.5, depth: -6 }, // Ajustado a -6
-      { key: 'snow_tree_02', xRatio: 0.92, yRatio: 0.94, scale: 0.35, depth: -6 }, // Ajustado a -6
+      { key: 'snow_tree_01', xRatio: 0.92, yRatio: 0.94, scale: 0.35, depth: -6 }, // Ajustado a -6
       { key: 'snow_tree_01', xRatio: 0.3, yRatio: 0.93, scale: 0.5, depth: -5 }, // Ajustado a -5
-      { key: 'snow_tree_02', xRatio: 0.7, yRatio: 0.92, scale: 0.4, depth: -5 } // Ajustado a -5
+      { key: 'snow_tree_01', xRatio: 0.7, yRatio: 0.92, scale: 0.4, depth: -5 } // Ajustado a -5
     ];
 
     // Utilizar posiciones base y añadir árboles adicionales con variación de posición
@@ -134,9 +134,8 @@ export default class BackgroundManager {
         treeConfig = { ...baseTreePositions[i] };
       } else {
         // Para árboles adicionales, crear posiciones aleatorias
-        const treeType = Phaser.Math.Between(0, 1) === 0 ? 'snow_tree_01' : 'snow_tree_02';
         treeConfig = {
-          key: treeType,
+          key: 'snow_tree_01',
           xRatio: Phaser.Math.FloatBetween(0.1, 0.9),
           yRatio: Phaser.Math.FloatBetween(0.9, 0.97),
           scale: Phaser.Math.FloatBetween(0.3, 0.5),
