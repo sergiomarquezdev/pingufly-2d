@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 
 /**
- * Clase que maneja la pantalla de fin de juego
+ * Clase que maneja la pantalla de fin de juego con estilo glaciar
  */
 export default class GameOverScreen {
   /**
@@ -10,103 +10,194 @@ export default class GameOverScreen {
    */
   constructor(scene) {
     this.scene = scene;
-    this.container = null;
-    this.buttons = [];
     this.isVisible = false;
+    this.container = null;
+    this.callbacks = {
+      onRestart: null,
+      onMainMenu: null
+    };
   }
 
   /**
-   * Muestra la pantalla de fin de juego
-   * @param {Object} config - Configuración de la pantalla
-   * @param {number} config.totalDistance - Distancia total recorrida
-   * @param {number} config.bestDistance - Mejor distancia histórica
-   * @param {Function} config.onRestart - Función a llamar cuando se hace clic en "Volver a Jugar"
-   * @param {Function} config.onMainMenu - Función a llamar cuando se hace clic en "Menú Principal"
+   * Muestra la pantalla de fin de juego con estilo glaciar
+   * @param {Object} options - Opciones para personalizar la pantalla
    */
-  show(config) {
-    // Guardar las referencias a los callbacks
-    this.onRestartCallback = config.onRestart;
-    this.onMainMenuCallback = config.onMainMenu;
+  show(options = {}) {
+    // Extraer opciones con valores por defecto
+    const {
+      totalDistance = 0,
+      bestDistance = 0,
+      onRestart = null,
+      onMainMenu = null
+    } = options;
 
-    // Activar flag
+    // Guardar los callbacks para poder usarlos más tarde
+    this.callbacks.onRestart = onRestart;
+    this.callbacks.onMainMenu = onMainMenu;
+
+    // Si ya hay una pantalla visible, eliminarla primero
+    this.hide();
+
+    // Marcar como visible
     this.isVisible = true;
 
-    const { totalDistance, bestDistance } = config;
-    const isNewRecord = totalDistance > bestDistance;
+    // Crear un contenedor principal que capturará inputs a nivel global
+    this.container = this.scene.add.container(0, 0);
+    this.container.setDepth(1000);
 
-    // Tamaño del canvas
-    const width = this.scene.scale.width;
-    const height = this.scene.scale.height;
+    // Obtener dimensiones de la pantalla
+    const width = this.scene.cameras.main.width;
+    const height = this.scene.cameras.main.height;
 
-    // Limpiar elementos previos si existen
-    this.destroy();
+    // ---- CAPA DE FONDO BLOQUEANTE ----
+    // Esta capa es interactiva y bloqueará cualquier click en el juego subyacente
+    const blockingOverlay = this.scene.add.rectangle(0, 0, width, height, 0x000000, 0.7)
+      .setOrigin(0)
+      .setScrollFactor(0)
+      .setInteractive(); // Hacerla interactiva para capturar todos los clicks
 
-    // Crear nuevo contenedor
-    this.container = this.scene.add.container(0, 0).setScrollFactor(0).setDepth(100);
+    // Detener todos los eventos en esta capa para evitar que lleguen al juego
+    blockingOverlay.on('pointerdown', (pointer, localX, localY, event) => {
+      event.stopPropagation();
+    });
 
-    // Fondo oscuro semitransparente para toda la pantalla
-    this.overlay = this.scene.add.rectangle(width/2, height/2, width, height, 0x000000, 0.7)
-      .setScrollFactor(0);
-    this.container.add(this.overlay);
+    this.container.add(blockingOverlay);
 
-    // Calcular altura del panel
-    const panelHeight = isNewRecord ? 440 : 380;
-    const panelWidth = 440;
+    // ---- PANEL PRINCIPAL CON ESTILO GLACIAR ----
+    // Dimensiones del panel con proporciones similares al menú de instrucciones
+    const panelWidth = width * 0.8;
+    const panelHeight = height * 0.7;
+    const panelX = width / 2 - panelWidth / 2;
+    const panelY = height * 0.15;
 
-    // Crear el panel principal
-    this.panel = this.scene.add.rectangle(width/2, height/2, panelWidth, panelHeight, 0x104080, 0.95)
-      .setStrokeStyle(4, 0xffdd00, 1);
-    this.container.add(this.panel);
+    // Panel principal con gradiente azul glaciar
+    const panelBg = this.scene.add.graphics();
+    panelBg.fillGradientStyle(0x2c85c1, 0x2c85c1, 0x88c1dd, 0x88c1dd, 0.9);
+    panelBg.fillRoundedRect(panelX, panelY, panelWidth, panelHeight, 20);
+    panelBg.lineStyle(4, 0x6baed6, 1);
+    panelBg.strokeRoundedRect(panelX, panelY, panelWidth, panelHeight, 20);
 
-    // Título
-    const title = this.scene.add.text(width/2, height/2 - panelHeight/2 + 50, 'JUEGO TERMINADO', {
-      fontFamily: 'Impact',
-      fontSize: '36px',
+    // Efecto de brillo interior - simula luz reflejada en el hielo
+    const iceDetails = this.scene.add.graphics();
+    iceDetails.fillStyle(0xe8f4fc, 0.4);
+    iceDetails.fillRoundedRect(
+      panelX + 10,
+      panelY + 10,
+      panelWidth - 20,
+      panelHeight - 20,
+      15
+    );
+
+    this.container.add([panelBg, iceDetails]);
+
+    // ---- TÍTULO CON ESTILO DE HIELO ----
+    const titleY = panelY + 60;
+    const titleText = this.scene.add.text(width / 2, titleY, '¡JUEGO TERMINADO!', {
+      fontFamily: 'Arial',
+      fontSize: '32px',
+      fontWeight: 'bold',
       color: '#ffffff',
-      stroke: '#000000',
-      strokeThickness: 4,
-      align: 'center'
-    }).setOrigin(0.5);
-    this.container.add(title);
+      stroke: '#003366',
+      strokeThickness: 4
+    }).setOrigin(0.5).setScrollFactor(0);
 
-    // Texto de distancia
-    const distanceLabel = this.scene.add.text(width/2, height/2 - 70, 'DISTANCIA TOTAL', {
-      fontFamily: 'Impact',
-      fontSize: '24px',
-      color: '#ffffff',
-      align: 'center'
-    }).setOrigin(0.5);
-    this.container.add(distanceLabel);
+    // Añadir un efecto de brillo al título
+    this.scene.tweens.add({
+      targets: titleText,
+      alpha: 0.8,
+      duration: 1500,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut'
+    });
 
-    const distanceText = this.scene.add.text(width/2, height/2 - 30, totalDistance + ' m', {
-      fontFamily: 'Impact',
-      fontSize: '48px',
-      color: '#ffffff',
-      stroke: '#104080',
-      strokeThickness: 3,
-      align: 'center'
-    }).setOrigin(0.5);
-    this.container.add(distanceText);
+    this.container.add(titleText);
 
-    // Añadir mensaje de récord si es necesario
+    // ---- PANEL DE DISTANCIA CON ESTILO DE HIELO ----
+    // Panel para la distancia total con borde brillante
+    const distancePanelY = titleY + 80;
+    const distancePanelWidth = panelWidth * 0.7;
+    const distancePanelHeight = 80;
+    const distancePanelX = width / 2 - distancePanelWidth / 2;
+
+    // Crear el panel para la distancia con gradiente más intenso
+    const distancePanel = this.scene.add.graphics();
+    distancePanel.fillGradientStyle(0x0066aa, 0x0066aa, 0x2c85c1, 0x2c85c1, 0.8);
+    distancePanel.fillRoundedRect(
+      distancePanelX,
+      distancePanelY,
+      distancePanelWidth,
+      distancePanelHeight,
+      15
+    );
+    distancePanel.lineStyle(3, 0xffaa00, 1);
+    distancePanel.strokeRoundedRect(
+      distancePanelX,
+      distancePanelY,
+      distancePanelWidth,
+      distancePanelHeight,
+      15
+    );
+
+    // Verificar si es un nuevo récord
+    const isNewRecord = totalDistance >= bestDistance;
+
+    // Texto descriptivo de la distancia
+    const distanceLabel = this.scene.add.text(
+      width / 2,
+      distancePanelY + 20,
+      'DISTANCIA TOTAL',
+      {
+        fontFamily: 'Arial',
+        fontSize: '20px',
+        fontWeight: 'bold',
+        color: '#ffffff',
+        stroke: '#003366',
+        strokeThickness: 2
+      }
+    ).setOrigin(0.5);
+
+    // Valor de la distancia con mayor énfasis
+    const distanceValue = this.scene.add.text(
+      width / 2,
+      distancePanelY + 55,
+      `${totalDistance} m`,
+      {
+        fontFamily: 'Arial',
+        fontSize: '28px',
+        fontWeight: 'bold',
+        color: '#ffffff',
+        stroke: '#003366',
+        strokeThickness: 3
+      }
+    ).setOrigin(0.5);
+
+    // Si es un nuevo récord, añadir efectos especiales
     if (isNewRecord) {
-      // Fondo del récord
-      const recordBg = this.scene.add.rectangle(width/2, height/2 + 30, 300, 40, 0x000000, 0.4)
-        .setStrokeStyle(2, 0xffdd00);
-      this.container.add(recordBg);
+      // Fondo del récord con estilo especial
+      const recordBgY = distancePanelY + distancePanelHeight + 30;
+      const recordBg = this.scene.add.graphics();
+      recordBg.fillStyle(0x000000, 0.3);
+      recordBg.fillRoundedRect(width / 2 - 150, recordBgY - 20, 300, 40, 10);
+      recordBg.lineStyle(2, 0xffdd00, 1);
+      recordBg.strokeRoundedRect(width / 2 - 150, recordBgY - 20, 300, 40, 10);
 
-      // Texto del récord
-      const recordText = this.scene.add.text(width/2, height/2 + 30, '¡NUEVO RÉCORD!', {
-        fontFamily: 'Impact',
-        fontSize: '32px',
-        color: '#ffdd00',
-        stroke: '#000000',
-        strokeThickness: 3,
-        align: 'center'
-      }).setOrigin(0.5);
-      this.container.add(recordText);
+      // Texto de nuevo récord con brillo
+      const recordText = this.scene.add.text(
+        width / 2,
+        recordBgY,
+        '¡NUEVO RÉCORD!',
+        {
+          fontFamily: 'Arial',
+          fontSize: '24px',
+          fontWeight: 'bold',
+          color: '#ffdd00',
+          stroke: '#003366',
+          strokeThickness: 3
+        }
+      ).setOrigin(0.5);
 
-      // Animación para el texto
+      // Pulso de brillo para el texto de récord
       this.scene.tweens.add({
         targets: recordText,
         scaleX: 1.1,
@@ -116,16 +207,12 @@ export default class GameOverScreen {
         repeat: -1
       });
 
-      // Brillo
+      // Añadir un efecto de resplandor alrededor del valor
       const glow = this.scene.add.graphics();
       glow.fillStyle(0xffdd00, 0.2);
-      glow.fillCircle(width/2, height/2 - 30, 110);
-      this.container.add(glow);
+      glow.fillCircle(width / 2, distancePanelY + 55, 70);
 
-      // Asegurar que el texto de distancia esté encima del brillo
-      this.container.bringToTop(distanceText);
-
-      // Efecto de destello
+      // Animar el resplandor
       this.scene.tweens.add({
         targets: glow,
         alpha: { from: 0.3, to: 0 },
@@ -133,28 +220,94 @@ export default class GameOverScreen {
         yoyo: true,
         repeat: -1
       });
+
+      this.container.add([recordBg, recordText, glow]);
     }
 
-    // Determinar la posición vertical de los botones
-    const buttonY = isNewRecord ? height/2 + 90 : height/2 + 50;
+    // Panel para la mejor distancia histórica
+    const bestPanelY = isNewRecord ? distancePanelY + distancePanelHeight + 80 : distancePanelY + distancePanelHeight + 30;
 
-    // BOTÓN VOLVER A JUGAR - implementado directamente sin ButtonFactory
-    this.createSimpleButton(width/2, buttonY, 'VOLVER A JUGAR', () => {
-      this.handleRestart();
-    });
+    // Texto de mejor distancia más sutil
+    const bestDistanceText = this.scene.add.text(
+      width / 2,
+      bestPanelY,
+      `Mejor distancia: ${bestDistance} m`,
+      {
+        fontFamily: 'Arial',
+        fontSize: '18px',
+        color: '#e8f4fc',
+        stroke: '#003366',
+        strokeThickness: 1
+      }
+    ).setOrigin(0.5);
 
-    // BOTÓN MENÚ PRINCIPAL - implementado directamente sin ButtonFactory
-    this.createSimpleButton(width/2, buttonY + 70, 'MENÚ PRINCIPAL', () => {
-      this.handleMainMenu();
-    });
+    this.container.add([distancePanel, distanceLabel, distanceValue, bestDistanceText]);
 
-    // Animar entrada
-    this.container.setScale(0.5);
-    this.container.setAlpha(0);
+    // ---- BOTONES CON ESTILO GLACIAR ----
+    // Determinar la posición vertical de los botones basada en si es un récord
+    const buttonStartY = isNewRecord ? bestPanelY + 60 : bestPanelY + 40;
 
+    // Botón de reiniciar con estilo glaciar
+    const restartButton = this.createGlacierButton(
+      width / 2,
+      buttonStartY,
+      280,
+      60,
+      'VOLVER A JUGAR',
+      0x2c85c1,
+      this.handleRestart.bind(this)
+    );
+
+    // Botón de menú principal con estilo glaciar
+    const menuButton = this.createGlacierButton(
+      width / 2,
+      buttonStartY + 80,
+      280,
+      60,
+      'MENÚ PRINCIPAL',
+      0x0066aa,
+      this.handleMainMenu.bind(this)
+    );
+
+    this.container.add([restartButton.container]);
+    this.container.add([menuButton.container]);
+
+    // ---- COPOS DE NIEVE DECORATIVOS ----
+    // Añadir copos de nieve decorativos flotando dentro del panel
+    for (let i = 0; i < 12; i++) {
+      const x = Phaser.Math.Between(panelX + 50, panelX + panelWidth - 50);
+      const y = Phaser.Math.Between(panelY + 50, panelY + panelHeight - 50);
+      const scale = Phaser.Math.FloatBetween(0.08, 0.15);
+      const rotationSpeed = Phaser.Math.FloatBetween(0.1, 0.2);
+
+      const snowflake = this.scene.add.image(x, y, 'snowflake')
+        .setScale(scale)
+        .setAlpha(Phaser.Math.FloatBetween(0.4, 0.7));
+
+      // Animar los copos con rotación suave
+      this.scene.tweens.add({
+        targets: snowflake,
+        y: y + Phaser.Math.Between(40, 80),
+        x: x + Phaser.Math.Between(-30, 30),
+        rotation: snowflake.rotation + rotationSpeed * 5,
+        alpha: 0.3,
+        duration: Phaser.Math.Between(3000, 6000),
+        repeat: -1,
+        onRepeat: () => {
+          snowflake.y = Phaser.Math.Between(panelY + 50, panelY + panelHeight - 50);
+          snowflake.x = Phaser.Math.Between(panelX + 50, panelX + panelWidth - 50);
+          snowflake.alpha = Phaser.Math.FloatBetween(0.4, 0.7);
+          snowflake.rotation = 0;
+        }
+      });
+
+      this.container.add(snowflake);
+    }
+
+    // Animar la entrada del contenedor completo
+    this.container.alpha = 0;
     this.scene.tweens.add({
       targets: this.container,
-      scale: 1,
       alpha: 1,
       duration: 400,
       ease: 'Back.easeOut'
@@ -162,62 +315,123 @@ export default class GameOverScreen {
   }
 
   /**
-   * Crea un botón simple directamente en la escena
+   * Crea un botón con estilo glaciar, similar a los del menú
    */
-  createSimpleButton(x, y, text, callback) {
-    // Grupo para el botón
-    const width = 240;
-    const height = 60;
+  createGlacierButton(x, y, width, height, text, baseColor, callback) {
+    const buttonContainer = this.scene.add.container(x, y);
 
-    // Fondo del botón
-    const bg = this.scene.add.rectangle(x, y, width, height, 0x1e90ff)
-      .setStrokeStyle(3, 0xffdd00)
-      .setInteractive({ useHandCursor: true })
-      .on('pointerover', () => {
-        bg.setFillStyle(0x3aa3ff);
-        buttonText.setScale(1.05);
-      })
-      .on('pointerout', () => {
-        bg.setFillStyle(0x1e90ff);
-        buttonText.setScale(1);
-      })
-      .on('pointerdown', () => {
-        bg.setFillStyle(0x0c6cbb);
-        buttonText.setScale(0.95);
-      })
-      .on('pointerup', () => {
-        bg.setFillStyle(0x1e90ff);
-        buttonText.setScale(1);
+    // Crear el fondo del botón con gradiente
+    const buttonBg = this.scene.add.graphics();
+    buttonBg.fillGradientStyle(baseColor, baseColor, 0x88c1dd, 0x88c1dd, 1);
+    buttonBg.fillRoundedRect(-width/2, -height/2, width, height, 15);
 
-        if (this.isVisible && callback) {
-          callback();
-        }
-      });
+    // Borde del botón
+    const buttonBorder = this.scene.add.graphics();
+    buttonBorder.lineStyle(3, 0xffaa00, 1);
+    buttonBorder.strokeRoundedRect(-width/2, -height/2, width, height, 15);
 
-    // Efecto de esquinas brillantes
-    const cornerSize = 8;
-    this.scene.add.rectangle(x - width/2, y - height/2, cornerSize, cornerSize, 0xffffff, 0.8);
-    this.scene.add.rectangle(x + width/2 - cornerSize, y - height/2, cornerSize, cornerSize, 0xffffff, 0.8);
-    this.scene.add.rectangle(x - width/2, y + height/2 - cornerSize, cornerSize, cornerSize, 0xffffff, 0.8);
-    this.scene.add.rectangle(x + width/2 - cornerSize, y + height/2 - cornerSize, cornerSize, cornerSize, 0xffffff, 0.8);
+    // Efecto de brillo interior
+    const buttonGlow = this.scene.add.graphics();
+    buttonGlow.fillStyle(0xe8f4fc, 0.3);
+    buttonGlow.fillRoundedRect(-width/2 + 5, -height/2 + 5, width - 10, height - 10, 10);
+
+    // Esquinas brillantes
+    const cornerSize = 6;
+    const corner1 = this.scene.add.rectangle(-width/2 + cornerSize/2, -height/2 + cornerSize/2, cornerSize, cornerSize, 0xffffff, 0.8);
+    const corner2 = this.scene.add.rectangle(width/2 - cornerSize/2, -height/2 + cornerSize/2, cornerSize, cornerSize, 0xffffff, 0.8);
+    const corner3 = this.scene.add.rectangle(-width/2 + cornerSize/2, height/2 - cornerSize/2, cornerSize, cornerSize, 0xffffff, 0.8);
+    const corner4 = this.scene.add.rectangle(width/2 - cornerSize/2, height/2 - cornerSize/2, cornerSize, cornerSize, 0xffffff, 0.8);
 
     // Texto del botón
-    const buttonText = this.scene.add.text(x, y, text, {
-      fontFamily: 'Impact',
+    const buttonText = this.scene.add.text(0, 0, text, {
+      fontFamily: 'Arial',
       fontSize: '24px',
+      fontWeight: 'bold',
       color: '#ffffff',
-      stroke: '#104080',
+      stroke: '#003366',
       strokeThickness: 3,
       align: 'center'
     }).setOrigin(0.5);
 
-    // Añadir al contenedor principal
-    this.container.add([bg, buttonText]);
+    // Añadir todos los elementos al contenedor
+    buttonContainer.add([buttonBg, buttonGlow, buttonBorder, buttonText, corner1, corner2, corner3, corner4]);
 
-    // Guardar referencia al botón
-    this.buttons.push({ bg, text: buttonText, callback });
+    // Crear zona interactiva
+    const buttonZone = this.scene.add.zone(0, 0, width, height).setInteractive({
+      useHandCursor: true
+    });
+    buttonContainer.add(buttonZone);
 
-    return { bg, text: buttonText };
+    // Eventos de interacción
+    buttonZone.on('pointerover', () => {
+      buttonBg.clear();
+      buttonBg.fillGradientStyle(0x3997d3, 0x3997d3, 0x99d2ee, 0x99d2ee, 1);
+      buttonBg.fillRoundedRect(-width/2, -height/2, width, height, 15);
+
+      buttonGlow.clear();
+      buttonGlow.fillStyle(0xe8f4fc, 0.5);
+      buttonGlow.fillRoundedRect(-width/2 + 5, -height/2 + 5, width - 10, height - 10, 10);
+
+      buttonText.setScale(1.05);
+
+      // Efecto de cursor para mejorar feedback
+      this.scene.game.canvas.style.cursor = 'pointer';
+    });
+
+    buttonZone.on('pointerout', () => {
+      buttonBg.clear();
+      buttonBg.fillGradientStyle(baseColor, baseColor, 0x88c1dd, 0x88c1dd, 1);
+      buttonBg.fillRoundedRect(-width/2, -height/2, width, height, 15);
+
+      buttonGlow.clear();
+      buttonGlow.fillStyle(0xe8f4fc, 0.3);
+      buttonGlow.fillRoundedRect(-width/2 + 5, -height/2 + 5, width - 10, height - 10, 10);
+
+      buttonText.setScale(1);
+
+      // Restaurar cursor normal
+      this.scene.game.canvas.style.cursor = 'default';
+    });
+
+    buttonZone.on('pointerdown', () => {
+      // Efecto visual al presionar
+      buttonBg.clear();
+      buttonBg.fillGradientStyle(0x0055aa, 0x0055aa, 0x4488bb, 0x4488bb, 1);
+      buttonBg.fillRoundedRect(-width/2, -height/2, width, height, 15);
+
+      buttonText.setScale(0.95);
+    });
+
+    buttonZone.on('pointerup', (pointer, localX, localY, event) => {
+      // CRÍTICO: Detener propagación del evento para evitar que llegue al juego
+      event.stopPropagation();
+
+      // Reproducir un sonido de clic si está disponible
+      if (this.scene.sound && this.scene.sound.add) {
+        const clickSound = this.scene.sound.get('click');
+        if (clickSound) clickSound.play({ volume: 0.5 });
+      }
+
+      // Efecto visual al soltar
+      buttonBg.clear();
+      buttonBg.fillGradientStyle(0x3997d3, 0x3997d3, 0x99d2ee, 0x99d2ee, 1);
+      buttonBg.fillRoundedRect(-width/2, -height/2, width, height, 15);
+
+      buttonText.setScale(1.05);
+
+      // Ejecutar el callback después de un breve retraso para la animación
+      if (callback && this.isVisible) {
+        // Pequeña pausa para que se vea el efecto visual
+        this.scene.time.delayedCall(50, callback);
+      }
+    });
+
+    return {
+      container: buttonContainer,
+      zone: buttonZone,
+      bg: buttonBg,
+      text: buttonText
+    };
   }
 
   /**
@@ -226,101 +440,98 @@ export default class GameOverScreen {
   handleRestart() {
     if (!this.isVisible) return;
 
-    // Desactivar la pantalla
+    // Desactivar la pantalla y prevenir múltiples clics
     this.isVisible = false;
 
-    // Ocultar la pantalla
+    // Animar la salida de la pantalla
     this.scene.tweens.add({
       targets: this.container,
       alpha: 0,
       scale: 0.8,
-      duration: 200,
+      duration: 300,
+      ease: 'Power2',
       onComplete: () => {
-        // Asegurarse que el modal está cerrado antes de reiniciar
+        // Asegurarse que el modal está cerrado en el state manager
         if (this.scene.stateManager) {
           this.scene.stateManager.setModalState(false);
         }
 
-        // Destruir el contenedor
-        this.destroy();
+        // Eliminar el contenedor
+        if (this.container) {
+          this.container.destroy();
+          this.container = null;
+        }
 
-        // Llamar al callback original después de un breve retraso
-        this.scene.time.delayedCall(50, () => {
-          if (this.onRestartCallback) {
-            this.onRestartCallback();
-          }
-        });
+        // Ejecutar el callback original después de un breve retraso
+        if (this.callbacks.onRestart) {
+          this.callbacks.onRestart();
+        }
       }
     });
   }
 
   /**
-   * Manejador para el botón de menú principal
+   * Manejador para el botón del menú principal
    */
   handleMainMenu() {
     if (!this.isVisible) return;
 
-    // Desactivar la pantalla
+    // Desactivar la pantalla y prevenir múltiples clics
     this.isVisible = false;
 
-    // Ocultar la pantalla
+    // Animar la salida de la pantalla
     this.scene.tweens.add({
       targets: this.container,
       alpha: 0,
       scale: 0.8,
-      duration: 200,
+      duration: 300,
+      ease: 'Power2',
       onComplete: () => {
-        // Asegurarse que el modal está cerrado antes de ir al menú
+        // Asegurarse que el modal está cerrado en el state manager
         if (this.scene.stateManager) {
           this.scene.stateManager.setModalState(false);
         }
 
-        // Destruir el contenedor
-        this.destroy();
+        // Eliminar el contenedor
+        if (this.container) {
+          this.container.destroy();
+          this.container = null;
+        }
 
-        // Llamar al callback original después de un breve retraso
-        this.scene.time.delayedCall(50, () => {
-          if (this.onMainMenuCallback) {
-            this.onMainMenuCallback();
-          }
-        });
+        // Ejecutar el callback original
+        if (this.callbacks.onMainMenu) {
+          this.callbacks.onMainMenu();
+        }
       }
     });
   }
 
   /**
-   * Destruye todos los elementos de la pantalla
-   */
-  destroy() {
-    if (this.container) {
-      // Asegurarse que todos los tweens se detengan
-      if (this.scene.tweens) {
-        const elements = this.container.getAll();
-        elements.forEach(element => {
-          this.scene.tweens.killTweensOf(element);
-        });
-      }
-
-      this.container.destroy();
-      this.container = null;
-    }
-
-    this.buttons = [];
-  }
-
-  /**
-   * Oculta la pantalla
+   * Oculta la pantalla de fin de juego
    */
   hide() {
-    // Ya no es necesario, hide se maneja dentro de los handlers de botones
-    if (this.isVisible) {
-      this.isVisible = false;
-
-      if (this.scene.stateManager) {
-        this.scene.stateManager.setModalState(false);
+    if (this.container) {
+      // Animar la salida si es visible
+      if (this.isVisible) {
+        this.scene.tweens.add({
+          targets: this.container,
+          alpha: 0,
+          scale: 0.8,
+          duration: 200,
+          ease: 'Power2',
+          onComplete: () => {
+            this.container.destroy();
+            this.container = null;
+            this.isVisible = false;
+          }
+        });
+      } else {
+        // Si no está visible, simplemente destruir
+        this.container.destroy();
+        this.container = null;
       }
-
-      this.destroy();
     }
+
+    this.isVisible = false;
   }
 }

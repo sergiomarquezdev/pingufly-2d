@@ -233,8 +233,8 @@ export default class Game extends Phaser.Scene {
         // Detener las físicas para evitar problemas
         this.matter.world.pause();
 
-        // Volver a la escena del menú
-        this.scene.start('Menu');
+        // Volver a la escena del menú, explícitamente indicando NO mostrar instrucciones
+        this.scene.start('Menu', { showInstructions: false });
       }
     });
   }
@@ -354,15 +354,23 @@ export default class Game extends Phaser.Scene {
    * Maneja la entrada del jugador según el estado del juego
    */
   handlePlayerInput() {
-    // Si hay un modal abierto, ignorar completamente la entrada
-    if (this.stateManager && this.stateManager.isModalOpen) {
-      return;
-    }
+    // VERIFICACIÓN DE BLOQUEOS EN ESTE ORDEN ESPECÍFICO
 
-    // Si estamos en proceso de reiniciar, ignorar la entrada
+    // 1. Si estamos en proceso de reiniciar, ignorar cualquier input completamente
     if (this.stateManager && this.stateManager.isResetting) {
       return;
     }
+
+    // 2. Si hay un modal abierto, verificamos si es la pantalla de Game Over
+    if (this.stateManager && this.stateManager.isModalOpen) {
+      // Aquí NO manejamos eventos de la pantalla de Game Over
+      // Sus propios controladores de botones ya manejan sus inputs
+      // Solo permiten eventos si son para los botones, pero ese manejo
+      // ocurre a nivel del contenedor, no aquí
+      return;
+    }
+
+    // Si hemos llegado hasta aquí, el juego está activo y acepta input
 
     // Si estamos esperando el primer clic, comenzar la selección de ángulo
     if (this.waitingForFirstClick) {
@@ -470,9 +478,12 @@ export default class Game extends Phaser.Scene {
    * Finaliza el juego actual
    */
   endGame() {
-    // Cambiar estado y abrir modal
+    // Cambiar el estado a ENDED para indicar que el juego ha finalizado
     this.stateManager.setState('ENDED');
-    this.stateManager.setModalState(true);
+
+    // Desactivar input mientras preparamos la pantalla de fin de juego
+    // para evitar interacciones no deseadas
+    this.input.enabled = false;
 
     // Comprobar si hemos batido el récord
     const isNewRecord = this.scoreManager.checkAndUpdateBestDistance();
@@ -482,42 +493,47 @@ export default class Game extends Phaser.Scene {
       this.gameUI.updateBestDistanceText(this.scoreManager.bestTotalDistance);
     }
 
-    // Definir los callbacks para depurar y asegurar ejecución
+    // Callbacks para las acciones de los botones
     const handleRestart = () => {
-      // Verificar que podemos reiniciar
+      // Esto se ejecutará cuando se haga clic en el botón "Volver a jugar"
+
+      // Cerrar el modal explícitamente antes de reiniciar
       this.stateManager.setModalState(false);
 
-      // Llamar a restartGame después de un breve retraso
-      this.time.delayedCall(100, () => {
-        this.restartGame();
-      });
+      // El GameOverScreen ya se habrá ocultado por su propio método handleRestart
+
+      // Llamar a restartGame para preparar un nuevo lanzamiento
+      this.restartGame();
     };
 
     const handleMainMenu = () => {
-      // Verificar que podemos ir al menú
+      // Esto se ejecutará cuando se haga clic en el botón "Menú principal"
+
+      // Cerrar el modal explícitamente antes de ir al menú
       this.stateManager.setModalState(false);
 
-      // Llamar a backToMenu después de un breve retraso
-      this.time.delayedCall(100, () => {
-        this.backToMenu();
-      });
+      // El GameOverScreen ya se habrá ocultado por su propio método handleMainMenu
+
+      // Volver al menú principal
+      this.backToMenu();
     };
 
-    // Desactivar input brevemente para evitar clics accidentales
-    this.input.enabled = false;
+    // Reactivamos el input justo antes de mostrar la pantalla de Game Over
+    this.input.enabled = true;
 
-    // Después de un breve retraso, mostrar la pantalla de fin de juego
-    this.time.delayedCall(200, () => {
-      // Reactivar input para permitir clics en los botones
-      this.input.enabled = true;
+    // Mostramos la pantalla de Game Over con los callbacks configurados
+    // e inmediatamente después activamos el estado modal
+    this.gameOverScreen.show({
+      totalDistance: this.scoreManager.totalDistance,
+      bestDistance: this.scoreManager.bestTotalDistance,
+      onRestart: handleRestart,
+      onMainMenu: handleMainMenu
+    });
 
-      // Mostrar pantalla de fin de juego con los callbacks
-      this.gameOverScreen.show({
-        totalDistance: this.scoreManager.totalDistance,
-        bestDistance: this.scoreManager.bestTotalDistance,
-        onRestart: handleRestart,
-        onMainMenu: handleMainMenu
-      });
+    // IMPORTANTE: Activar el estado modal en el siguiente frame
+    // para asegurarnos de que todo está correctamente inicializado
+    this.time.delayedCall(1, () => {
+      this.stateManager.setModalState(true);
     });
   }
 
