@@ -250,7 +250,7 @@ export default class GameOverScreen {
         fontFamily: 'Arial',
         fontSize: '18px',
         fontWeight: 'bold',
-        color: '#ffffff',
+      color: '#ffffff',
         stroke: '#8b4513', // Marrón para contraste con el dorado
         strokeThickness: 2
       }
@@ -265,7 +265,7 @@ export default class GameOverScreen {
         fontFamily: 'Arial',
         fontSize: '24px',
         fontWeight: 'bold',
-        color: '#ffffff',
+      color: '#ffffff',
         stroke: '#8b4513',
         strokeThickness: 3
       }
@@ -628,11 +628,11 @@ export default class GameOverScreen {
         });
       } else {
         // Si no está visible, simplemente destruir
-        this.container.destroy();
-        this.container = null;
-      }
+      this.container.destroy();
+      this.container = null;
+    }
     }
 
-    this.isVisible = false;
+      this.isVisible = false;
   }
 }

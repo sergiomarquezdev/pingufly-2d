@@ -1,279 +1,362 @@
-# PinguFly 🐧
+# 🐧 PinguFly
 
 ![License](https://img.shields.io/badge/license-ISC-blue.svg)
 ![Phaser Version](https://img.shields.io/badge/Phaser-3.88.2-brightgreen.svg)
 ![Status](https://img.shields.io/badge/status-In%20Development-yellow)
-
-A modern web-based remake of the classic Yeti Sports Pingu Throw game. Launch a penguin as far as possible through a beautifully designed winter landscape and aim for the highest distance score!
-
-[Play PinguFly Online](https://pingufly.sergiomarquez.dev/) | [Report a Bug](https://github.com/sergiomarquezdev/pingufly-2d/issues) | [Request a Feature](https://github.com/sergiomarquezdev/pingufly-2d/issues)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-yellow.svg)
+![Vite](https://img.shields.io/badge/Vite-6.2.2-blueviolet.svg)
 
 <div align="center">
   <img src="public/assets/images/game-screenshot.png" alt="PinguFly Gameplay" width="80%">
-  <p><em>PinguFly in action: Angle selection phase with the penguin ready for launch</em></p>
+  <p><em>PinguFly en acción: Fase de selección de ángulo con el pingüino listo para ser lanzado</em></p>
 </div>
 
-## 📖 Table of Contents
+Una reimaginación moderna del clásico juego Yeti Sports Pingu Throw, donde lanzas un pingüino lo más lejos posible a través de un hermoso paisaje invernal y compites por la mejor distancia.
 
-- [About The Project](#-about-the-project)
-  - [Built With](#built-with)
-  - [Game Features](#game-features)
-- [Features in Detail](#-features-in-detail)
-  - [Physics-Based Gameplay](#physics-based-gameplay)
-  - [Two-Stage Launch System](#two-stage-launch-system)
-  - [Dynamic Winter Environment](#dynamic-winter-environment)
-  - [Score and Progress Tracking](#score-and-progress-tracking)
-  - [Responsive UI Design](#responsive-ui-design)
-  - [Game State Management](#game-state-management)
-- [Technical Implementation](#-technical-implementation)
-  - [Performance Optimizations](#performance-optimizations)
-  - [Modular Code Architecture](#modular-code-architecture)
-  - [Analytics Integration](#analytics-integration)
-- [Getting Started](#-getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-- [How to Play](#-how-to-play)
-  - [Controls](#controls)
-  - [Game Mechanics](#game-mechanics)
-- [Development Roadmap](#️-development-roadmap)
-- [Project Structure](#-project-structure)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Contact](#-contact)
-- [Acknowledgments](#-acknowledgments)
+[¡Juega PinguFly Online!](https://pingufly.sergiomarquez.dev/) | [Reportar un bug](https://github.com/sergiomarquezdev/pingufly-2d/issues) | [Sugerir una función](https://github.com/sergiomarquezdev/pingufly-2d/issues)
 
-## 🎮 About The Project
+## 📖 Contenido
 
-PinguFly is a web-based remake of the classic Yeti Sports game where players launch a penguin using a yeti and a flamingo as a golf club. The objective is to launch the penguin as far as possible across an icy terrain, competing for the highest distance score.
+- [🐧 PinguFly](#-pingufly)
+  - [📖 Contenido](#-contenido)
+  - [🎮 Sobre el Proyecto](#-sobre-el-proyecto)
+    - [Construido Con](#construido-con)
+    - [Características del Juego](#características-del-juego)
+  - [✨ Funcionalidades en Detalle](#-funcionalidades-en-detalle)
+    - [Física Realista](#física-realista)
+    - [Sistema de Lanzamiento en Dos Fases](#sistema-de-lanzamiento-en-dos-fases)
+    - [Entorno Invernal Dinámico](#entorno-invernal-dinámico)
+    - [Seguimiento de Puntuación y Progreso](#seguimiento-de-puntuación-y-progreso)
+    - [Diseño UI Responsivo](#diseño-ui-responsivo)
+    - [Gestión de Estados de Juego](#gestión-de-estados-de-juego)
+  - [🔧 Arquitectura y Diseño Técnico](#-arquitectura-y-diseño-técnico)
+    - [Estructura Modular](#estructura-modular)
+    - [Sistema de Componentes](#sistema-de-componentes)
+    - [Manejo de Recursos](#manejo-de-recursos)
+    - [Flujo de Juego](#flujo-de-juego)
+  - [⚙️ Implementación Técnica](#️-implementación-técnica)
+    - [Optimizaciones de Rendimiento](#optimizaciones-de-rendimiento)
+    - [Arquitectura de Código Modular](#arquitectura-de-código-modular)
+    - [Integración de Analytics](#integración-de-analytics)
+    - [Adaptaciones para Móviles](#adaptaciones-para-móviles)
+  - [🚀 Primeros Pasos](#-primeros-pasos)
+    - [Requisitos Previos](#requisitos-previos)
+    - [Instalación](#instalación)
+    - [Comandos Disponibles](#comandos-disponibles)
+  - [🎮 Cómo Jugar](#-cómo-jugar)
+    - [Controles](#controles)
+    - [Mecánicas de Juego](#mecánicas-de-juego)
+  - [🛣️ Roadmap de Desarrollo](#️-roadmap-de-desarrollo)
+  - [📂 Estructura del Proyecto](#-estructura-del-proyecto)
+  - [👥 Contribuyendo](#-contribuyendo)
+  - [📝 Licencia](#-licencia)
+  - [📞 Contacto](#-contacto)
+  - [🙏 Agradecimientos](#-agradecimientos)
 
-This remake enhances the fundamental experience of the original game using modern web technologies, particularly Phaser 3 and JavaScript, making it playable across various devices including mobile phones. The game features a rich winter environment with dynamic elements such as snowflakes, trees, snowmen, and igloos that create an immersive experience.
+## 🎮 Sobre el Proyecto
 
-### Built With
+PinguFly recrea la experiencia nostálgica del clásico juego Yeti Sports donde un yeti lanza un pingüino usando un flamenco como palo de golf. El objetivo es simple pero adictivo: lanzar el pingüino lo más lejos posible a través de un paisaje helado, compitiendo por la mayor distancia.
 
-* [Phaser 3.88.2](https://phaser.io/) - A powerful 2D game framework for making HTML5 games
-* [JavaScript (ES6+)](https://developer.mozilla.org/en-US/docs/Web/JavaScript) - Modern JavaScript for game logic
-* [Vite 6.2.2](https://vitejs.dev/) - Next generation frontend tooling for fast development and optimized builds
-* [Matter.js](https://brm.io/matter-js/) - 2D physics engine (integrated with Phaser)
-* [HTML5](https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5) & [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS) - For structure and styling
+Este remake aprovecha las tecnologías web modernas, especialmente Phaser 3 y JavaScript ES6+, creando una experiencia de juego fluida y accesible tanto en ordenadores como en dispositivos móviles. El juego presenta un rico ambiente invernal con elementos dinámicos como copos de nieve, árboles, muñecos de nieve e iglús que crean una experiencia inmersiva.
 
-### Game Features
+### Construido Con
 
-* 🎯 Two-stage launch mechanics: angle selection followed by power selection
-* ❄️ Dynamic winter environment with animated snowfall and wind simulation
-* 🏔️ Beautifully designed landscapes with mountains, trees, igloos, and snowmen
-* 🎚️ Intuitive controls for both desktop and mobile
-* 🌊 Smooth physics-based gameplay with realistic projectile motion
-* 📊 Score tracking and personal best records with visual feedback
-* 🏆 Multiple launch attempts per game session
-* 📱 Responsive design that works on various screen sizes
-* 🎨 Appealing visuals with smooth animations and glacier-styled UI
-* 🧩 Modular code architecture for improved maintenance
+* [Phaser 3.88.2](https://phaser.io/) - Framework de juegos 2D potente para HTML5
+* [JavaScript ES6+](https://developer.mozilla.org/es/docs/Web/JavaScript) - JavaScript moderno con patrones funcionales
+* [Vite 6.2.2](https://vitejs.dev/) - Herramienta de desarrollo ultra-rápida para frontend
+* [Matter.js](https://brm.io/matter-js/) - Motor de física 2D (integrado con Phaser)
+* [HTML5](https://developer.mozilla.org/es/docs/Web/Guide/HTML/HTML5) y [CSS3](https://developer.mozilla.org/es/docs/Web/CSS) - Para estructura y estilo
 
-## ✨ Features in Detail
+### Características del Juego
 
-### Physics-Based Gameplay
-PinguFly utilizes the Matter.js physics engine integrated with Phaser to create realistic projectile motion. The penguin's trajectory is affected by:
-- Gravity and air resistance
-- Launch angle and power
-- Ground friction (simulating ice for longer slides)
-- Physical collisions with the environment
+* 🎯 Mecánica de lanzamiento en dos fases: selección de ángulo seguida de selección de potencia
+* ❄️ Entorno invernal dinámico con nevada animada, efectos de viento y fondos con parallax
+* 🏔️ Paisajes diseñados con montañas, árboles, iglús y muñecos de nieve
+* 🎚️ Controles intuitivos optimizados para escritorio y móvil
+* 🌊 Jugabilidad física realista con trayectorias de proyectil naturales
+* 📊 Seguimiento de puntuación y récords personales con retroalimentación visual
+* 🏆 Múltiples intentos de lanzamiento por sesión de juego
+* 📱 Diseño responsivo que funciona en diversos tamaños de pantalla
+* 🎨 Efectos visuales atractivos con animaciones fluidas y UI estilo glaciar
+* 🧩 Arquitectura de código modular para mejor mantenimiento y escalabilidad
 
-### Two-Stage Launch System
-The game implements a strategic two-stage launch mechanic:
-1. **Angle Selection**: An animated arrow indicates the launch angle, oscillating between 0° and 90°. Players time their click/tap to select the optimal angle.
-2. **Power Selection**: A power bar rises and falls, allowing players to choose the perfect power level for their shot.
+## ✨ Funcionalidades en Detalle
 
-### Dynamic Winter Environment
-- **Atmospheric Snowfall**: Continuous snowfall creates a dynamic winter atmosphere with varied opacity, sizes, and wind effects
-- **Parallax Backgrounds**: Multi-layered mountains and sky create depth perception
-- **Environmental Elements**: Strategically placed trees, snowmen, and igloos enhance the visual experience
-- **Dynamic Clouds**: Drifting clouds in various shapes and sizes add atmosphere to the sky
-- **Sun and Lighting**: Enhanced visual effects with sun rays and ambient lighting
+### Física Realista
+PinguFly utiliza el motor de física Matter.js integrado con Phaser para crear una trayectoria de proyectil realista. La trayectoria del pingüino se ve afectada por:
+- Gravedad y resistencia del aire ajustadas para un vuelo más extenso
+- Ángulo y potencia de lanzamiento calculados con precisión
+- Fricción del suelo reducida para simular hielo y deslizamientos más largos
+- Colisiones físicas con el entorno calculadas en tiempo real
 
-### Score and Progress Tracking
-- Tracks distance in real-time during penguin flight
-- Accumulates total distance across multiple attempts
-- Stores and displays personal best records using local storage
-- Visual feedback shows remaining attempts with animated penguin icons
-- Special effects for new record achievements on the Game Over screen
+### Sistema de Lanzamiento en Dos Fases
+El juego implementa un sistema estratégico de lanzamiento en dos fases:
+1. **Selección de Ángulo**: Una flecha animada indica el ángulo de lanzamiento, oscilando entre 0° y 90°. Los jugadores sincronizan su clic/toque para seleccionar el ángulo óptimo.
+2. **Selección de Potencia**: Una barra de potencia sube y baja, permitiendo a los jugadores elegir el nivel de potencia perfecto para su lanzamiento.
 
-### Responsive UI Design
-- Adapts seamlessly to different screen sizes and orientations
-- Full-screen game experience with proper scaling
-- Touch controls optimized for mobile devices
-- Desktop controls with keyboard shortcuts for improved user experience
-- Glacier-styled UI elements with glowing effects and animations
+### Entorno Invernal Dinámico
+- **Nevada Atmosférica**: Copos de nieve continuos crean una atmósfera invernal con opacidad, tamaños y efectos de viento variables
+- **Fondos con Parallax**: Montañas y cielo en múltiples capas crean percepción de profundidad
+- **Elementos Ambientales**: Árboles, muñecos de nieve e iglús estratégicamente ubicados mejoran la experiencia visual
+- **Nubes Dinámicas**: Nubes a la deriva en diversas formas y tamaños añaden atmósfera al cielo
+- **Sol y Efectos de Luz**: Efectos visuales mejorados con rayos de sol e iluminación ambiental
 
-### Game State Management
-- Centralized state management with GameStateManager
-- Clean scene transitions with loading states
-- Polished Game Over screen with final scores, best distance records, and restart options
-- Persistent storage for best distances
-- Modal state system to control user interactions at different game stages
+### Seguimiento de Puntuación y Progreso
+- Seguimiento de distancia en tiempo real durante el vuelo del pingüino
+- Acumulación de distancia total a través de múltiples intentos
+- Almacenamiento y visualización de récords personales usando localStorage
+- Retroalimentación visual muestra intentos restantes con iconos de pingüino animados
+- Efectos especiales para nuevos récords en la pantalla de Game Over
 
-## 🔧 Technical Implementation
+### Diseño UI Responsivo
+- Se adapta perfectamente a diferentes tamaños de pantalla y orientaciones
+- Experiencia de juego a pantalla completa con escalado adecuado
+- Controles táctiles optimizados para dispositivos móviles
+- Controles de escritorio con atajos de teclado para mejor experiencia
+- Elementos UI con estilo glaciar con efectos brillantes y animaciones
 
-### Performance Optimizations
-- Efficient asset loading with proper preloading and caching strategies
-- Texture optimization for reduced memory usage and faster rendering
-- Particle system optimizations for snow effects without performance impact
-- Efficient state management to minimize unnecessary updates
-- Scene management for better memory utilization
-- Optimized physics calculations for smooth gameplay
+### Gestión de Estados de Juego
+- Gestión de estados centralizada con GameStateManager
+- Transiciones limpias entre escenas con estados de carga
+- Pantalla de Game Over pulida con puntuaciones finales, récords y opciones para reiniciar
+- Almacenamiento persistente para mejores distancias
+- Sistema de estados modales para controlar interacciones en diferentes etapas
 
-### Modular Code Architecture
-- Functional programming patterns for better code organization
-- Component-based design focused on single responsibilities
-- Separation of concerns between game logic, UI, and physics
-- Centralized configuration for easy adjustments and tuning
-- Clean interfaces between systems for better maintainability
-- Efficient event handling with proper cleanup to prevent memory leaks
+## 🔧 Arquitectura y Diseño Técnico
 
-### Analytics Integration
-- Google Analytics integration for tracking user engagement
-- Custom event tracking for gameplay metrics
-- Performance monitoring for optimization insights
-- Non-intrusive implementation that maintains game performance
+### Estructura Modular
+PinguFly está construido con una arquitectura modular que separa claramente las responsabilidades:
 
-## 🚀 Getting Started
+- **Componentes**: Unidades reutilizables que gestionan aspectos específicos del juego
+  - **CharacterManager**: Gestiona todos los personajes del juego (Yeti, Pingüino, Flamenco)
+  - **BackgroundManager**: Controla elementos de fondo y parallax
+  - **CloudManager**: Maneja la generación y animación de nubes
+  - **GroundManager**: Configura la física del suelo y el terreno
+  - **LaunchManager**: Coordina el proceso de lanzamiento completo
+  - **UI Components**: Maneja visualización y entrada de usuario
 
-Follow these steps to get a local copy up and running.
+- **Escenas**: Etapas distintas del juego con flujos específicos
+  - **Boot**: Configuración inicial y precarga mínima
+  - **Preload**: Carga de recursos con barra de progreso
+  - **Menu**: Menú principal e instrucciones
+  - **Game**: Lógica principal de juego
+  - **Results**: Pantalla de resultados
+  - **AnimationTest**: Escena para pruebas de animación
 
-### Prerequisites
+- **Utilidades**: Servicios compartidos para gestión de datos y lógica
+  - **GameStateManager**: Sistema central de estados del juego
+  - **ScoreManager**: Gestión de puntuaciones y mejor distancia
+  - **StorageManager**: Interfaz para localStorage
+  - **CameraController**: Control avanzado de cámara
 
-* Node.js (v14.0.0 or later)
-* npm (comes with Node.js)
+### Sistema de Componentes
+Cada componente del juego sigue el principio de responsabilidad única:
+
+1. **BackgroundManager**: Crea un entorno de parallax con múltiples capas (cielo, montañas, sol) y gestiona la generación de elementos decorativos.
+
+2. **CharacterManager**: Responsable de la creación, posicionamiento y animación de todos los personajes, así como la aplicación de física al pingüino durante el vuelo.
+
+3. **CloudManager**: Genera nubes en diferentes capas con movimiento independiente, optimizado para móviles con detección de capacidades.
+
+4. **LaunchManager**: Coordina el proceso completo de lanzamiento, comunicándose con AngleIndicator y PowerBar.
+
+5. **GameUI**: Centraliza la creación y actualización de todos los elementos de interfaz, incluyendo puntuaciones, intentos e indicaciones.
+
+### Manejo de Recursos
+- **Carga Progresiva**: Los recursos se cargan en la escena Preload con una barra de progreso
+- **Gestión de Memoria**: Los componentes implementan métodos destroy() para limpieza explícita
+- **Reutilización de Assets**: Estructuras de datos compartidas para definiciones de animación
+- **Escalado Adaptativo**: Detección de capacidades del dispositivo para ajustar calidad visual
+
+### Flujo de Juego
+1. **Inicialización**: Boot → Preload → Menu
+2. **Ciclo de Juego**:
+   - Inicio (READY)
+   - Selección de ángulo (ANGLE_SELECTION)
+   - Selección de potencia (POWER_SELECTION)
+   - Lanzamiento (LAUNCHING)
+   - Vuelo (FLYING)
+   - Fin del lanzamiento (STOPPED)
+   - Siguiente lanzamiento o fin (WAIT_FOR_CLICK / ENDED)
+3. **Fin de Juego**: Game Over → Results / Menu
+
+## ⚙️ Implementación Técnica
+
+### Optimizaciones de Rendimiento
+- Carga eficiente de assets con precarga y estrategias de caché
+- Optimización de texturas para menor uso de memoria y renderizado más rápido
+- Sistema de partículas optimizado para efectos de nieve sin impacto en rendimiento
+- Gestión eficiente de estados para minimizar actualizaciones innecesarias
+- Gestión de escenas para mejor utilización de memoria
+- Cálculos físicos optimizados para jugabilidad fluida
+- Detección de capacidades del dispositivo para ajustes dinámicos de calidad
+
+### Arquitectura de Código Modular
+- Patrones de programación funcional para mejor organización del código
+- Diseño basado en componentes enfocado en responsabilidades únicas
+- Separación de preocupaciones entre lógica de juego, UI y física
+- Configuración centralizada para ajustes y afinación fáciles
+- Interfaces limpias entre sistemas para mejor mantenimiento
+- Manejo eficiente de eventos con limpieza adecuada para prevenir fugas de memoria
+- Componentes desacoplados que se comunican a través de sistemas de observadores
+
+### Integración de Analytics
+- Integración con Google Analytics para seguimiento de engagement
+- Seguimiento de eventos personalizados para métricas de jugabilidad
+- Monitoreo de rendimiento para insights de optimización
+- Implementación no intrusiva que mantiene el rendimiento del juego
+
+### Adaptaciones para Móviles
+- Detección automática de dispositivos móviles para ajustes de rendimiento
+- Reducción de elementos visuales en dispositivos de menor potencia
+- Optimización de cálculos físicos para CPU móvil
+- Controles táctiles adaptados con áreas de hit ampliadas
+- Interfaz de usuario escalable para diferentes tamaños de pantalla
+- Proporciones adaptativas para elementos visuales clave
+
+## 🚀 Primeros Pasos
+
+Sigue estos pasos para obtener una copia local funcionando.
+
+### Requisitos Previos
+
+* Node.js (v14.0.0 o posterior)
+* npm (viene con Node.js)
 
 ```bash
-# Check your Node.js version
+# Verificar versión de Node.js
 node -v
 
-# Check your npm version
+# Verificar versión de npm
 npm -v
 ```
 
-### Installation
+### Instalación
 
-1. Clone the repository
+1. Clonar el repositorio
    ```sh
    git clone https://github.com/sergiomarquezdev/pingufly-2d.git
    cd pingufly-2d
    ```
 
-2. Install NPM packages
+2. Instalar paquetes NPM
    ```sh
    npm install
    ```
 
-3. Start the development server
+3. Iniciar el servidor de desarrollo
    ```sh
    npm run dev
    ```
 
-4. Open your browser and navigate to `http://localhost:3000`
+4. Abre tu navegador y navega a `http://localhost:3000`
 
-5. For production build
-   ```sh
-   npm run build
-   ```
+### Comandos Disponibles
 
-6. Preview the production build
-   ```sh
-   npm run preview
-   ```
+```bash
+# Iniciar servidor de desarrollo con hot-reload
+npm run dev
 
-## 🎮 How to Play
+# Compilar para producción
+npm run build
 
-### Controls
+# Previsualizar la compilación de producción
+npm run preview
+```
 
-- **PC/Desktop**: Use mouse clicks or taps to interact
-- **Mobile**: Use touch screen taps to interact
-- **Keyboard shortcuts**:
-  - `ESC` - Return to main menu
-  - `R` - Restart game
+## 🎮 Cómo Jugar
 
-### Game Mechanics
+### Controles
 
-1. **Start the game** - Click/tap the "Play" button on the main menu
-2. **Angle selection** - Click/tap when the moving arrow is at your desired launch angle
-3. **Power selection** - Click/tap when the power bar reaches your desired strength
-4. **Watch the penguin fly** - The distance is measured and added to your total score
-5. **Game Over** - After your attempts are exhausted, view your total distance and best record
-6. **Play Again** - Choose to restart the game or return to the main menu
+- **PC/Escritorio**: Usa clics del ratón o toques para interactuar
+- **Móvil**: Usa toques en la pantalla para interactuar
+- **Atajos de teclado**:
+  - `ESC` - Volver al menú principal
+  - `R` - Reiniciar juego
 
-## 🛣️ Development Roadmap
+### Mecánicas de Juego
 
-- ✅ Core game mechanics and physics
-- ✅ Basic UI elements and game flow
-- ✅ Score tracking and record keeping
-- ✅ Responsive design for multiple devices
-- ✅ Refactored code architecture for better maintainability
-- ✅ Improved positioning system for game characters
-- ✅ Enhanced Game Over screen with restart options
-- ✅ Optimized power and angle selection UI
-- ✅ Dynamic snowfall effect with wind simulation
-- ✅ Environmental elements (trees, snowmen, igloos)
-- ❌ Final character assets and animations
-- ❌ Sound effects and background music
-- ❌ Performance optimizations for mobile devices
-- ❌ Additional obstacles and interactive elements
-- ❌ Online leaderboards
+1. **Inicia el juego** - Haz clic/toca el botón "Jugar" en el menú principal
+2. **Selección de ángulo** - Haz clic/toca cuando la flecha en movimiento esté en el ángulo deseado
+3. **Selección de potencia** - Haz clic/toca cuando la barra de potencia alcance el nivel deseado
+4. **Observa volar al pingüino** - La distancia se mide y se suma a tu puntuación total
+5. **Game Over** - Después de agotar tus intentos, visualiza tu distancia total y mejor récord
+6. **Jugar de nuevo** - Elige reiniciar el juego o volver al menú principal
 
-For a more detailed roadmap, see [timeline.md](project_docs/timeline.md).
+## 🛣️ Roadmap de Desarrollo
 
-## 📂 Project Structure
+- ✅ Mecánicas principales de juego y física
+- ✅ Elementos básicos de UI y flujo de juego
+- ✅ Seguimiento de puntuación y mantenimiento de récords
+- ✅ Diseño responsivo para múltiples dispositivos
+- ✅ Arquitectura de código refactorizada para mejor mantenimiento
+- ✅ Sistema de posicionamiento mejorado para personajes del juego
+- ✅ Pantalla de Game Over mejorada con opciones de reinicio
+- ✅ UI optimizada de selección de potencia y ángulo
+- ✅ Efecto de nevada dinámica con simulación de viento
+- ✅ Elementos ambientales (árboles, muñecos de nieve, iglús)
+- ❌ Assets finales de personajes y animaciones
+- ❌ Efectos de sonido y música de fondo
+- ❌ Optimizaciones de rendimiento para dispositivos móviles
+- ❌ Obstáculos adicionales y elementos interactivos
+- ❌ Tabla de clasificación online
 
-The project follows a modular organization pattern, with code separated by feature and responsibility:
+Para un roadmap más detallado, consulta [timeline.md](project_docs/timeline.md).
+
+## 📂 Estructura del Proyecto
+
+El proyecto sigue un patrón de organización modular, con código separado por característica y responsabilidad:
 
 ```
 pingufly-2d
-├─ src/                       # Source code
-│  ├─ components/             # Reusable game components
-│  │  ├─ characters/          # Character-related components (CharacterManager)
-│  │  ├─ environment/         # Environment components (BackgroundManager, CloudManager, GroundManager)
-│  │  ├─ gameplay/            # Core gameplay mechanics (LaunchManager)
-│  │  └─ ui/                  # User interface components (GameUI, PowerBar, AngleIndicator, GameOverScreen)
-│  ├─ config/                 # Game configuration (gameConfig, physicsConfig, penguinAnimations)
-│  ├─ entities/               # Game entities and objects
-│  ├─ scenes/                 # Phaser scenes (Game, Menu, Preload, Boot, AnimationTest)
-│  ├─ utils/                  # Utility classes (ScoreManager, CameraController, GameStateManager, StorageManager)
-│  └─ main.js                 # Entry point
-├─ public/                    # Static assets
-│  └─ assets/                 # Game assets
-│     ├─ images/              # Image assets (backgrounds, characters, UI)
-│     └─ audio/               # Audio assets
-├─ project_docs/              # Project documentation
-│  ├─ assets_checklist.md     # Asset tracking and requirements
-│  ├─ timeline.md             # Development timeline and roadmap
-│  └─ pingufly-design_development-documentation.md # Design and development documentation
-├─ index.html                 # Main HTML entry point
-└─ vite.config.js             # Vite configuration
+├─ src/                       # Código fuente
+│  ├─ components/             # Componentes reusables
+│  │  ├─ characters/          # Componentes de personajes (CharacterManager)
+│  │  ├─ environment/         # Componentes del entorno (BackgroundManager, CloudManager, GroundManager)
+│  │  ├─ gameplay/            # Mecánicas de juego (LaunchManager)
+│  │  └─ ui/                  # Componentes de interfaz (GameUI, PowerBar, AngleIndicator, GameOverScreen)
+│  ├─ config/                 # Configuración del juego (gameConfig, physicsConfig, penguinAnimations)
+│  ├─ entities/               # Entidades y objetos del juego
+│  ├─ scenes/                 # Escenas Phaser (Game, Menu, Preload, Boot, AnimationTest)
+│  ├─ utils/                  # Clases utilitarias (ScoreManager, CameraController, GameStateManager, StorageManager)
+│  └─ main.js                 # Punto de entrada
+├─ public/                    # Assets estáticos
+│  └─ assets/                 # Assets del juego
+│     ├─ images/              # Assets de imagen (fondos, personajes, UI)
+│     └─ audio/               # Assets de audio
+├─ project_docs/              # Documentación del proyecto
+│  ├─ assets_checklist.md     # Seguimiento de assets y requisitos
+│  ├─ timeline.md             # Línea de tiempo de desarrollo y roadmap
+│  └─ pingufly-design_development-documentation.md # Documentación de diseño y desarrollo
+├─ index.html                 # Punto de entrada HTML principal
+├─ vite.config.js             # Configuración de Vite
+└─ package.json               # Configuración NPM y dependencias
 ```
 
-Each component is focused on a single responsibility, making the codebase easier to maintain and extend. All major systems follow functional programming patterns where possible, with classes used only when necessary for Phaser-specific implementations.
+Cada componente está enfocado en una única responsabilidad, haciendo que la base de código sea más fácil de mantener y extender. Todos los sistemas principales siguen patrones de programación funcional donde es posible, usando clases solo cuando es necesario para implementaciones específicas de Phaser.
 
-## 👥 Contributing
+## 👥 Contribuyendo
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+Las contribuciones son lo que hace que la comunidad de código abierto sea un lugar increíble para aprender, inspirar y crear. Cualquier contribución que hagas es **muy apreciada**.
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1. Haz un Fork del proyecto
+2. Crea tu rama de características (`git checkout -b feature/CaracteristicaIncreible`)
+3. Haz commit de tus cambios (`git commit -m 'Añadir alguna CaracterísticaIncreible'`)
+4. Haz Push a la rama (`git push origin feature/CaracteristicaIncreible`)
+5. Abre un Pull Request
 
-When contributing, please follow the established code patterns:
-- Use functional programming where possible
-- Maintain single responsibility for components
-- Follow the established naming conventions
-- Prioritize performance optimizations
-- Write clear documentation for your changes
+Al contribuir, sigue los patrones de código establecidos:
+- Usa programación funcional donde sea posible
+- Mantén la responsabilidad única para componentes
+- Sigue las convenciones de nomenclatura establecidas
+- Prioriza las optimizaciones de rendimiento
+- Escribe documentación clara para tus cambios
 
-## 📝 License
+## 📝 Licencia
 
-Distributed under the ISC License. See `LICENSE` for more information.
+Distribuido bajo la Licencia ISC. Consulta `LICENSE` para más información.
 
-## 📞 Contact
+## 📞 Contacto
 
 **Sergio Márquez**
 
@@ -281,13 +364,13 @@ Distributed under the ISC License. See `LICENSE` for more information.
 [![X](https://img.shields.io/badge/X-smarquezdev-%23000000.svg?logo=X&logoColor=white)](https://x.com/smarquezdev)
 [![LinkedIn](https://custom-icon-badges.demolab.com/badge/LinkedIn-Sergio%20Márquez%20Pérez-0A66C2?logo=linkedin-white&logoColor=fff)](https://www.linkedin.com/in/sergio-marquez-perez/)
 [![Email](https://img.shields.io/badge/Email-contacto@sergiomarquez.dev-D14836?logo=gmail&style=flat-square)](mailto:contacto@sergiomarquez.dev)
-[![Website](https://img.shields.io/badge/Website-sergiomarquez.dev-4285F4?logo=google-chrome&style=flat-square)](https://sergiomarquez.dev)
+[![Web](https://img.shields.io/badge/Web-sergiomarquez.dev-4285F4?logo=google-chrome&style=flat-square)](https://sergiomarquez.dev)
 
-Project Link: [https://github.com/sergiomarquezdev/pingufly-2d](https://github.com/sergiomarquezdev/pingufly-2d)
+Enlace del proyecto: [https://github.com/sergiomarquezdev/pingufly-2d](https://github.com/sergiomarquezdev/pingufly-2d)
 
-## 🙏 Acknowledgments
+## 🙏 Agradecimientos
 
-* Original Yeti Sports games for inspiration
-* [Phaser](https://phaser.io/) community for their excellent documentation and examples
-* [OpenGameArt](https://opengameart.org/) for some of the game assets
-* Everyone who has contributed to making this project better
+* Los juegos originales de Yeti Sports por la inspiración
+* La comunidad de [Phaser](https://phaser.io/) por su excelente documentación y ejemplos
+* [OpenGameArt](https://opengameart.org/) por algunos de los assets del juego
+* A todos los que han contribuido a hacer este proyecto mejor
