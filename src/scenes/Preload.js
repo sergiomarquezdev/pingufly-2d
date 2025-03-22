@@ -97,8 +97,7 @@ export default class Preload extends Phaser.Scene {
     this.load.audio('sfx_land', 'assets/audio/sfx_land.ogg');
     this.load.audio('sfx_slide', 'assets/audio/sfx_slide.ogg');
     this.load.audio('sfx_record', 'assets/audio/sfx_record.ogg');
-    this.load.audio('sfx_angle', 'assets/audio/sfx_angle.ogg');
-    this.load.audio('sfx_power', 'assets/audio/sfx_power.ogg');
+    this.load.audio('sfx_angle_power', 'assets/audio/sfx_angle_power.ogg');
 
     // Evento cuando un archivo de audio ha sido cargado
     this.load.on('filecomplete', (key, type, data) => {

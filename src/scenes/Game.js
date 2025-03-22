@@ -47,7 +47,8 @@ export default class Game extends Phaser.Scene {
     this.soundManager.playMusic(SoundManager.MUSIC_MAIN, {
       loop: true,
       fade: true,
-      fadeTime: 1000
+      fadeTime: 1000,
+      seek: 2
     });
 
     // Configurar el mundo físico con límites extendidos hacia la izquierda (valores negativos de X)
@@ -267,7 +268,8 @@ export default class Game extends Phaser.Scene {
     this.soundManager.playMusic(SoundManager.MUSIC_MAIN, {
       loop: true,
       fade: true,
-      fadeTime: 500
+      fadeTime: 500,
+      seek: 2
     });
 
     // Detener físicas inmediatamente
@@ -428,7 +430,7 @@ export default class Game extends Phaser.Scene {
       switch (this.stateManager.currentState) {
         case 'ANGLE_SELECTION':
           // Reproducir sonido de ángulo seleccionado
-          this.soundManager.playSfx('sfx_angle');
+          this.soundManager.playSfx('sfx_angle_power');
 
           this.launchManager.endAngleSelection();
           this.launchManager.startPowerSelection();
@@ -436,7 +438,7 @@ export default class Game extends Phaser.Scene {
 
         case 'POWER_SELECTION':
           // Reproducir sonido de potencia seleccionada
-          this.soundManager.playSfx('sfx_power');
+          this.soundManager.playSfx('sfx_angle_power');
 
           this.launchManager.endPowerSelection();
           this.launchManager.launchPenguin();

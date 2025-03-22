@@ -7,11 +7,6 @@ Este documento enumera los recursos gráficos y de audio necesarios para el jueg
 ### Personajes
 
 #### Yeti
-- [X] Sprite base del Yeti (implementación provisional)
-  - *Nombre de archivo*: `yeti.png`
-  - *Ruta*: `assets/images/characters`
-  - *Tamaño*: 200x250px
-  - *Descripción*: Yeti blanco con expresión amigable
 - [ ] Spritesheet del Yeti (animaciones pendientes)
   - *Nombre de archivo*: `yeti_sheet.png`
   - *Tamaño recomendado*: 512x512px
@@ -19,12 +14,6 @@ Este documento enumera los recursos gráficos y de audio necesarios para el jueg
   - *Estado*: Pendiente de diseño
 
 #### Pingüino
-- [X] Sprite del pingüino
-  - *Nombre de archivo*: `penguin.png`
-  - *Ruta*: `assets/images/characters`
-  - *Tamaño*: 256x320px
-  - *Tamaño de cada elemento*: 32x32 (cada acción del sprite)
-  - *Descripción*: Pingüino que realiza distintas acciones
 - [X] Spritesheet del pingüino
   - *Nombre de archivo*: `penguin_sheet.png`
   - *Ruta*: `assets/images/characters`
@@ -120,19 +109,19 @@ Este documento enumera los recursos gráficos y de audio necesarios para el jueg
   - *Nombre de archivo*: `music_main.mp3`
   - *Duración*: 1-2 minutos (loop)
   - *Descripción*: Melodía alegre con ambiente invernal
-  - *Estado*: Pendiente de implementar
+  - *Estado*: IMPLEMENTADO
 
 - [X] Tema entre menús
   - *Nombre de archivo*: `music_menu.mp3`
   - *Duración*: 1-2 minutos (loop)
   - *Descripción*: Melodía alegre con ambiente invernal
-  - *Estado*: Pendiente de implementar
+  - *Estado*: IMPLEMENTADO
 
 - [X] Tema de Game Over
   - *Nombre de archivo*: `music_gameover.mp3`
   - *Duración*: 30 segundos (loop)
   - *Descripción*: Variación del tema principal con tono conclusivo
-  - *Estado*: Pendiente de implementar
+  - *Estado*: IMPLEMENTADO
 
 ### Efectos de Sonido
 - [X] Sonido de botón
@@ -170,20 +159,8 @@ Este documento enumera los recursos gráficos y de audio necesarios para el jueg
   - *Descripción*: Fanfarria positiva para nuevo récord
   - *Estado*: Pendiente de implementar
 
-- [X] Sonido de ángulo seleccionado
-  - *Nombre de archivo*: `sfx_angle.wav`
+- [X] Sonido de ángulo y potencia seleccionado
+  - *Nombre de archivo*: `sfx_angle_power.wav`
   - *Duración*: 0.3 segundos
-  - *Descripción*: Sonido de confirmación para selección de ángulo
-  - *Estado*: Pendiente de implementar
-
-- [X] Sonido de potencia seleccionada
-  - *Nombre de archivo*: `sfx_power.wav`
-  - *Duración*: 0.3 segundos
-  - *Descripción*: Sonido de confirmación para selección de potencia
-  - *Estado*: Pendiente de implementar
-
-## Optimizaciones Pendientes para Assets
-
-1. **Compresión de Audio**
-   - Preparar formatos alternativos (.ogg) para mejor compatibilidad
-   - Optimizar bitrate para balance entre calidad y tamaño
+  - *Descripción*: Sonido de confirmación para selección de ángulo y potencia
+  - *Estado*: IMPLEMENTADO

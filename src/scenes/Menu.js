@@ -61,11 +61,14 @@ export default class Menu extends Phaser.Scene {
       this.showInstructionsPanel();
     }
 
-    // Reproducir música de menú
-    this.soundManager.playMusic(SoundManager.MUSIC_MENU, {
-      loop: true,
-      fade: true,
-      fadeTime: 1000
+    // Reproducir música de menú con pequeño retraso para evitar solapamientos
+    this.time.delayedCall(100, () => {
+      this.soundManager.playMusic(SoundManager.MUSIC_MENU, {
+        loop: true,
+        fade: true,
+        fadeTime: 1000,
+        seek: 0 // Explícitamente comenzar desde el principio
+      });
     });
   }
 
@@ -914,10 +917,17 @@ export default class Menu extends Phaser.Scene {
 
     animButton.on('pointerdown', () => {
       // Transición de salida
+
+      // Primero detener la música del menú
+      this.soundManager.stopMusic(true, 300);
+
       this.cameras.main.fade(300, 0, 0, 0, false, (camera, progress) => {
         if (progress === 1) {
-          // Iniciar la escena de prueba de animaciones
-          this.scene.start('AnimationTest');
+          // Esperar un poco más para asegurar que la música del menú se haya detenido correctamente
+          this.time.delayedCall(200, () => {
+            // Iniciar la escena de prueba de animaciones
+            this.scene.start('AnimationTest');
+          });
         }
       });
     });

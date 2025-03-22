@@ -5,6 +5,12 @@
 
 import StorageManager from './StorageManager';
 
+// Mantener un registro global de las instancias de música activas
+const globalMusicRegistry = {
+  activeMusicKeys: new Set(),
+  transitionInProgress: false
+};
+
 export default class SoundManager {
   // Claves para localStorage
   static MUSIC_ENABLED_KEY = 'pinguFly_musicEnabled';
@@ -26,6 +32,7 @@ export default class SoundManager {
 
     // Pistas de música activas
     this.currentMusic = null;
+    this.currentMusicKey = null;
 
     // Estado del audio (habilitado/deshabilitado)
     this.musicEnabled = this.loadMusicEnabled();
@@ -34,6 +41,46 @@ export default class SoundManager {
     // Valores de volumen (de 0 a 1)
     this.musicVolume = this.loadMusicVolume();
     this.sfxVolume = this.loadSfxVolume();
+
+    // Escuchar eventos de cambio de escena para limpiar correctamente
+    this.setupSceneEvents();
+  }
+
+  /**
+   * Configura los listeners para eventos de cambio de escena
+   * @private
+   */
+  setupSceneEvents() {
+    // Limpiar cuando esta escena se detenga o se destruya
+    this.scene.events.once('shutdown', this.handleSceneShutdown, this);
+    this.scene.events.once('destroy', this.handleSceneDestroy, this);
+  }
+
+  /**
+   * Maneja el evento de apagado de escena
+   * @private
+   */
+  handleSceneShutdown() {
+    // Detener la música si está sonando y no hay una transición en progreso
+    if (this.currentMusic && this.currentMusic.isPlaying && !globalMusicRegistry.transitionInProgress) {
+      console.log(`🔇 Deteniendo música de escena cerrada: ${this.currentMusicKey}`);
+      this.currentMusic.stop();
+      if (this.currentMusicKey) {
+        globalMusicRegistry.activeMusicKeys.delete(this.currentMusicKey);
+      }
+    }
+
+    // Eliminar listeners para evitar memory leaks
+    this.scene.events.off('shutdown', this.handleSceneShutdown, this);
+    this.scene.events.off('destroy', this.handleSceneDestroy, this);
+  }
+
+  /**
+   * Maneja el evento de destrucción de escena
+   * @private
+   */
+  handleSceneDestroy() {
+    this.handleSceneShutdown();
   }
 
   /**
@@ -97,6 +144,15 @@ export default class SoundManager {
     // No reproducir si la música está deshabilitada
     if (!this.musicEnabled) return;
 
+    // Si ya está sonando esta música en el juego (desde otra escena), no reproducirla de nuevo
+    // A menos que estemos en la escena de AnimationTest o Game que necesitan su propia instancia de música
+    const isTestOrGameScene = this.scene.scene.key === 'AnimationTest' || this.scene.scene.key === 'Game';
+
+    if (globalMusicRegistry.activeMusicKeys.has(key) && !isTestOrGameScene) {
+      console.log(`⏩ La música ${key} ya está sonando en otra escena, omitiendo reproducción duplicada`);
+      return;
+    }
+
     // Valores predeterminados para la configuración
     const defaultConfig = {
       loop: true,
@@ -112,11 +168,16 @@ export default class SoundManager {
     if (this.currentMusic && this.currentMusic.isPlaying) {
       // Si se solicita fade, hacer fade out antes de cambiar
       if (finalConfig.fade) {
+        globalMusicRegistry.transitionInProgress = true;
         this.fadeOutMusic(finalConfig.fadeTime, () => {
           this.startNewMusic(key, finalConfig);
+          globalMusicRegistry.transitionInProgress = false;
         });
       } else {
         this.currentMusic.stop();
+        if (this.currentMusicKey) {
+          globalMusicRegistry.activeMusicKeys.delete(this.currentMusicKey);
+        }
         this.startNewMusic(key, finalConfig);
       }
     } else {
@@ -136,16 +197,35 @@ export default class SoundManager {
     }
 
     try {
+      // Mostrar en qué escena estamos reproduciendo música
+      console.log(`🎮 Reproduciendo música ${key} en la escena: ${this.scene.scene.key}`);
+
       // Iniciar la nueva pista
       this.currentMusic = this.scene.sound.add(key, {
         loop: config.loop,
         volume: config.volume
       });
 
+      // Guardar la clave de la música actual
+      this.currentMusicKey = key;
+
+      // Registrar en el registro global
+      globalMusicRegistry.activeMusicKeys.add(key);
+
+      // Mostrar el registro global de música activa
+      console.log(`🎵 Registro global de música activa: [${Array.from(globalMusicRegistry.activeMusicKeys).join(', ')}]`);
+
       // Reproducir con fade in si está configurado
       if (config.fade) {
         this.currentMusic.setVolume(0);
         this.currentMusic.play();
+
+        // Si se especificó una posición de inicio (seek), aplicarla
+        if (config.seek !== undefined) {
+          this.currentMusic.setSeek(config.seek);
+          console.log(`⏩ Iniciando desde el segundo ${config.seek}`);
+        }
+
         this.scene.tweens.add({
           targets: this.currentMusic,
           volume: config.volume,
@@ -153,8 +233,21 @@ export default class SoundManager {
           ease: 'Linear'
         });
       } else {
-        this.currentMusic.play();
+        // Reproducir normalmente, con o sin seek
+        const seekOptions = config.seek !== undefined ? { seek: config.seek } : undefined;
+        this.currentMusic.play(seekOptions);
+
+        if (config.seek !== undefined) {
+          console.log(`⏩ Iniciando desde el segundo ${config.seek}`);
+        }
       }
+
+      // Configurar evento para cuando termine la música
+      this.currentMusic.once('complete', () => {
+        if (this.currentMusicKey) {
+          globalMusicRegistry.activeMusicKeys.delete(this.currentMusicKey);
+        }
+      });
 
       console.log(`🎵 Reproduciendo música: ${key}`);
     } catch (error) {
@@ -181,6 +274,10 @@ export default class SoundManager {
       ease: 'Linear',
       onComplete: () => {
         this.currentMusic.stop();
+        // Eliminar del registro global
+        if (this.currentMusicKey) {
+          globalMusicRegistry.activeMusicKeys.delete(this.currentMusicKey);
+        }
         if (onComplete) onComplete();
       }
     });
@@ -212,10 +309,18 @@ export default class SoundManager {
   stopMusic(fade = false, fadeTime = 1000) {
     if (!this.currentMusic) return;
 
+    globalMusicRegistry.transitionInProgress = true;
+
     if (fade) {
-      this.fadeOutMusic(fadeTime);
+      this.fadeOutMusic(fadeTime, () => {
+        globalMusicRegistry.transitionInProgress = false;
+      });
     } else {
       this.currentMusic.stop();
+      if (this.currentMusicKey) {
+        globalMusicRegistry.activeMusicKeys.delete(this.currentMusicKey);
+      }
+      globalMusicRegistry.transitionInProgress = false;
     }
   }
 
