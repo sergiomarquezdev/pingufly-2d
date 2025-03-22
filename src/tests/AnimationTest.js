@@ -5,6 +5,7 @@
 
 import Phaser from 'phaser';
 import penguinAnimations from '../config/penguinAnimations';
+import SoundManager from '../utils/SoundManager';
 
 export default class AnimationTest extends Phaser.Scene {
   constructor() {
@@ -17,6 +18,9 @@ export default class AnimationTest extends Phaser.Scene {
   }
 
   create() {
+    // Inicializar gestor de sonido
+    this.soundManager = new SoundManager(this);
+
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
 
@@ -37,6 +41,13 @@ export default class AnimationTest extends Phaser.Scene {
 
     // Añadir copos de nieve animados
     this.createSnowflakes(width, height);
+
+    // Reproducir música principal (la misma que en el juego)
+    this.soundManager.playMusic(SoundManager.MUSIC_MAIN, {
+      loop: true,
+      fade: true,
+      fadeTime: 1000
+    });
   }
 
   /**
@@ -813,6 +824,9 @@ export default class AnimationTest extends Phaser.Scene {
   }
 
   handleBackButton() {
+    // Detener la música
+    this.soundManager.stopMusic(true, 300);
+
     // Agregar una transición de salida
     this.cameras.main.fade(300, 0, 0, 0, false, (camera, progress) => {
       if (progress === 1) {

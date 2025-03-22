@@ -14,6 +14,7 @@ import GameStateManager from '../utils/GameStateManager';
 import ScoreManager from '../utils/ScoreManager';
 import GameUI from '../components/ui/GameUI';
 import LaunchManager from '../components/gameplay/LaunchManager';
+import SoundManager from '../utils/SoundManager';
 // Importar los nuevos componentes
 import CloudManager from '../components/environment/CloudManager';
 import BackgroundManager from '../components/environment/BackgroundManager';
@@ -39,6 +40,16 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
+    // Inicializar el gestor de sonido
+    this.soundManager = new SoundManager(this);
+
+    // Iniciar la música del juego
+    this.soundManager.playMusic(SoundManager.MUSIC_MAIN, {
+      loop: true,
+      fade: true,
+      fadeTime: 1000
+    });
+
     // Configurar el mundo físico con límites extendidos hacia la izquierda (valores negativos de X)
     this.matter.world.setBounds(-10000, 0, 20000, 600);
     // Reducir la gravedad para un vuelo más lento y mayor deslizamiento
@@ -227,6 +238,9 @@ export default class Game extends Phaser.Scene {
       this.stateManager.setModalState(false);
     }
 
+    // Detener la música del juego
+    this.soundManager.stopMusic(true, 500);
+
     // Efecto de transición
     this.cameraController.fade({
       callback: () => {
@@ -248,6 +262,13 @@ export default class Game extends Phaser.Scene {
 
     // Asegurarse de que el modal está cerrado
     this.stateManager.setModalState(false);
+
+    // Reproducir música principal
+    this.soundManager.playMusic(SoundManager.MUSIC_MAIN, {
+      loop: true,
+      fade: true,
+      fadeTime: 500
+    });
 
     // Detener físicas inmediatamente
     this.matter.world.pause();
@@ -406,13 +427,22 @@ export default class Game extends Phaser.Scene {
     try {
       switch (this.stateManager.currentState) {
         case 'ANGLE_SELECTION':
+          // Reproducir sonido de ángulo seleccionado
+          this.soundManager.playSfx('sfx_angle');
+
           this.launchManager.endAngleSelection();
           this.launchManager.startPowerSelection();
           break;
 
         case 'POWER_SELECTION':
+          // Reproducir sonido de potencia seleccionada
+          this.soundManager.playSfx('sfx_power');
+
           this.launchManager.endPowerSelection();
           this.launchManager.launchPenguin();
+
+          // Reproducir sonido de lanzamiento
+          this.soundManager.playSfx('sfx_launch');
           break;
 
         case 'ENDED':
@@ -454,6 +484,9 @@ export default class Game extends Phaser.Scene {
       this.characterManager.penguin.setVelocity(0, 0);
       this.characterManager.penguin.setAngularVelocity(0); // Asegurar que se detiene cualquier rotación
       this.characterManager.penguin.setAngle(0); // Asegurar que el ángulo vuelve a cero
+
+      // Reproducir sonido de aterrizaje
+      this.soundManager.playSfx('sfx_land');
     }
 
     // Acumular la distancia actual al total
@@ -487,10 +520,21 @@ export default class Game extends Phaser.Scene {
     // Cambiar el estado a ENDED para indicar que el juego ha finalizado
     this.stateManager.setState('ENDED');
 
+    // Detener la música del juego y reproducir música de game over
+    this.soundManager.stopMusic(true, 500);
+    this.soundManager.playMusic(SoundManager.MUSIC_GAMEOVER, {
+      loop: true,
+      fade: true,
+      fadeTime: 500
+    });
+
     // Comprobar si hemos batido el récord
     const isNewRecord = this.scoreManager.checkAndUpdateBestDistance();
 
     if (isNewRecord) {
+      // Reproducir sonido de récord
+      this.soundManager.playSfx('sfx_record');
+
       // Actualizar el texto de mejor distancia
       this.gameUI.updateBestDistanceText(this.scoreManager.bestTotalDistance);
     }
@@ -504,6 +548,9 @@ export default class Game extends Phaser.Scene {
 
       // Reactivar input general del juego (aunque debería estar ya activo)
       this.input.enabled = true;
+
+      // Detener música de game over
+      this.soundManager.stopMusic(true, 300);
 
       // Llamar a restartGame para preparar un nuevo lanzamiento
       this.time.delayedCall(100, () => {
@@ -519,6 +566,9 @@ export default class Game extends Phaser.Scene {
 
       // Reactivar input general del juego (aunque debería estar ya activo)
       this.input.enabled = true;
+
+      // Detener música de game over
+      this.soundManager.stopMusic(true, 300);
 
       // Volver al menú principal
       this.time.delayedCall(100, () => {

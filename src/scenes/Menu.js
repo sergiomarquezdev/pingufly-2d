@@ -4,6 +4,8 @@
  */
 
 import Phaser from 'phaser';
+import StorageManager from '../utils/StorageManager';
+import SoundManager from '../utils/SoundManager';
 
 export default class Menu extends Phaser.Scene {
   constructor() {
@@ -14,9 +16,18 @@ export default class Menu extends Phaser.Scene {
 
     // Variable para almacenar el récord
     this.bestDistance = 0;
+
+    // Flag para mostrar instrucciones
+    this.showInstructions = false;
+
+    // Flag para evitar múltiples clics
+    this.isTransitioning = false;
   }
 
   create(data) {
+    // Inicializar gestor de sonido
+    this.soundManager = new SoundManager(this);
+
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
 
@@ -46,8 +57,16 @@ export default class Menu extends Phaser.Scene {
 
     // Si venimos de AnimationTest y se solicita mostrar instrucciones
     if (data && data.showInstructions) {
-      this.showInstructions();
+      this.showInstructions = data.showInstructions;
+      this.showInstructionsPanel();
     }
+
+    // Reproducir música de menú
+    this.soundManager.playMusic(SoundManager.MUSIC_MENU, {
+      loop: true,
+      fade: true,
+      fadeTime: 1000
+    });
   }
 
   /**
@@ -131,6 +150,18 @@ export default class Menu extends Phaser.Scene {
 
     // Añadir algunas animaciones para hacer el menú más dinámico
     this.addMenuAnimations(title, subtitle);
+
+    return {
+      button: startButton.button,
+      elements: [buttonPanel, title, subtitle, startButton.button, instructionsButton.button],
+      text: startButton.text,
+      background: startButton.background,
+      border: startButton.border,
+      glow: startButton.glow,
+      innerBorder: startButton.innerBorder,
+      textShadow: startButton.textShadow,
+      snowflakes: startButton.snowflakes
+    };
   }
 
   /**
@@ -184,7 +215,7 @@ export default class Menu extends Phaser.Scene {
       // Dibujar 6 rayos para simular un copo de nieve
       for (let i = 0; i < 3; i++) {
         const angle = (i * Math.PI) / 3;
-        rays.beginPath();
+      rays.beginPath();
         rays.moveTo(pos.x, pos.y);
         rays.lineTo(
           pos.x + Math.cos(angle) * rayLength,
@@ -195,7 +226,7 @@ export default class Menu extends Phaser.Scene {
           pos.x - Math.cos(angle) * rayLength,
           pos.y - Math.sin(angle) * rayLength
         );
-        rays.strokePath();
+      rays.strokePath();
       }
 
       snowflakes.add([flake, rays]);
@@ -372,7 +403,7 @@ export default class Menu extends Phaser.Scene {
         duration: 100,
         yoyo: true,
         onComplete: () => {
-          this.showInstructions();
+          this.showInstructionsPanel();
         }
       });
     });
@@ -598,21 +629,28 @@ export default class Menu extends Phaser.Scene {
   }
 
   /**
-   * Inicia el juego pasando a la escena de juego
+   * Inicia el juego
    */
   startGame() {
-    // Efecto de transición
-    this.cameras.main.fade(500, 0, 0, 0);
+    // Evitar múltiples clics
+    if (this.isTransitioning) return;
+    this.isTransitioning = true;
 
-    this.cameras.main.once('camerafadeoutcomplete', () => {
+    // Detener la música del menú
+    this.soundManager.stopMusic(true, 500);
+
+    // Efecto de transición
+    this.cameras.main.fade(500, 0, 0, 0, false, (camera, progress) => {
+      if (progress === 1) {
       this.scene.start('Game');
+      }
     });
   }
 
   /**
    * Muestra las instrucciones del juego
    */
-  showInstructions() {
+  showInstructionsPanel() {
     // Ocultar el menú principal mientras se muestran las instrucciones
     this.mainMenuContainer.setVisible(false);
 

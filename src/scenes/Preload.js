@@ -23,6 +23,9 @@ export default class Preload extends Phaser.Scene {
     // Registrar eventos de carga
     this.registerLoadingEvents();
 
+    // Cargar archivos de audio
+    this.loadAudioFiles();
+
     // Cargar assets de fondo
     this.load.image('background_sky', 'assets/images/background/background_sky.png');
     this.load.image('background_sun', 'assets/images/background/background_sun.png');
@@ -70,6 +73,47 @@ export default class Preload extends Phaser.Scene {
 
     // Tiempo mínimo de carga (para simular carga con pocos assets)
     this.simulateLoading();
+  }
+
+  /**
+   * Carga los archivos de audio
+   */
+  loadAudioFiles() {
+    console.log('🎵 Iniciando carga de archivos de audio...');
+
+    // Música principal del juego
+    this.load.audio('music_main', 'assets/audio/music_main.mp3');
+
+    // Música del menú
+    this.load.audio('music_menu', 'assets/audio/music_menu.mp3');
+
+    // Música de game over
+    this.load.audio('music_gameover', 'assets/audio/music_gameover.mp3');
+
+    // Efectos de sonido
+    this.load.audio('sfx_button', 'assets/audio/sfx_button.ogg');
+    this.load.audio('sfx_launch', 'assets/audio/sfx_launch.ogg');
+    this.load.audio('sfx_hit', 'assets/audio/sfx_hit.ogg');
+    this.load.audio('sfx_land', 'assets/audio/sfx_land.ogg');
+    this.load.audio('sfx_slide', 'assets/audio/sfx_slide.ogg');
+    this.load.audio('sfx_record', 'assets/audio/sfx_record.ogg');
+    this.load.audio('sfx_angle', 'assets/audio/sfx_angle.ogg');
+    this.load.audio('sfx_power', 'assets/audio/sfx_power.ogg');
+
+    // Evento cuando un archivo de audio ha sido cargado
+    this.load.on('filecomplete', (key, type, data) => {
+      if (type === 'audio') {
+        console.log(`✅ Audio cargado correctamente: ${key}`);
+      }
+    });
+
+    // Verificar error en carga de archivos de audio
+    this.load.on('fileerror', (key, file, error) => {
+      if (key.startsWith('music_') || key.startsWith('sfx_')) {
+        console.error(`❌ Error al cargar el audio "${key}":`, error);
+        console.error(`📂 Ruta del archivo: ${file.url}`);
+      }
+    });
   }
 
   create() {
