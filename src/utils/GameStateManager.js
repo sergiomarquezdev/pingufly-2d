@@ -165,4 +165,31 @@ export default class GameStateManager {
     getMaxAttempts() {
         return this.maxLaunchAttempts;
     }
+
+    /**
+     * Pausa el juego
+     * @returns {GameStateManager} - Retorna this para encadenamiento
+     */
+    pause() {
+        // Guardamos el estado anterior para poder recuperarlo luego si es necesario
+        this._previousState = this.currentState;
+        this.setState('PAUSED');
+        return this;
+    }
+
+    /**
+     * Reanuda el juego después de una pausa
+     * @returns {GameStateManager} - Retorna this para encadenamiento
+     */
+    resume() {
+        // Si teníamos un estado previo, lo restauramos
+        if (this._previousState && this._previousState !== 'PAUSED') {
+            this.setState(this._previousState);
+            this._previousState = null;
+        } else {
+            // Si no hay estado previo, simplemente volvemos a READY
+            this.setState('READY');
+        }
+        return this;
+    }
 }

@@ -21,6 +21,8 @@ import BackgroundManager from '../components/environment/BackgroundManager';
 import GroundManager from '../components/environment/GroundManager';
 // Importar configuración de animaciones del pingüino
 import penguinAnimations from '../config/penguinAnimations';
+import SettingsButton from '../components/ui/SettingsButton';
+import SettingsModal from '../components/ui/SettingsModal';
 // import UIManager from '../components/ui/UIManager'; // File doesn't exist
 // import CollisionManager from '../utils/CollisionManager'; // File doesn't exist
 
@@ -37,6 +39,8 @@ export default class Game extends Phaser.Scene {
 
     // Flag para indicar si estamos esperando el primer clic
     this.waitingForFirstClick = false;
+
+    this.settingsModal = null;
   }
 
   create() {
@@ -127,6 +131,12 @@ export default class Game extends Phaser.Scene {
 
     // PASO 10: Iniciar el juego
     this.startGame();
+
+    // Botón de configuración
+    this.createSettingsButton();
+
+    // Inicializar modal de configuración
+    this.settingsModal = new SettingsModal(this);
   }
 
   /**
@@ -666,5 +676,25 @@ export default class Game extends Phaser.Scene {
     this.scoreManager = null;
 
     super.destroy();
+  }
+
+  /**
+   * Crea el botón de configuración en la esquina superior izquierda
+   */
+  createSettingsButton() {
+    const settingsButton = new SettingsButton(this, () => {
+      // Pausar el juego cuando se muestra el modal
+      if (this.stateManager && this.stateManager.getState() !== 'PAUSED') {
+        this.stateManager.pause();
+      }
+
+      // Reproducir sonido de botón
+      this.soundManager.playSfx('sfx_button');
+
+      // Mostrar el modal de configuración
+      this.settingsModal.show();
+    });
+
+    settingsButton.create();
   }
 }

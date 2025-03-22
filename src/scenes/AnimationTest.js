@@ -696,16 +696,21 @@ export default class AnimationTest extends Phaser.Scene {
     backButtonContainer.setDepth(10);
 
     // Posición en la esquina superior izquierda
-    const buttonX = 40;
-    const buttonY = 40;
-    const buttonRadius = 25;
+    const buttonX = 25;
+    const buttonY = 25;
+    const buttonRadius = 20;
 
-    // Crear círculo de fondo
-    const backButtonBg = this.add.circle(buttonX, buttonY, buttonRadius, 0x0066aa, 0.9);
-    backButtonBg.setStrokeStyle(3, 0xffaa00, 1);
+    // Crear círculo de fondo con gradiente
+    const backButtonBg = this.add.graphics();
+    backButtonBg.fillGradientStyle(0x2c85c1, 0x2c85c1, 0x88c1dd, 0x88c1dd, 0.9);
+    backButtonBg.fillCircle(buttonX, buttonY, buttonRadius);
+    backButtonBg.lineStyle(3, 0xffaa00, 1);
+    backButtonBg.strokeCircle(buttonX, buttonY, buttonRadius);
 
     // Efecto de brillo interno
-    const backButtonGlow = this.add.circle(buttonX, buttonY, buttonRadius - 5, 0x88c1dd, 0.3);
+    const backButtonGlow = this.add.graphics();
+    backButtonGlow.fillStyle(0xe8f4fc, 0.3);
+    backButtonGlow.fillCircle(buttonX, buttonY, buttonRadius - 5);
 
     // Crear icono de flecha
     const arrowGraphic = this.add.graphics();
@@ -739,30 +744,46 @@ export default class AnimationTest extends Phaser.Scene {
 
     // Eventos del botón
     backButton.on('pointerover', () => {
-      backButtonBg.setFillStyle(0x3997d3, 0.9);
-      backButtonGlow.setAlpha(0.5);
-      arrowGraphic.setAlpha(0.8);
+      backButtonBg.clear();
+      backButtonBg.fillGradientStyle(0x3997d3, 0x3997d3, 0x99d2ee, 0x99d2ee, 0.9);
+      backButtonBg.fillCircle(buttonX, buttonY, buttonRadius);
+      backButtonBg.lineStyle(3, 0xffaa00, 1);
+      backButtonBg.strokeCircle(buttonX, buttonY, buttonRadius);
+
+      backButtonGlow.clear();
+      backButtonGlow.fillStyle(0xe8f4fc, 0.5);
+      backButtonGlow.fillCircle(buttonX, buttonY, buttonRadius - 5);
 
       // Escalar ligeramente
-      backButtonBg.setScale(1.05);
-      backButtonGlow.setScale(1.05);
-      arrowGraphic.setScale(1.05);
+      backButtonContainer.setScale(1.05);
     });
 
     backButton.on('pointerout', () => {
-      backButtonBg.setFillStyle(0x0066aa, 0.9);
-      backButtonGlow.setAlpha(0.3);
-      arrowGraphic.setAlpha(1);
+      backButtonBg.clear();
+      backButtonBg.fillGradientStyle(0x2c85c1, 0x2c85c1, 0x88c1dd, 0x88c1dd, 0.9);
+      backButtonBg.fillCircle(buttonX, buttonY, buttonRadius);
+      backButtonBg.lineStyle(3, 0xffaa00, 1);
+      backButtonBg.strokeCircle(buttonX, buttonY, buttonRadius);
+
+      backButtonGlow.clear();
+      backButtonGlow.fillStyle(0xe8f4fc, 0.3);
+      backButtonGlow.fillCircle(buttonX, buttonY, buttonRadius - 5);
 
       // Restaurar escala
-      backButtonBg.setScale(1);
-      backButtonGlow.setScale(1);
-      arrowGraphic.setScale(1);
+      backButtonContainer.setScale(1);
     });
 
     backButton.on('pointerdown', () => {
+      // Reducir escala al presionar
+      backButtonContainer.setScale(0.95);
+
       // Reproducir efecto de sonido del botón
       this.soundManager.playSfx('sfx_button');
+    });
+
+    backButton.on('pointerup', () => {
+      // Restaurar escala
+      backButtonContainer.setScale(1);
 
       this.handleBackButton();
     });

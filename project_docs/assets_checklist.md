@@ -102,6 +102,16 @@ Este documento enumera los recursos gráficos y de audio necesarios para el jueg
 - [X] Panel de instrucciones
   - *Implementación*: Completada con estilo glaciar
 
+#### Menú de Configuración
+- [X] Icono de engranaje
+  - *Nombre de archivo*: `gear_icon.png`
+  - *Ruta*: `assets/images/ui`
+  - *Tamaño*: 32x32px
+  - *Implementación*: Completada con animación hover y glow
+
+- [X] Modal de configuración
+  - *Implementación*: Completada con efectos de transición, toggle para sonido, y botones para resetear récord y reiniciar juego
+
 ## Recursos de Audio
 
 ### Música

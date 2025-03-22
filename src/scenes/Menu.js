@@ -6,6 +6,8 @@
 import Phaser from 'phaser';
 import StorageManager from '../utils/StorageManager';
 import SoundManager from '../utils/SoundManager';
+import SettingsButton from '../components/ui/SettingsButton';
+import SettingsModal from '../components/ui/SettingsModal';
 
 export default class Menu extends Phaser.Scene {
   constructor() {
@@ -22,6 +24,8 @@ export default class Menu extends Phaser.Scene {
 
     // Flag para evitar múltiples clics
     this.isTransitioning = false;
+
+    this.settingsModal = null;
   }
 
   create(data) {
@@ -70,6 +74,12 @@ export default class Menu extends Phaser.Scene {
         seek: 0 // Explícitamente comenzar desde el principio
       });
     });
+
+    // Botón de configuración
+    this.createSettingsButton();
+
+    // Inicializar modal de configuración
+    this.settingsModal = new SettingsModal(this);
   }
 
   /**
@@ -1077,5 +1087,29 @@ export default class Menu extends Phaser.Scene {
 
     // Añadir el contenedor al menú principal
     this.mainMenuContainer.add(recordContainer);
+  }
+
+  /**
+   * Crea el botón de configuración en la esquina superior izquierda
+   */
+  createSettingsButton() {
+    const settingsButton = new SettingsButton(this, () => {
+      // Evitar múltiples clicks rápidos
+      if (this.isTransitioning) return;
+      this.isTransitioning = true;
+
+      // Reproducir sonido de botón
+      this.soundManager.playSfx('sfx_button');
+
+      // Mostrar el modal de configuración
+      this.settingsModal.show();
+
+      // Restablecer el bloqueo después de un tiempo
+      this.time.delayedCall(300, () => {
+        this.isTransitioning = false;
+      });
+    });
+
+    settingsButton.create();
   }
 }

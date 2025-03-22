@@ -26,6 +26,9 @@ export default class Preload extends Phaser.Scene {
     // Cargar archivos de audio
     this.loadAudioFiles();
 
+    // Cargar assets UI
+    this.load.image('gear_icon', 'assets/images/ui/gear_icon.png');
+
     // Cargar assets de fondo
     this.load.image('background_sky', 'assets/images/background/background_sky.png');
     this.load.image('background_sun', 'assets/images/background/background_sun.png');
@@ -210,4 +213,5 @@ export default class Preload extends Phaser.Scene {
       this.load.image(`dummy${i}`, 'https://labs.phaser.io/assets/sprites/phaser-dude.png');
     }
   }
+
 }
