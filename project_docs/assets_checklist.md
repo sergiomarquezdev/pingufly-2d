@@ -125,9 +125,10 @@ Este documento enumera los recursos gráficos y de audio necesarios para el jueg
 
 ### Efectos de Sonido
 - [X] Sonido de botón
-  - *Nombre de archivo*: `sfx_button.wav`
+  - *Nombre de archivo*: `sfx_button.ogg`
   - *Duración*: 0.5 segundos
-  - *Estado*: Pendiente de implementar
+  - *Descripción*: Sonido de feedback para botones, implementado en Menu.js, AnimationTest.js y GameOverScreen.js
+  - *Estado*: IMPLEMENTADO
 
 - [X] Sonido de lanzamiento
   - *Nombre de archivo*: `sfx_launch.wav`

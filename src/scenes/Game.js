@@ -486,9 +486,6 @@ export default class Game extends Phaser.Scene {
       this.characterManager.penguin.setVelocity(0, 0);
       this.characterManager.penguin.setAngularVelocity(0); // Asegurar que se detiene cualquier rotación
       this.characterManager.penguin.setAngle(0); // Asegurar que el ángulo vuelve a cero
-
-      // Reproducir sonido de aterrizaje
-      this.soundManager.playSfx('sfx_land');
     }
 
     // Acumular la distancia actual al total

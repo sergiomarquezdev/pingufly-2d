@@ -495,6 +495,11 @@ export default class GameOverScreen {
       // Detener la propagación del evento para evitar que llegue al juego
       event.stopPropagation();
 
+      // Reproducir efecto de sonido del botón si el soundManager está disponible
+      if (this.scene.soundManager) {
+        this.scene.soundManager.playSfx('sfx_button');
+      }
+
       // Marcar el botón como presionado
       isButtonPressed = true;
 

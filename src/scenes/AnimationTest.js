@@ -552,6 +552,9 @@ export default class AnimationTest extends Phaser.Scene {
       });
 
       buttonZone.on('pointerdown', () => {
+        // Reproducir efecto de sonido del botón
+        this.soundManager.playSfx('sfx_button');
+
         this.playAnimation(anim.key);
       });
 
@@ -758,6 +761,9 @@ export default class AnimationTest extends Phaser.Scene {
     });
 
     backButton.on('pointerdown', () => {
+      // Reproducir efecto de sonido del botón
+      this.soundManager.playSfx('sfx_button');
+
       this.handleBackButton();
     });
   }
@@ -837,8 +843,8 @@ export default class AnimationTest extends Phaser.Scene {
       if (progress === 1) {
         // Asegurar que esperamos a que la música se detenga completamente
         this.time.delayedCall(350, () => {
-          // Volver al menú y mostrar automáticamente las instrucciones
-          this.scene.start('Menu', { showInstructions: true });
+        // Volver al menú y mostrar automáticamente las instrucciones
+        this.scene.start('Menu', { showInstructions: true });
         });
       }
     });

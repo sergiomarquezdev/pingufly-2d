@@ -343,6 +343,9 @@ export default class Menu extends Phaser.Scene {
     });
 
     startButton.on('pointerdown', () => {
+      // Reproducir efecto de sonido del botón
+      this.soundManager.playSfx('sfx_button');
+
       // Efecto de presionado
       this.tweens.add({
         targets: startButton,
@@ -399,6 +402,9 @@ export default class Menu extends Phaser.Scene {
     });
 
     instructionsButton.on('pointerdown', () => {
+      // Reproducir efecto de sonido del botón
+      this.soundManager.playSfx('sfx_button');
+
       // Efecto de presionado
       this.tweens.add({
         targets: instructionsButton,
@@ -784,6 +790,9 @@ export default class Menu extends Phaser.Scene {
     });
 
     backArrowButton.on('pointerdown', () => {
+      // Reproducir efecto de sonido del botón
+      this.soundManager.playSfx('sfx_button');
+
       // Hacer visible el menú principal pero con alpha 0
       this.mainMenuContainer.setVisible(true);
       this.mainMenuContainer.setAlpha(0);
@@ -916,6 +925,9 @@ export default class Menu extends Phaser.Scene {
     });
 
     animButton.on('pointerdown', () => {
+      // Reproducir efecto de sonido del botón
+      this.soundManager.playSfx('sfx_button');
+
       // Transición de salida
 
       // Primero detener la música del menú
@@ -925,8 +937,8 @@ export default class Menu extends Phaser.Scene {
         if (progress === 1) {
           // Esperar un poco más para asegurar que la música del menú se haya detenido correctamente
           this.time.delayedCall(200, () => {
-            // Iniciar la escena de prueba de animaciones
-            this.scene.start('AnimationTest');
+          // Iniciar la escena de prueba de animaciones
+          this.scene.start('AnimationTest');
           });
         }
       });
