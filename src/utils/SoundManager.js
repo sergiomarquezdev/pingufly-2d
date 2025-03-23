@@ -63,7 +63,6 @@ export default class SoundManager {
   handleSceneShutdown() {
     // Detener la música si está sonando y no hay una transición en progreso
     if (this.currentMusic && this.currentMusic.isPlaying && !globalMusicRegistry.transitionInProgress) {
-      console.log(`🔇 Deteniendo música de escena cerrada: ${this.currentMusicKey}`);
       this.currentMusic.stop();
       if (this.currentMusicKey) {
         globalMusicRegistry.activeMusicKeys.delete(this.currentMusicKey);
@@ -121,18 +120,6 @@ export default class SoundManager {
         formats.push('OGG: error al verificar');
       }
     }
-
-    console.log('🎵 Sistema de audio inicializado');
-    if (formats.length > 0) {
-      console.log('📋 Formatos de audio soportados:', formats.join(', '));
-    }
-
-    // Listar archivos de audio disponibles en la caché
-    if (this.scene.cache && this.scene.cache.audio && this.scene.cache.audio.entries && this.scene.cache.audio.entries.size > 0) {
-      console.log('🎧 Archivos de audio cargados:', Array.from(this.scene.cache.audio.entries.keys()).join(', '));
-    } else {
-      console.warn('⚠️ No hay archivos de audio cargados en la caché');
-    }
   }
 
   /**
@@ -149,7 +136,6 @@ export default class SoundManager {
     const isTestOrGameScene = this.scene.scene.key === 'AnimationTest' || this.scene.scene.key === 'Game';
 
     if (globalMusicRegistry.activeMusicKeys.has(key) && !isTestOrGameScene) {
-      console.log(`⏩ La música ${key} ya está sonando en otra escena, omitiendo reproducción duplicada`);
       return;
     }
 
@@ -192,14 +178,10 @@ export default class SoundManager {
   startNewMusic(key, config) {
     // Comprobar si la música está cargada
     if (!this.scene.cache.audio.exists(key)) {
-      console.warn(`La música ${key} no está cargada en la caché de audio`);
       return;
     }
 
     try {
-      // Mostrar en qué escena estamos reproduciendo música
-      console.log(`🎮 Reproduciendo música ${key} en la escena: ${this.scene.scene.key}`);
-
       // Iniciar la nueva pista
       this.currentMusic = this.scene.sound.add(key, {
         loop: config.loop,
@@ -212,9 +194,6 @@ export default class SoundManager {
       // Registrar en el registro global
       globalMusicRegistry.activeMusicKeys.add(key);
 
-      // Mostrar el registro global de música activa
-      console.log(`🎵 Registro global de música activa: [${Array.from(globalMusicRegistry.activeMusicKeys).join(', ')}]`);
-
       // Reproducir con fade in si está configurado
       if (config.fade) {
         this.currentMusic.setVolume(0);
@@ -223,7 +202,6 @@ export default class SoundManager {
         // Si se especificó una posición de inicio (seek), aplicarla
         if (config.seek !== undefined) {
           this.currentMusic.setSeek(config.seek);
-          console.log(`⏩ Iniciando desde el segundo ${config.seek}`);
         }
 
         this.scene.tweens.add({
@@ -236,10 +214,6 @@ export default class SoundManager {
         // Reproducir normalmente, con o sin seek
         const seekOptions = config.seek !== undefined ? { seek: config.seek } : undefined;
         this.currentMusic.play(seekOptions);
-
-        if (config.seek !== undefined) {
-          console.log(`⏩ Iniciando desde el segundo ${config.seek}`);
-        }
       }
 
       // Configurar evento para cuando termine la música
@@ -249,7 +223,6 @@ export default class SoundManager {
         }
       });
 
-      console.log(`🎵 Reproduciendo música: ${key}`);
     } catch (error) {
       console.error(`Error al reproducir la música ${key}:`, error);
     }
@@ -335,7 +308,6 @@ export default class SoundManager {
 
     // Comprobar si el sonido está cargado
     if (!this.scene.cache.audio.exists(key)) {
-      console.warn(`El efecto de sonido ${key} no está cargado en la caché de audio`);
       return;
     }
 
@@ -350,7 +322,6 @@ export default class SoundManager {
 
       // Reproducir el efecto
       this.scene.sound.play(key, finalConfig);
-      console.log(`🔊 Reproduciendo efecto: ${key}`);
     } catch (error) {
       console.error(`Error al reproducir el efecto ${key}:`, error);
     }

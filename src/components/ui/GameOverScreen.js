@@ -64,13 +64,11 @@ export default class GameOverScreen {
     // IMPORTANTE: Detener todos los eventos en esta capa para evitar que lleguen al juego
     // Esto evita que los clics fuera de los botones hagan algo
     blockingOverlay.on('pointerdown', (pointer, localX, localY, event) => {
-      console.log('Clic en el fondo del modal - Evento bloqueado');
       event.stopPropagation();
     });
 
     // También prevenir clics al soltar el botón del ratón
     blockingOverlay.on('pointerup', (pointer, localX, localY, event) => {
-      console.log('Liberación de clic en el fondo del modal - Evento bloqueado');
       event.stopPropagation();
     });
 
@@ -505,10 +503,7 @@ export default class GameOverScreen {
 
       // Efecto visual de pulsación
       buttonContainer.setScale(0.95);
-      buttonContainer.y += 2;
-
-      // Registrar en consola para debugging
-      console.log(`Botón "${text}" presionado`);
+      buttonContainer.y += 2
     });
 
     hitBox.on('pointerup', (pointer, localX, localY, event) => {
@@ -524,7 +519,6 @@ export default class GameOverScreen {
 
         // Ejecutar el callback
         if (callback) {
-          console.log(`Ejecutando callback para botón "${text}"`);
           callback();
         }
 
@@ -542,8 +536,6 @@ export default class GameOverScreen {
   handleRestart() {
     if (!this.isVisible) return;
 
-    console.log('GameOverScreen: handleRestart ejecutándose');
-
     // Desactivar la pantalla y prevenir múltiples clics
     this.isVisible = false;
 
@@ -555,8 +547,6 @@ export default class GameOverScreen {
       duration: 300,
       ease: 'Power2',
       onComplete: () => {
-        console.log('GameOverScreen: Animación de salida completada');
-
         // Eliminar el contenedor
         if (this.container) {
           this.container.destroy();
@@ -565,7 +555,6 @@ export default class GameOverScreen {
 
         // Ejecutar el callback original proporcionado por Game.js
         if (typeof this.callbacks.onRestart === 'function') {
-          console.log('GameOverScreen: Ejecutando callback onRestart');
           this.callbacks.onRestart();
         } else {
           console.error('GameOverScreen: No hay callback de reinicio válido');
@@ -580,8 +569,6 @@ export default class GameOverScreen {
   handleMainMenu() {
     if (!this.isVisible) return;
 
-    console.log('GameOverScreen: handleMainMenu ejecutándose');
-
     // Desactivar la pantalla y prevenir múltiples clics
     this.isVisible = false;
 
@@ -593,8 +580,6 @@ export default class GameOverScreen {
       duration: 300,
       ease: 'Power2',
       onComplete: () => {
-        console.log('GameOverScreen: Animación de salida completada');
-
         // Eliminar el contenedor
         if (this.container) {
           this.container.destroy();
@@ -603,7 +588,6 @@ export default class GameOverScreen {
 
         // Ejecutar el callback original proporcionado por Game.js
         if (typeof this.callbacks.onMainMenu === 'function') {
-          console.log('GameOverScreen: Ejecutando callback onMainMenu');
           this.callbacks.onMainMenu();
         } else {
           console.error('GameOverScreen: No hay callback de menú válido');

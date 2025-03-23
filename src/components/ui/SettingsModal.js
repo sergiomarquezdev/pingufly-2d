@@ -323,8 +323,6 @@ export default class SettingsModal {
 
             // Actualizar el menú si estamos en esa escena
             if (this.scene.scene.key === 'Menu') {
-              console.log('Actualizando récord en Menu a 0');
-
               // Actualizar la variable bestDistance en el menú
               this.scene.bestDistance = 0;
 
@@ -365,15 +363,10 @@ export default class SettingsModal {
                       element.text.includes(' m')) {
                     // Actualizar el texto del récord a 0 m
                     element.setText('0 m');
-                    console.log('Texto de récord actualizado a 0 m');
                   }
                 });
-              } else {
-                console.log('No se encontró el contenedor del récord');
               }
             } else if (this.scene.scene.key === 'Game') {
-              console.log('Actualizando récord en Game a 0');
-
               // Si estamos en la escena Game, actualizar el scoreManager
               if (this.scene.scoreManager) {
                 this.scene.scoreManager.bestTotalDistance = 0;
@@ -381,7 +374,6 @@ export default class SettingsModal {
                 // Actualizar el texto si existe
                 if (this.scene.gameUI) {
                   this.scene.gameUI.updateBestDistanceText(0);
-                  console.log('Texto de mejor distancia actualizado en GameUI');
                 }
               }
             }

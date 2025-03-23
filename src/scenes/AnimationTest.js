@@ -45,7 +45,6 @@ export default class AnimationTest extends Phaser.Scene {
     // Reproducir música principal del juego con pequeño retraso para asegurar
     // que no hay conflictos con la música del menú
     this.time.delayedCall(200, () => {
-      console.log('🎮 Reproduciendo música principal en AnimationTest');
       this.soundManager.playMusic(SoundManager.MUSIC_MAIN, {
         loop: true,
         fade: true,

@@ -82,8 +82,6 @@ export default class Preload extends Phaser.Scene {
    * Carga los archivos de audio
    */
   loadAudioFiles() {
-    console.log('🎵 Iniciando carga de archivos de audio...');
-
     // Música principal del juego
     this.load.audio('music_main', 'assets/audio/music_main.mp3');
 
@@ -101,13 +99,6 @@ export default class Preload extends Phaser.Scene {
     this.load.audio('sfx_slide', 'assets/audio/sfx_slide.ogg');
     this.load.audio('sfx_record', 'assets/audio/sfx_record.ogg');
     this.load.audio('sfx_angle_power', 'assets/audio/sfx_angle_power.ogg');
-
-    // Evento cuando un archivo de audio ha sido cargado
-    this.load.on('filecomplete', (key, type, data) => {
-      if (type === 'audio') {
-        console.log(`✅ Audio cargado correctamente: ${key}`);
-      }
-    });
 
     // Verificar error en carga de archivos de audio
     this.load.on('fileerror', (key, file, error) => {

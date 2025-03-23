@@ -167,17 +167,6 @@ export default class Game extends Phaser.Scene {
           repeat: animConfig.repeat
         });
       });
-
-      // Verificar que todas las animaciones se han creado correctamente
-      const animsCreated = Object.keys(this.anims.anims.entries);
-
-      // Verificar si hay alguna animación que no se ha creado
-      const expectedAnims = Object.values(penguinAnimations).map(anim => anim.key);
-      const missingAnims = expectedAnims.filter(key => !animsCreated.includes(key));
-
-      if (missingAnims.length > 0) {
-        console.warn('⚠️ Algunas animaciones no se crearon correctamente:', missingAnims);
-      }
     } catch (error) {
       console.error('❌ Error al crear animaciones del pingüino:', error);
     }
@@ -524,8 +513,6 @@ export default class Game extends Phaser.Scene {
    * Finaliza el juego actual
    */
   endGame() {
-    console.log('Finalizando juego y mostrando Game Over');
-
     // Cambiar el estado a ENDED para indicar que el juego ha finalizado
     this.stateManager.setState('ENDED');
 
@@ -550,8 +537,6 @@ export default class Game extends Phaser.Scene {
 
     // Callbacks para las acciones de los botones
     const handleRestart = () => {
-      console.log('Game: handleRestart llamado desde GameOverScreen');
-
       // Cerrar el modal explícitamente antes de reiniciar
       this.stateManager.setModalState(false);
 
@@ -568,8 +553,6 @@ export default class Game extends Phaser.Scene {
     };
 
     const handleMainMenu = () => {
-      console.log('Game: handleMainMenu llamado desde GameOverScreen');
-
       // Cerrar el modal explícitamente antes de ir al menú
       this.stateManager.setModalState(false);
 
@@ -597,8 +580,6 @@ export default class Game extends Phaser.Scene {
     // PASO 2: Activar el estado modal
     // Esto hará que handlePlayerInput() ignore los clics fuera del modal
     this.stateManager.setModalState(true);
-
-    console.log('Game Over modal activado. Estado modal:', this.stateManager.isModalOpen);
   }
 
   /**
