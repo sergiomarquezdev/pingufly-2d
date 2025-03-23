@@ -185,6 +185,7 @@ export default class Game extends Phaser.Scene {
 
       if (this.characterManager.updatePenguinPhysics()) {
         this.endLaunch();
+        return; // IMPORTANTE: Salir de update() inmediatamente después de endLaunch
       }
 
       // Verificar si el pingüino está fuera de los límites del mundo y ajustar la cámara
@@ -193,16 +194,20 @@ export default class Game extends Phaser.Scene {
       if (penguin && penguin.x < this.cameraController.getInitialScrollX() - 5000) {
         // Si el pingüino se ha ido demasiado lejos, forzar la detención del vuelo
         this.endLaunch();
+        return; // IMPORTANTE: Salir de update() inmediatamente después de endLaunch
       }
-    }
 
-    // Actualizar la distancia si el pingüino está en el aire
-    if (gameState === 'FLYING') {
-      // Actualizar la puntuación
+      // Actualizar la puntuación del lanzamiento actual
       this.scoreManager.updateDistance(this.characterManager.getPenguinCurrentX(), this.launchPositionX);
 
-      // Actualizar UI
-      this.gameUI.updateDistanceText(this.scoreManager.currentDistance, this.scoreManager.totalDistance);
+      // Durante el vuelo, mostramos la distancia actual + la distancia acumulada anterior
+      // IMPORTANTE: No usamos getTotalWithCurrent() para evitar duplicación
+      const distanciaActual = this.scoreManager.currentDistance;
+      const totalAcumulado = this.scoreManager.totalDistance;
+      const totalConActual = totalAcumulado + distanciaActual;
+
+      // Actualizar UI con la suma (solo visual, no modifica scoreManager.totalDistance)
+      this.gameUI.updateDistanceText(0, totalConActual);
 
       // Gestionar el seguimiento de la cámara basado en la posición del pingüino
       this.cameraController.followTarget(this.characterManager.penguin, true);
@@ -298,10 +303,13 @@ export default class Game extends Phaser.Scene {
 
       // Reiniciar todos los valores del juego
       this.stateManager.reset();
+
+      // Resetear puntuaciones
       this.scoreManager.resetCurrentDistance();
       this.scoreManager.resetTotalDistance();
 
-      // Actualizar textos de distancia
+      // Actualizar textos de distancia con los valores reseteados (ambos en 0)
+      // IMPORTANTE: Pasamos 0 en ambos parámetros
       this.gameUI.updateDistanceText(0, 0);
 
       // Actualizar la UI de intentos
@@ -480,6 +488,10 @@ export default class Game extends Phaser.Scene {
    * Finaliza el lanzamiento actual
    */
   endLaunch() {
+    // CRÍTICO: Cambiar el estado de juego INMEDIATAMENTE para evitar que update() vuelva a procesar
+    // el vuelo en el mismo frame después de que se actualice el total
+    this.stateManager.setState('STOPPED');
+
     // Detener el pingüino completamente antes de procesar el final del lanzamiento
     if (this.characterManager && this.characterManager.penguin) {
       this.characterManager.penguin.setVelocity(0, 0);
@@ -487,8 +499,20 @@ export default class Game extends Phaser.Scene {
       this.characterManager.penguin.setAngle(0); // Asegurar que el ángulo vuelve a cero
     }
 
-    // Acumular la distancia actual al total
-    this.scoreManager.addCurrentToTotal();
+    // Hacer una última actualización de la distancia para asegurar precisión
+    this.scoreManager.updateDistance(this.characterManager.getPenguinCurrentX(), this.launchPositionX);
+
+    // Guardar la distancia actual para debugging
+    const distanciaActual = this.scoreManager.currentDistance;
+    const distanciaAnterior = this.scoreManager.totalDistance;
+    const nuevaDistanciaTotal = distanciaAnterior + distanciaActual;
+
+    // IMPORTANTE: Actualizar formalmente la distancia total
+    this.scoreManager.totalDistance = nuevaDistanciaTotal;
+
+    // Actualizar la UI con la distancia total final
+    // IMPORTANTE: Pasamos 0 como currentDistance para no afectar el cálculo
+    this.gameUI.updateDistanceText(0, nuevaDistanciaTotal);
 
     // Animar actualización del total
     this.tweens.add({
@@ -603,8 +627,18 @@ export default class Game extends Phaser.Scene {
       this.angleIndicator.clearTexts();
     }
 
-    // Reiniciamos solo la distancia actual para el nuevo intento
+    // IMPORTANTE: Resetear completamente la distancia actual para el nuevo intento
     this.scoreManager.resetCurrentDistance();
+
+    // Verificar que la distancia actual se haya reseteado correctamente
+    if (this.scoreManager.currentDistance !== 0) {
+      console.error(`[ERROR] La distancia actual no se ha reseteado correctamente. Valor: ${this.scoreManager.currentDistance}`);
+      this.scoreManager.currentDistance = 0; // Forzar reset si es necesario
+    }
+
+    // Actualizar la UI mostrando solo la distancia total acumulada
+    // IMPORTANTE: currentDistance es 0, no afecta al cálculo
+    this.gameUI.updateDistanceText(0, this.scoreManager.totalDistance);
 
     // Eliminar todos los textos temporales
     this.cleanupTexts();

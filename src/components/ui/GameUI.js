@@ -150,16 +150,16 @@ export default class GameUI {
 
     /**
      * Actualiza el texto de distancia en la UI
-     * @param {Number} currentDistance - Distancia del lanzamiento actual
+     * @param {Number} currentDistance - Distancia del lanzamiento actual (ya no se usa)
      * @param {Number} totalDistance - Distancia total acumulada
      */
     updateDistanceText(currentDistance, totalDistance) {
-        // Calcular la distancia total (la acumulada hasta ahora + la del lanzamiento actual)
-        const totalWithCurrent = totalDistance + currentDistance;
+        // IMPORTANTE: Mostramos EXACTAMENTE el valor que se pasa, sin sumar nada
+        const textToShow = `${totalDistance} m`;
 
-        // Actualizar el texto de distancia con la suma total
-        if (Math.abs(parseInt(this.distanceText.text) - totalWithCurrent) >= 1) {
-            this.distanceText.setText(totalWithCurrent + ' m');
+        // Actualizar el texto de distancia
+        if (this.distanceText.text !== textToShow) {
+            this.distanceText.setText(textToShow);
 
             // Pequeña animación de escala al cambiar el número
             this.scene.tweens.add({
