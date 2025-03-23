@@ -35,8 +35,14 @@ export default class ScoreManager {
         // Convertir a metros (escala arbitraria para el juego) y asegurar que sea positiva
         const distanceInMeters = Math.floor(distanceInPixels / this.pixelToMeterRatio);
 
-        // Actualizar la distancia actual (solo si es positiva, para evitar distancias negativas si va a la derecha)
-        this.currentDistance = Math.max(0, distanceInMeters);
+        // Calcular la distancia actual (solo valores positivos)
+        const currentCalculatedDistance = Math.max(0, distanceInMeters);
+
+        // SOLUCIÓN: Mantener el valor máximo alcanzado durante el vuelo
+        // Solo actualizar si la nueva distancia es mayor que la almacenada
+        if (currentCalculatedDistance > this.currentDistance) {
+            this.currentDistance = currentCalculatedDistance;
+        }
 
         return this.currentDistance;
     }
