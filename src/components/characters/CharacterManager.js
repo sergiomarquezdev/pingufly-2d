@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import penguinAnimations from '../../config/penguinAnimations';
+import yetiAnimations from '../../config/yetiAnimations';
 
 /**
  * Clase que maneja los personajes del juego
@@ -29,8 +30,8 @@ export default class CharacterManager {
     // Esto permitirá mantener las posiciones relativas cuando cambie la posición de lanzamiento
     this.offsets = {
       yeti: {
-        x: 20,       // Offset X respecto a launchPositionX
-        y: -10       // Offset Y respecto a launchPositionY
+        x: 45,       // Offset X respecto a launchPositionX
+        y: -25       // Offset Y respecto a launchPositionY
       },
       flamingo: {
         x: 8,        // Offset X respecto a launchPositionX
@@ -63,7 +64,10 @@ export default class CharacterManager {
     this.hasShownStopAnimation = false;
 
     // Estado actual de la animación del pingüino
-    this.currentAnimation = 'idle';
+    this.currentPenguinAnimation = 'idle';
+
+    // Estado actual de la animación del yeti
+    this.currentYetiAnimation = 'idle';
   }
 
   /**
@@ -112,12 +116,41 @@ export default class CharacterManager {
    * Crea los personajes del juego
    */
   createCharacters() {
-    // Crear el Yeti
-    this.yeti = this.scene.add.image(
-      this.getYetiX(),
-      this.getYetiY(),
-      'yeti'
-    ).setDepth(5);
+    // Crear el Yeti como sprite en lugar de imagen
+    try {
+      // Verificar si el sprite sheet está disponible
+      if (this.scene.textures.exists('yeti_sheet')) {
+        this.yeti = this.scene.add.sprite(
+          this.getYetiX(),
+          this.getYetiY(),
+          'yeti_sheet',
+          1  // Frame inicial (posición idle)
+        ).setDepth(5);
+
+        // Iniciar con la animación de aparición
+        this.scene.time.delayedCall(100, () => {
+          this.playYetiAnimation('yeti_appear');
+        });
+      } else {
+        // Usar imagen estática como fallback
+        this.yeti = this.scene.add.image(
+          this.getYetiX(),
+          this.getYetiY(),
+          'yeti'
+        ).setDepth(5);
+      }
+    } catch (error) {
+      console.error('Error al crear el personaje yeti:', error);
+      // Fallback a imagen estática
+      this.yeti = this.scene.add.image(
+        this.getYetiX(),
+        this.getYetiY(),
+        'yeti'
+      ).setDepth(5);
+    }
+
+    // Ajustar escala para el yeti
+    this.yeti.setScale(1.5);
 
     // Voltear el Yeti para que mire hacia la izquierda
     this.yeti.setFlipX(true);
@@ -165,7 +198,7 @@ export default class CharacterManager {
               // Verificar si la animación existe antes de reproducirla
               if (this.scene.anims.exists('penguin_idle')) {
                 this.penguin.play('penguin_idle');
-                this.currentAnimation = 'penguin_idle';
+                this.currentPenguinAnimation = 'penguin_idle';
               } else {
                 console.error('❌ La animación penguin_idle no existe');
               }
@@ -214,6 +247,93 @@ export default class CharacterManager {
   }
 
   /**
+   * Reproduce una animación específica en el yeti
+   * @param {string} key - Clave de la animación a reproducir
+   * @param {boolean} ignoreIfPlaying - Si es true, no cambiará si ya está reproduciendo esta animación
+   */
+  playYetiAnimation(key, ignoreIfPlaying = true) {
+    // Verificar si el yeti existe
+    if (!this.yeti) {
+      return;
+    }
+
+    // Verificar si el yeti tiene componente de animaciones
+    if (!this.yeti.anims) {
+      return;
+    }
+
+    // Comprobar si la animación existe en la escena
+    if (!this.scene.anims.exists(key)) {
+      console.error(`La animación ${key} no existe`);
+      return;
+    }
+
+    try {
+      // Si queremos ignorar si ya está reproduciéndose, verificar el estado actual
+      if (ignoreIfPlaying) {
+        // Obtener la animación actual con manejo de errores
+        const currentAnim = this.yeti.anims.currentAnim;
+        const currentKey = currentAnim ? currentAnim.key : null;
+
+        if (currentKey === key) {
+          return;
+        }
+      }
+
+      // Obtener la configuración de esta animación para aplicar propiedades especiales
+      const animConfig = Object.values(yetiAnimations).find(anim => anim.key === key);
+
+      if (animConfig) {
+        // Aplicar flipX si está definido en la configuración
+        if (animConfig.flipX !== undefined) {
+          this.yeti.setFlipX(animConfig.flipX);
+        }
+      }
+
+      // Reproducir la animación
+      this.yeti.play(key, true);
+      this.currentYetiAnimation = key;
+
+      // Si la animación es "appear" (aparición), configurar transición a "idle" al finalizar
+      if (key === 'yeti_appear') {
+        this.yeti.once('animationcomplete', () => {
+          this.playYetiAnimation('yeti_idle', false);
+        });
+      }
+    } catch (error) {
+      console.error(`Error al reproducir la animación ${key} del yeti:`, error);
+    }
+  }
+
+  /**
+   * Actualiza la animación del yeti según la fase de juego
+   * @param {string} gameState - Estado actual del juego
+   */
+  updateYetiAnimation(gameState) {
+    // Mapear estados del juego a animaciones del yeti
+    switch (gameState) {
+      case 'READY':
+      case 'RESETTING':
+        this.playYetiAnimation('yeti_idle');
+        break;
+      case 'ANGLE_SELECTION':
+      case 'POWER_SELECTION':
+        this.playYetiAnimation('yeti_prepare');
+        break;
+      case 'LAUNCHING':
+        this.playYetiAnimation('yeti_launch');
+        break;
+      case 'FLYING':
+      case 'SLIDING':
+      case 'STOPPED':
+      case 'ENDED':
+        // Volver a idle cuando el pingüino está en vuelo o después
+        this.playYetiAnimation('yeti_idle');
+        break;
+    }
+  }
+
+  /**
    * Reproduce una animación específica en el pingüino
    * @param {string} key - Clave de la animación a reproducir
    * @param {boolean} ignoreIfPlaying - Si es true, no cambiará si ya está reproduciendo esta animación
@@ -258,7 +378,7 @@ export default class CharacterManager {
 
       // Reproducir la animación
       this.penguin.play(key, true);
-      this.currentAnimation = key;
+      this.currentPenguinAnimation = key;
     } catch (error) {
       console.error(`Error al reproducir la animación ${key}:`, error);
     }
@@ -270,6 +390,15 @@ export default class CharacterManager {
   resetPositions() {
     // Colocar los personajes en sus posiciones iniciales
     this.yeti.setPosition(this.getYetiX(), this.getYetiY());
+
+    // Reiniciar animación del yeti
+    if (this.yeti.anims) {
+      this.yeti.anims.stop();
+      // Pequeño retraso para asegurar que se cambia la animación
+      this.scene.time.delayedCall(50, () => {
+        this.playYetiAnimation('yeti_idle', false);
+      });
+    }
 
     // Reposicionar el flamingo cerca de la mano del Yeti
     this.flamingo.setPosition(this.getFlamingoX(), this.getFlamingoY());
@@ -390,14 +519,28 @@ export default class CharacterManager {
         this.penguin.clearTint();
         this.penguin.setAlpha(1);
 
+        // Reproducir la animación de aparición del yeti
+        this.playYetiAnimation('yeti_appear', false);
+
         // Añadir un pequeño efecto de rebote al yeti y al flamingo
         this.scene.tweens.add({
-          targets: [this.yeti, this.flamingo],
+          targets: [this.flamingo],
           y: '-=10',
           duration: 150,
           yoyo: true,
           ease: 'Sine.easeInOut',
-          onComplete: onComplete
+          onComplete: () => {
+            // Solo llamamos a onComplete después de que la animación del yeti ha terminado
+            if (this.yeti.anims) {
+              // Esperar a que termine la animación de aparición antes de llamar a onComplete
+              this.yeti.once('animationcomplete', () => {
+                if (onComplete) onComplete();
+              });
+            } else {
+              // Si no hay animaciones, llamar directamente
+              if (onComplete) onComplete();
+            }
+          }
         });
       }
     });
@@ -441,63 +584,74 @@ export default class CharacterManager {
 
     // Esperar a que termine la animación de preparación antes de lanzar
     this.scene.time.delayedCall(200, () => {
-      // Reproducir la animación de lanzamiento
-      this.playPenguinAnimation('penguin_launch', false);
+      // Cambiar a la animación de lanzamiento para el yeti
+      this.playYetiAnimation('yeti_launch', false);
 
-      // Hacer que el pingüino sea dinámico para que la física lo afecte
-      this.penguin.setStatic(false);
+      // Pequeña pausa para sincronizar animaciones
+      this.scene.time.delayedCall(100, () => {
+        // Reproducir la animación de lanzamiento del pingüino
+        this.playPenguinAnimation('penguin_launch', false);
 
-      // Para lanzar hacia la izquierda, invertimos el ángulo
-      const invertedAngle = 180 - angle;
-      const angleRad = Phaser.Math.DegToRad(invertedAngle);
+        // Animar el golpe del flamingo
+        this.animateHit();
 
-      // Ajustar rango de potencia para mantener buen control y distancia adecuada
-      const minPower = 5;  // Reducido ligeramente para mayor control en potencias bajas
-      const maxPower = 15; // Reducido para evitar movimientos demasiado extremos
-      const powerNormalized = minPower + power * (maxPower - minPower);
+        // Hacer que el pingüino sea dinámico para que la física lo afecte
+        this.penguin.setStatic(false);
 
-      // Ajustar multiplicador con un valor más equilibrado
-      const powerMultiplier = 0.8; // Reducido ligeramente para mejor control
-      const powerMultiplied = powerNormalized * powerMultiplier;
+        // Para lanzar hacia la izquierda, invertimos el ángulo
+        const invertedAngle = 180 - angle;
+        const angleRad = Phaser.Math.DegToRad(invertedAngle);
 
-      // Aplicamos velocidades más equilibradas
-      const velocityX = powerMultiplied * Math.cos(angleRad);
-      const velocityY = -powerMultiplied * Math.sin(angleRad); // Negativo porque en pantalla Y+ es hacia abajo
+        // Ajustar rango de potencia para mantener buen control y distancia adecuada
+        const minPower = 5;  // Reducido ligeramente para mayor control en potencias bajas
+        const maxPower = 15; // Reducido para evitar movimientos demasiado extremos
+        const powerNormalized = minPower + power * (maxPower - minPower);
 
-      // Aplicar la velocidad al pingüino
-      this.penguin.setVelocity(velocityX, velocityY);
+        // Ajustar multiplicador con un valor más equilibrado
+        const powerMultiplier = 0.8; // Reducido ligeramente para mejor control
+        const powerMultiplied = powerNormalized * powerMultiplier;
 
-      // Asegurar explícitamente que no hay rotación
-      this.penguin.setAngularVelocity(0);
+        // Aplicamos velocidades más equilibradas
+        const velocityX = powerMultiplied * Math.cos(angleRad);
+        const velocityY = -powerMultiplied * Math.sin(angleRad); // Negativo porque en pantalla Y+ es hacia abajo
 
-      // Después de un breve retraso, cambiar a la animación de vuelo
-      this.scene.time.delayedCall(200, () => {
-        this.playPenguinAnimation('penguin_fly', false);
-        // Reforzar que no haya rotación
+        // Aplicar la velocidad al pingüino
+        this.penguin.setVelocity(velocityX, velocityY);
+
+        // Asegurar explícitamente que no hay rotación
         this.penguin.setAngularVelocity(0);
+
+        // Después de un breve retraso, cambiar a la animación de vuelo
+        this.scene.time.delayedCall(200, () => {
+          this.playPenguinAnimation('penguin_fly', false);
+          // Reforzar que no haya rotación
+          this.penguin.setAngularVelocity(0);
+
+          // Volver a estado idle del yeti después del lanzamiento
+          this.scene.time.delayedCall(300, () => {
+            this.playYetiAnimation('yeti_idle', false);
+          });
+        });
+
+        // Reiniciar estado de deslizamiento
+        this.isOnIce = false;
+        this.lastGroundContact = 0;
+
+        // Reiniciar tracking de distancia
+        this.maxDistanceReached = false;
+        this.maxDistance = 0;
+
+        // Comenzar a registrar la última posición X del pingüino
+        this.lastPenguinX = this.penguin.x;
+        this.penguinStoppedFrames = 0;
+
+        // Restaurar propiedades de física para el lanzamiento
+        const { frictionAir, friction, bounce, density } = this.config.penguinPhysicsConfig;
+        this.penguin.setFrictionAir(frictionAir);
+        this.penguin.setFriction(friction);
+        this.penguin.setBounce(bounce);
+        this.penguin.setDensity(density);
       });
-
-      // Reiniciar estado de deslizamiento
-      this.isOnIce = false;
-      this.lastGroundContact = 0;
-
-      // Reiniciar tracking de distancia
-      this.maxDistanceReached = false;
-      this.maxDistance = 0;
-
-      // Comenzar a registrar la última posición X del pingüino
-      this.lastPenguinX = this.penguin.x;
-      this.penguinStoppedFrames = 0;
-
-      // Restaurar propiedades de física para el lanzamiento
-      const { frictionAir, friction, bounce, density } = this.config.penguinPhysicsConfig;
-      this.penguin.setFrictionAir(frictionAir);
-      this.penguin.setFriction(friction);
-      this.penguin.setBounce(bounce);
-      this.penguin.setDensity(density);
-
-      // Animar el golpe del flamingo
-      this.animateHit();
     });
 
     return this;
@@ -554,7 +708,7 @@ export default class CharacterManager {
       this.penguin.setAngularVelocity(0);
 
       // Si está en el aire y no tiene la animación de vuelo, ponerla
-      if (this.currentAnimation !== 'penguin_fly' && isMovingSignificantly) {
+      if (this.currentPenguinAnimation !== 'penguin_fly' && isMovingSignificantly) {
         this.playPenguinAnimation('penguin_fly', false);
       }
 
@@ -580,7 +734,7 @@ export default class CharacterManager {
         this.penguin.setAngle(0);
 
         // Primero mostrar la animación de parada
-        if (this.currentAnimation !== 'penguin_stop' && !this.hasShownStopAnimation) {
+        if (this.currentPenguinAnimation !== 'penguin_stop' && !this.hasShownStopAnimation) {
           this.playPenguinAnimation('penguin_stop', false);
           this.hasShownStopAnimation = true;
 
@@ -650,28 +804,30 @@ export default class CharacterManager {
    * @param {object} options - Opciones adicionales
    */
   setAnimationByState(gameState, options = {}) {
-    if (!this.penguin || !this.penguin.anims) {
-      return;
+    // Actualizar animación del pingüino
+    if (this.penguin && this.penguin.anims) {
+      // Mapear estados del juego a animaciones
+      const penguinStateAnimMap = {
+        'READY': 'penguin_idle',
+        'ANGLE_SELECTION': 'penguin_idle',
+        'POWER_SELECTION': 'penguin_prepare',
+        'LAUNCHING': 'penguin_launch',
+        'FLYING': 'penguin_fly',
+        'SLIDING': 'penguin_slide',
+        'STOPPED': 'penguin_stop',
+        'ENDED': options.success ? 'penguin_celebrate' : 'penguin_dizzy',
+        'RESETTING': 'penguin_idle'
+      };
+
+      // Obtener la animación para el estado actual
+      const penguinAnimKey = penguinStateAnimMap[gameState] || 'penguin_idle';
+
+      // Reproducir la animación correspondiente
+      this.playPenguinAnimation(penguinAnimKey, options.ignoreIfPlaying !== false);
     }
 
-    // Mapear estados del juego a animaciones
-    const stateAnimMap = {
-      'READY': 'penguin_idle',
-      'ANGLE_SELECTION': 'penguin_idle',
-      'POWER_SELECTION': 'penguin_prepare',
-      'LAUNCHING': 'penguin_launch',
-      'FLYING': 'penguin_fly',
-      'SLIDING': 'penguin_slide',
-      'STOPPED': 'penguin_stop',
-      'ENDED': options.success ? 'penguin_celebrate' : 'penguin_dizzy',
-      'RESETTING': 'penguin_idle'
-    };
-
-    // Obtener la animación para el estado actual
-    const animKey = stateAnimMap[gameState] || 'penguin_idle';
-
-    // Reproducir la animación correspondiente
-    this.playPenguinAnimation(animKey, options.ignoreIfPlaying !== false);
+    // Actualizar animación del yeti
+    this.updateYetiAnimation(gameState);
 
     return this;
   }

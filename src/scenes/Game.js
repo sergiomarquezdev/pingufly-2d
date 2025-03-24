@@ -21,6 +21,7 @@ import BackgroundManager from '../components/environment/BackgroundManager';
 import GroundManager from '../components/environment/GroundManager';
 // Importar configuración de animaciones del pingüino
 import penguinAnimations from '../config/penguinAnimations';
+import yetiAnimations from '../config/yetiAnimations';
 import SettingsButton from '../components/ui/SettingsButton';
 import SettingsModal from '../components/ui/SettingsModal';
 // import UIManager from '../components/ui/UIManager'; // File doesn't exist
@@ -76,8 +77,9 @@ export default class Game extends Phaser.Scene {
     this.cloudManager = new CloudManager(this);
     this.cloudManager.create();
 
-    // PASO 3: Crear animaciones del pingüino
+    // PASO 3: Crear animaciones del pingüino y yeti
     this.createPenguinAnimations();
+    this.createYetiAnimations();
 
     // PASO 4: Inicializar gestor de personajes
     this.characterManager = new CharacterManager(this, {
@@ -169,6 +171,39 @@ export default class Game extends Phaser.Scene {
       });
     } catch (error) {
       console.error('❌ Error al crear animaciones del pingüino:', error);
+    }
+  }
+
+  /**
+   * Crea las animaciones del yeti basadas en el sprite sheet
+   */
+  createYetiAnimations() {
+    // Verificar que el sprite sheet está cargado
+    if (!this.textures.exists('yeti_sheet')) {
+      console.error('❌ El sprite sheet "yeti_sheet" no está cargado');
+      return;
+    }
+
+    try {
+      // Recorrer todas las animaciones definidas y crearlas
+      Object.values(yetiAnimations).forEach(animConfig => {
+        // Verificar si la animación ya existe y eliminarla para evitar duplicados
+        if (this.anims.exists(animConfig.key)) {
+          this.anims.remove(animConfig.key);
+        }
+
+        // Crear la animación
+        this.anims.create({
+          key: animConfig.key,
+          frames: this.anims.generateFrameNumbers('yeti_sheet', {
+            frames: animConfig.frames
+          }),
+          frameRate: animConfig.frameRate,
+          repeat: animConfig.repeat
+        });
+      });
+    } catch (error) {
+      console.error('❌ Error al crear animaciones del yeti:', error);
     }
   }
 

@@ -7,7 +7,7 @@ const yetiAnimations = {
   // Animación para la aparición del yeti
   appear: {
     key: 'yeti_appear',
-    frames: [29, 30, 31, 32, 1],
+    frames: [28,20,30,31,1],
     frameRate: 8,
     repeat: 0,
     flipX: true
@@ -16,7 +16,7 @@ const yetiAnimations = {
   // Animación para el estado idle (estático)
   idle: {
     key: 'yeti_idle',
-    frames: [1, 2, 3, 4, 5, 6, 7, 8],
+    frames: [0,1,2,3,4,5,6,7],
     frameRate: 6,
     repeat: -1,
     flipX: true
@@ -25,7 +25,7 @@ const yetiAnimations = {
   // Animación para la preparación del lanzamiento
   prepare: {
     key: 'yeti_prepare',
-    frames: [45, 46, 47, 48, 1, 2, 3, 4],
+    frames: [44, 45, 46, 47, 0, 1, 2, 3],
     frameRate: 6,
     repeat: 0,
     flipX: true
@@ -34,7 +34,7 @@ const yetiAnimations = {
   // Animación para el momento del lanzamiento
   launch: {
     key: 'yeti_launch',
-    frames: [17, 42],
+    frames: [16, 41, 42, 43],
     frameRate: 10,
     repeat: 0,
     flipX: true

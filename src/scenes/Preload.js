@@ -55,14 +55,29 @@ export default class Preload extends Phaser.Scene {
       margin: 0         // Margen alrededor de los frames
     });
 
+    // Cargar sprite sheet del yeti
+    this.load.spritesheet('yeti_sheet', 'assets/images/characters/yeti_sheet.png', {
+      frameWidth: 64,   // Ancho de cada frame (6x8 grid, cada cuadro 64x64px)
+      frameHeight: 64,  // Alto de cada frame
+      spacing: 0,       // Espacio entre frames
+      margin: 0         // Margen alrededor de los frames
+    });
+
     // Verificar si la textura se está cargando correctamente
     this.load.on('filecomplete-spritesheet-penguin_sheet', () => {
       // Sprite sheet cargado correctamente
     });
 
+    this.load.on('filecomplete-spritesheet-yeti_sheet', () => {
+      // Sprite sheet del yeti cargado correctamente
+    });
+
     this.load.on('fileerror', (key, file, error) => {
       if (key === 'penguin_sheet') {
         console.error('❌ Error al cargar el sprite sheet del pingüino:', error);
+      }
+      if (key === 'yeti_sheet') {
+        console.error('❌ Error al cargar el sprite sheet del yeti:', error);
       }
     });
 
