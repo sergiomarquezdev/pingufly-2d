@@ -274,12 +274,6 @@ this.characterManager.createCharacters();
 - Posicionado con sistema de offset relativo al punto de lanzamiento
 - Desarrollo futuro planificado para versión animada
 
-### 8.3. Flamingo
-
-- Implementado como un sprite pivotante
-- Animación durante la secuencia de lanzamiento
-- Posicionado relativo a la mano del Yeti
-
 ## 9. User Interface Implementation
 
 El sistema de UI es modular y consta de varios componentes especializados:

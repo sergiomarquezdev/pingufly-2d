@@ -86,7 +86,6 @@ export default class Preload extends Phaser.Scene {
     this.load.image('yeti', 'https://labs.phaser.io/assets/sprites/phaser-dude.png');
     // Mantenemos la imagen estática como fallback
     this.load.image('penguin', 'https://labs.phaser.io/assets/sprites/phaser-ship.png');
-    this.load.image('flamingo', 'https://labs.phaser.io/assets/sprites/asteroids_ship.png');
     this.load.image('button', 'https://labs.phaser.io/assets/sprites/button-bg.png');
 
     // Tiempo mínimo de carga (para simular carga con pocos assets)

@@ -33,10 +33,6 @@ export default class CharacterManager {
         x: 45,       // Offset X respecto a launchPositionX
         y: -25       // Offset Y respecto a launchPositionY
       },
-      flamingo: {
-        x: 8,        // Offset X respecto a launchPositionX
-        y: 0         // Offset Y respecto a launchPositionY
-      },
       // El pingüino estará en la posición de lanzamiento exacta
       penguin: {
         x: 0,
@@ -47,7 +43,6 @@ export default class CharacterManager {
     // Referencias a objetos del juego
     this.yeti = null;
     this.penguin = null;
-    this.flamingo = null;
 
     // Estado de movimiento del pingüino
     this.lastPenguinX = 0;
@@ -85,20 +80,6 @@ export default class CharacterManager {
   }
 
   /**
-   * Obtiene la posición X del flamenco
-   */
-  getFlamingoX() {
-    return this.config.launchPositionX + this.offsets.flamingo.x;
-  }
-
-  /**
-   * Obtiene la posición Y del flamenco
-   */
-  getFlamingoY() {
-    return this.config.launchPositionY + this.offsets.flamingo.y;
-  }
-
-  /**
    * Obtiene la posición X del pingüino
    */
   getPenguinX() {
@@ -127,6 +108,9 @@ export default class CharacterManager {
           1  // Frame inicial (posición idle)
         ).setDepth(5);
 
+        // Recortar 1px de la parte superior para eliminar la línea extraña
+        this.yeti.setCrop(0, 1, 64, 63);
+
         // Iniciar con la animación de aparición
         this.scene.time.delayedCall(100, () => {
           this.playYetiAnimation('yeti_appear');
@@ -154,18 +138,6 @@ export default class CharacterManager {
 
     // Voltear el Yeti para que mire hacia la izquierda
     this.yeti.setFlipX(true);
-
-    // Crear el flamingo - Reposicionado cerca de la mano del Yeti
-    this.flamingo = this.scene.add.image(
-      this.getFlamingoX(),
-      this.getFlamingoY(),
-      'flamingo'
-    ).setDepth(5);
-
-    // Voltear el flamingo para que apunte hacia la izquierda
-    this.flamingo.setFlipX(true);
-    // Rotar ligeramente para posición de inicio
-    this.flamingo.setAngle(20);
 
     // Crear el pingüino - intentamos primero con el sprite, con fallback a imagen estática
     try {
@@ -391,6 +363,11 @@ export default class CharacterManager {
     // Colocar los personajes en sus posiciones iniciales
     this.yeti.setPosition(this.getYetiX(), this.getYetiY());
 
+    // Asegurar que el recorte del yeti se mantiene
+    if (this.yeti) {
+      this.yeti.setCrop(0, 1, 64, 63);
+    }
+
     // Reiniciar animación del yeti
     if (this.yeti.anims) {
       this.yeti.anims.stop();
@@ -399,12 +376,6 @@ export default class CharacterManager {
         this.playYetiAnimation('yeti_idle', false);
       });
     }
-
-    // Reposicionar el flamingo cerca de la mano del Yeti
-    this.flamingo.setPosition(this.getFlamingoX(), this.getFlamingoY());
-
-    // Restablecer ángulo inicial
-    this.flamingo.setAngle(20);
 
     // Restablecer completamente el pingüino y sus propiedades visuales
     this.penguin.setPosition(this.getPenguinX(), this.getPenguinY());
@@ -460,9 +431,8 @@ export default class CharacterManager {
     const { launchPositionY } = this.config;
     const offsetY = 200; // Desplazamiento vertical para colocar fuera de pantalla
 
-    // Colocar el yeti y el flamingo fuera de la vista inicialmente (por debajo de la pantalla)
+    // Colocar el yeti fuera de la vista inicialmente (por debajo de la pantalla)
     this.yeti.setPosition(this.getYetiX(), launchPositionY + offsetY);
-    this.flamingo.setPosition(this.getFlamingoX(), launchPositionY + offsetY);
 
     // Establecer el pingüino fuera de pantalla pero con propiedades visuales correctas
     this.penguin.setPosition(this.getPenguinX(), launchPositionY + offsetY);
@@ -505,14 +475,13 @@ export default class CharacterManager {
 
     // Animar la entrada del yeti y el pingüino desde abajo
     this.scene.tweens.add({
-      targets: [this.yeti, this.flamingo, this.penguin],
+      targets: [this.yeti, this.penguin],
       y: { from: launchPositionY + offsetY, to: launchPositionY - bounceY },
       duration: 500,
       ease: 'Back.easeOut',
       onComplete: () => {
         // Ajustar las posiciones finales exactas
         this.penguin.setPosition(this.getPenguinX(), this.getPenguinY());
-        this.flamingo.setPosition(this.getFlamingoX(), this.getFlamingoY());
         this.yeti.setPosition(this.getYetiX(), this.getYetiY());
 
         // Asegurarnos que el pingüino está completamente visible y sin efectos extras
@@ -523,41 +492,17 @@ export default class CharacterManager {
         this.playYetiAnimation('yeti_appear', false);
 
         // Añadir un pequeño efecto de rebote al yeti y al flamingo
-        this.scene.tweens.add({
-          targets: [this.flamingo],
-          y: '-=10',
-          duration: 150,
-          yoyo: true,
-          ease: 'Sine.easeInOut',
-          onComplete: () => {
-            // Solo llamamos a onComplete después de que la animación del yeti ha terminado
-            if (this.yeti.anims) {
-              // Esperar a que termine la animación de aparición antes de llamar a onComplete
-              this.yeti.once('animationcomplete', () => {
-                if (onComplete) onComplete();
-              });
-            } else {
-              // Si no hay animaciones, llamar directamente
-              if (onComplete) onComplete();
-            }
-          }
-        });
+        if (this.yeti.anims) {
+          // Esperar a que termine la animación de aparición antes de llamar a onComplete
+          this.yeti.once('animationcomplete', () => {
+            if (onComplete) onComplete();
+          });
+        } else {
+          // Si no hay animaciones, llamar directamente
+          if (onComplete) onComplete();
+        }
+
       }
-    });
-
-    return this;
-  }
-
-  /**
-   * Anima el golpe del flamingo al pingüino
-   */
-  animateHit() {
-    // Animar el golpe con el flamingo - cambiar a animación hacia abajo
-    this.scene.tweens.add({
-      targets: this.flamingo,
-      angle: 90, // Ángulo positivo para que gire hacia abajo
-      duration: 200,
-      yoyo: true
     });
 
     return this;
@@ -591,9 +536,6 @@ export default class CharacterManager {
       this.scene.time.delayedCall(100, () => {
         // Reproducir la animación de lanzamiento del pingüino
         this.playPenguinAnimation('penguin_launch', false);
-
-        // Animar el golpe del flamingo
-        this.animateHit();
 
         // Hacer que el pingüino sea dinámico para que la física lo afecte
         this.penguin.setStatic(false);
