@@ -572,6 +572,34 @@ export default class Menu extends Phaser.Scene {
     // Reproducir la animación idle
     pinguin.play('menu_penguin_idle');
 
+    // Crear la animación de salto para el pingüino
+    if (!this.anims.exists('menu_penguin_jump')) {
+      this.anims.create({
+        key: 'menu_penguin_jump',
+        frames: this.anims.generateFrameNumbers('penguin_sheet', {
+          frames: [50, 51, 50] // Frames de salto
+        }),
+        frameRate: 4,
+        repeat: 2
+      });
+    }
+
+    // Configurar evento para alternar ocasionalmente a la animación de salto
+    this.time.addEvent({
+      delay: 5000, // Cada 5 segundos
+      callback: () => {
+        // Cambiar a animación de salto
+        pinguin.play('menu_penguin_jump');
+
+        // Volver a idle cuando termine la animación de salto
+        pinguin.once('animationcomplete', () => {
+          pinguin.play('menu_penguin_idle');
+        });
+      },
+      callbackScope: this,
+      loop: true
+    });
+
     // Añadir un yeti decorativo (usando el sheet)
     const yetiFrame = 1; // Frame inicial
     const yeti = this.add.sprite(width * 0.83, height * 0.91, 'yeti_sheet', yetiFrame)
@@ -603,7 +631,7 @@ export default class Menu extends Phaser.Scene {
           frames: [45, 46, 47, 48] // Frames de prepare
         }),
         frameRate: 6,
-        repeat: 1 // Solo repetir una vez
+        repeat: 2
       });
     }
 
