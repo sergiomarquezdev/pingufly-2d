@@ -315,7 +315,7 @@ npm run preview
 - ✅ Animaciones decorativas para personajes en el menú
 - ✅ Sistema de audio mejorado con control de volumen avanzado
 - ✅ Correcciones en el cálculo de distancia para prevenir duplicaciones
-- ❌ Efectos de sonido completos para todas las interacciones
+- ✅ Efectos de sonido completos para todas las interacciones
 - ✅ Animaciones finales de personajes durante el juego
 - ❌ Obstáculos adicionales y elementos interactivos
 - ❌ Optimizaciones de rendimiento para dispositivos móviles
