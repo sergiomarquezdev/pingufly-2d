@@ -805,7 +805,7 @@ export default class Menu extends Phaser.Scene {
     const instructionsText = this.add.text(width / 2, height / 2,
       '1. Haz clic una vez para seleccionar el ángulo\n' +
       '2. Haz clic de nuevo para seleccionar la potencia\n' +
-      '3. El Yeti golpeará al pingüino con el flamenco\n' +
+      '3. El Yeti lanzará al pingüino\n' +
       '4. Intenta alcanzar la mayor distancia posible\n\n' +
       'Tienes 5 intentos por partida.', {
       fontFamily: 'Arial',

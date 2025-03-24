@@ -56,7 +56,7 @@ Una reimaginación moderna del clásico juego Yeti Sports Pingu Throw, donde lan
 
 ## 🎮 Sobre el Proyecto
 
-PinguFly recrea la experiencia nostálgica del clásico juego Yeti Sports donde un yeti lanza un pingüino usando un flamenco como palo de golf. El objetivo es simple pero adictivo: lanzar el pingüino lo más lejos posible a través de un paisaje helado, compitiendo por la mayor distancia.
+PinguFly recrea la experiencia nostálgica del clásico juego Yeti Sports donde un yeti lanza un pingüino. El objetivo es simple pero adictivo: lanzar el pingüino lo más lejos posible a través de un paisaje helado, compitiendo por la mayor distancia.
 
 Este remake aprovecha las tecnologías web modernas, especialmente Phaser 3 y JavaScript ES6+, creando una experiencia de juego fluida y accesible tanto en ordenadores como en dispositivos móviles. El juego presenta un rico ambiente invernal con elementos dinámicos como copos de nieve, árboles, muñecos de nieve e iglús que crean una experiencia inmersiva.
 
@@ -141,7 +141,7 @@ El juego implementa un sistema estratégico de lanzamiento en dos fases:
 PinguFly está construido con una arquitectura modular que separa claramente las responsabilidades:
 
 - **Componentes**: Unidades reutilizables que gestionan aspectos específicos del juego
-  - **CharacterManager**: Gestiona todos los personajes del juego (Yeti, Pingüino, Flamenco)
+  - **CharacterManager**: Gestiona todos los personajes del juego (Yeti y Pingüino)
   - **BackgroundManager**: Controla elementos de fondo y parallax
   - **CloudManager**: Maneja la generación y animación de nubes
   - **GroundManager**: Configura la física del suelo y el terreno
