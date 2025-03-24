@@ -1,7 +1,7 @@
-# IMPORTANT: Obsolete - don't use# Design and Development Documentation: PinguFly
+# Design and Development Documentation: PinguFly
 
-**Date:** May 25, 2023
-**Version:** 2.0
+**Date:** Updated June 2024
+**Version:** 3.0
 **Product:** PinguFly videogame
 **Audience:** Game Designers, Game Developers
 
@@ -150,16 +150,47 @@ if (gameState === 'FLYING') {
 }
 ```
 
+El sistema ha sido recientemente mejorado para evitar duplicaciones en el cálculo de la distancia:
+
+```javascript
+// Mejora en Game.js - método update()
+if (this.stateManager.getState() === 'FLYING') {
+  // Verificar si el pingüino ha aterrizado o se ha detenido
+  if (this.characterManager.hasPenguinLanded() || this.characterManager.hasPenguinStopped()) {
+    // Finalizar el lanzamiento sin duplicar el cálculo
+    this.endLaunch();
+    // Importante: retornamos inmediatamente para evitar cálculos adicionales
+    return;
+  }
+
+  // Actualizamos la distancia solo si seguimos volando
+  this.scoreManager.updateDistance(
+    this.characterManager.getPenguinCurrentX(),
+    this.launchPositionX
+  );
+
+  // Actualizamos la UI con la distancia actual y total
+  this.gameUI.updateDistanceText(
+    this.scoreManager.currentDistance,
+    this.scoreManager.totalDistance
+  );
+}
+```
+
 - Cálculo de distancia en tiempo real durante el vuelo
 - Seguimiento de distancia actual y total
 - Récord de mejor distancia guardado en localStorage
 - Feedback visual a través del componente `GameUI`
+- Mecanismo de prevención de duplicación para asegurar mediciones precisas
 
 ### 6.6. Game Session Management
 
 ```javascript
 // En Game.js
 endLaunch() {
+  // Cambiar el estado inmediatamente para evitar actualizaciones duplicadas
+  this.stateManager.setState('STOPPED');
+
   // Acumular la distancia actual al total
   this.scoreManager.addCurrentToTotal();
 
@@ -178,6 +209,7 @@ endLaunch() {
 - Conteo y gestión de intentos a través de `GameStateManager`
 - Indicador visual claro de intentos restantes
 - La sesión de juego termina después del intento final con una pantalla de resultados detallada
+- Mecanismos de estado mejorados para prevenir comportamientos inesperados
 
 ## 7. Environment Implementation
 
@@ -270,9 +302,46 @@ this.characterManager.createCharacters();
 
 ### 8.2. Yeti
 
-- Actualmente implementado como un sprite estático
+- Sprite animado con comportamientos interactivos
+- Animaciones para estados idle, prepare y swing
 - Posicionado con sistema de offset relativo al punto de lanzamiento
-- Desarrollo futuro planificado para versión animada
+- Integrado en la secuencia de lanzamiento para mejorar feedback visual
+
+### 8.3. Character Animations
+
+Las animaciones de los personajes se han ampliado significativamente:
+
+```javascript
+// En Menu.js - Ejemplo de animaciones decorativas
+// Crear la animación idle para el pingüino decorativo
+if (!this.anims.exists('menu_penguin_idle')) {
+  this.anims.create({
+    key: 'menu_penguin_idle',
+    frames: this.anims.generateFrameNumbers('penguin_sheet', {
+      frames: [40, 41, 42, 40] // Frames para animación idle
+    }),
+    frameRate: 2,
+    repeat: -1
+  });
+}
+
+// Crear la animación de salto para el pingüino
+if (!this.anims.exists('menu_penguin_jump')) {
+  this.anims.create({
+    key: 'menu_penguin_jump',
+    frames: this.anims.generateFrameNumbers('penguin_sheet', {
+      frames: [50, 51, 50] // Frames de salto
+    }),
+    frameRate: 4,
+    repeat: 2
+  });
+}
+```
+
+- Hojas de sprites organizadas para personajes principales
+- Sistema de animación basado en estado para comportamientos complejos
+- Animaciones decorativas para elementos de menú y UI
+- Transiciones suaves entre estados de animación
 
 ## 9. User Interface Implementation
 
@@ -306,6 +375,7 @@ createMainMenu(width, height) {
 - Diseño responsivo que se adapta al tamaño de pantalla
 - Botones interactivos con efectos de hover/press
 - Título animado y copos de nieve decorativos
+- Personajes animados (pingüino y yeti) con comportamientos periódicos
 
 ### 9.2. Game UI Elements
 
@@ -342,17 +412,141 @@ this.gameOverScreen.show({
 - Opciones de reinicio y menú principal
 - Diseño temático de glaciar que coincide con el estilo general de UI
 
-### 9.4. Instructions Screen
+### 9.4. Settings Modal
+
+Una adición reciente al juego es el modal de configuración mejorado, que permite a los usuarios ajustar diversas opciones:
+
+```javascript
+// En SettingsModal.js
+addSoundToggle(x, y, width) {
+  // Implementación del control de volumen con slider y botón de mute
+  // ...
+
+  // Dibujar icono de altavoz según estado y volumen
+  const speakerIcon = this.scene.add.graphics();
+
+  // Determinar si debería estar silenciado (isEnabled false o volumen 0)
+  const isMuted = !isSoundEnabled || currentVolume === 0;
+
+  // Dibujar altavoz inicial
+  this.drawSpeakerIcon(speakerIcon, iconX, iconY, !isMuted);
+
+  // --- SLIDER DE VOLUMEN ---
+  // Fondo del slider con estilo glaciar
+  const sliderBg = this.scene.add.graphics();
+  sliderBg.fillGradientStyle(0x3d5e7e, 0x3d5e7e, 0x555555, 0x555555, 0.8);
+
+  // Actualizar volumen cuando se mueve el slider
+  this.updateVolumeControls(state, knob, progressBar, percentText, newSliderX, sliderY, sliderWidth, sliderHeight, speakerIcon, iconX, iconY);
+}
+```
+
+- Control de volumen con slider visual integrado con el estilo glaciar
+- Botón de mute/unmute con indicador visual que cambia según el estado
+- Visualización de porcentaje de volumen (0-100%)
+- Opciones para resetear récords y reiniciar el juego
+- Interfaz reactiva con feedback visual para todas las interacciones
+- Diseño coherente con el resto de la UI del juego
+
+### 9.5. Instructions Screen
 
 - Instrucciones detalladas del juego con ayudas visuales
 - Elementos interactivos para demostrar la jugabilidad
 - Opción para ver animaciones de pingüino para pruebas
 
-## 10. Technical Architecture
+## 10. Audio System Implementation
+
+El sistema de audio es una característica clave implementada a través de la clase `SoundManager`:
+
+```javascript
+// En SoundManager.js - Ejemplo de método de reproducción de música
+playMusic(key, config = {}) {
+  // No reproducir si la música está deshabilitada
+  if (!this.musicEnabled) return;
+
+  // Valores predeterminados para la configuración
+  const defaultConfig = {
+    loop: true,
+    volume: this.musicVolume,
+    fade: false,
+    fadeTime: 1000
+  };
+
+  // Combinar la configuración proporcionada con la predeterminada
+  const finalConfig = { ...defaultConfig, ...config };
+
+  // Implementación de reproducción de música...
+}
+```
+
+El sistema de audio incluye:
+
+### 10.1. Music Management
+
+- Reproducción de música de fondo con opciones para loop, fade in/out
+- Cambios suaves entre pistas con transiciones de fade
+- Soporte para pausar/reanudar música durante interacciones del juego
+- Registro global para evitar reproducción duplicada de música
+
+### 10.2. Sound Effects Management
+
+- Sistema de efectos de sonido para acciones del juego
+- Control de volumen independiente para música y efectos
+- Caché de sonidos para rendimiento optimizado
+- Verificación de soporte de audio del navegador
+
+### 10.3. Volume Control Integration
+
+Recientemente mejorado con controles de volumen avanzados:
+
+```javascript
+// En SettingsModal.js - Método para actualizar control de volumen
+updateVolumeControls(state, knob, progressBar, percentText, sliderX, sliderY, sliderWidth, sliderHeight, speakerIcon, iconX, iconY) {
+  // Actualizar posición del knob
+  knob.clear();
+  knob.fillStyle(0x4CAF50, 1);
+  const knobPosition = sliderX - sliderWidth/2 + (sliderWidth * state.volume);
+  knob.fillCircle(knobPosition, sliderY, (sliderHeight - 10) / 2);
+
+  // Actualizar barra de progreso
+  this.updateVolumeBar(progressBar, sliderX, sliderY, sliderWidth, sliderHeight, state.volume);
+
+  // Actualizar texto de porcentaje
+  const volumePercentage = Math.round(state.volume * 100);
+  percentText.setText(`${volumePercentage}%`);
+
+  // Verificar si debemos actualizar el icono basado en el volumen
+  if (speakerIcon && iconX !== undefined && iconY !== undefined) {
+    const shouldBeMuted = state.volume === 0 || !state.isOn;
+    speakerIcon.clear();
+    this.drawSpeakerIcon(speakerIcon, iconX, iconY, !shouldBeMuted);
+  }
+
+  // Aplicar volumen al SoundManager
+  if (this.scene.soundManager) {
+    this.scene.soundManager.setMusicVolume(state.volume);
+    this.scene.soundManager.setSfxVolume(state.volume);
+  }
+}
+```
+
+- Control deslizable para ajuste fino del volumen (0-100%)
+- Botón de mute/unmute con cambio automático cuando el volumen llega a 0
+- Persistencia de preferencias de volumen usando `StorageManager`
+- Interfaz visual que refleja el estilo glaciar del juego
+- Eventos de arrastre optimizados para controlar el volumen en tiempo real
+
+### 10.4. Audio Persistence
+
+- Preferencias de audio guardadas en localStorage
+- Restauración automática de configuraciones de audio entre sesiones
+- Verificación de capacidades de audio del navegador
+
+## 11. Technical Architecture
 
 El juego está construido con una arquitectura modular centrada en la separación de responsabilidades:
 
-### 10.1. Scene Management
+### 11.1. Scene Management
 
 ```javascript
 // En main.js
@@ -368,7 +562,7 @@ const config = {
 - `Game`: Implementación core de gameplay
 - `AnimationTest`: Escena dedicada para probar animaciones
 
-### 10.2. Component System
+### 11.2. Component System
 
 El juego utiliza una arquitectura basada en componentes:
 
@@ -385,7 +579,7 @@ src/
 - Cada componente tiene una responsabilidad enfocada
 - Los componentes se comunican a través de interfaces definidas
 
-### 10.3. State Management
+### 11.3. State Management
 
 Centralizado a través del `GameStateManager`:
 
@@ -408,7 +602,7 @@ this.stateManager.addStateObserver((newState) => {
 - Sistema de estado modal para controlar el bloqueo de entrada
 - Capacidades de reset para reinicio del juego
 
-### 10.4. Data Persistence
+### 11.4. Data Persistence
 
 Implementado con localStorage:
 
@@ -429,11 +623,11 @@ checkAndUpdateBestDistance() {
 - Persistencia de configuraciones del juego
 - Recuperación de estado en recarga de página
 
-## 11. Current Implementation Status
+## 12. Current Implementation Status
 
 Basado en la línea de tiempo de desarrollo:
 
-### 11.1. Completed Features
+### 12.1. Completed Features
 - Mecánicas core del juego (selección de ángulo, selección de potencia, física de lanzamiento)
 - Sistema de gestión de personajes con estados de animación
 - Entorno con fondos de parallax y elementos visuales
@@ -442,26 +636,30 @@ Basado en la línea de tiempo de desarrollo:
 - Seguimiento de puntuación con récords de mejor distancia
 - Sistema de gestión de estado
 - Pantalla de fin de juego con opciones de reinicio y menú
+- Animaciones mejoradas para personajes en menú principal
+- Control de volumen avanzado con slider y botón de mute
+- Sistema de corrección para cálculo preciso de distancia
 
-### 11.2. In Progress / Planned Features
+### 12.2. In Progress / Planned Features
 - Efectos de sonido completos y música de fondo
-- Animaciones y sprites finales de personajes
+- Animaciones finales de personajes durante el juego
 - Obstáculos ambientales adicionales y elementos interactivos
 - Optimizaciones de rendimiento para dispositivos móviles
 - Integración de analytics para métricas de gameplay
 - Sistema de tabla de clasificación online
 
-## 12. Technical Considerations and Optimizations
+## 13. Technical Considerations and Optimizations
 
-### 12.1. Performance Optimization
+### 13.1. Performance Optimization
 
 Las optimizaciones actuales incluyen:
 - Gestión eficiente de sprites con pooling para partículas
 - Culling de cámara para elementos fuera de pantalla
 - Física simplificada para objetos distantes
 - Configuraciones de calidad adaptativas basadas en capacidades del dispositivo
+- Correcciones para prevenir cálculos duplicados que afectan el rendimiento
 
-### 12.2. Mobile Considerations
+### 13.2. Mobile Considerations
 
 El juego está optimizado para móvil con:
 - Canvas responsivo que escala al tamaño del dispositivo
@@ -469,17 +667,17 @@ El juego está optimizado para móvil con:
 - Calidad de renderizado adaptativa
 - Cálculos de física simplificados en dispositivos de gama baja
 
-### 12.3. Browser Compatibility
+### 13.3. Browser Compatibility
 
 El juego se dirige a navegadores modernos con:
 - Renderizado WebGL con fallback a Canvas
 - Características ES6+ con polyfills apropiados
 - Diseño responsivo para varios tamaños de pantalla
 
-## 13. Conclusion
+## 14. Conclusion
 
-PinguFly ha evolucionado desde un diseño conceptual a un juego completamente funcional con visuales ricos, mecánicas atractivas y una experiencia de usuario pulida. La arquitectura modular y el diseño basado en componentes permiten un refinamiento continuo y expansión de características.
+PinguFly ha evolucionado desde un diseño conceptual a un juego completamente funcional con visuales ricos, mecánicas atractivas y una experiencia de usuario pulida. Las recientes mejoras en el sistema de audio, correcciones en el cálculo de distancia y expansión de animaciones de personajes han fortalecido significativamente la experiencia de juego.
 
-La implementación actual captura con éxito la esencia del juego original Yeti Sports mientras añade toques modernos, física mejorada y visuales mejorados que crean una experiencia de juego atractiva y adictiva.
+La arquitectura modular y el diseño basado en componentes continúan permitiendo un refinamiento fácil y expansión de características, como se ha demostrado con la reciente implementación del control de volumen avanzado.
 
-El desarrollo futuro se centrará en completar la integración de assets, añadir efectos de sonido, implementar obstáculos ambientales adicionales y optimizar el rendimiento para una gama más amplia de dispositivos.
+El desarrollo futuro se centrará en completar la integración de efectos de sonido, implementar obstáculos ambientales adicionales y optimizar el rendimiento para una gama más amplia de dispositivos.

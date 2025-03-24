@@ -27,6 +27,7 @@ Una reimaginación moderna del clásico juego Yeti Sports Pingu Throw, donde lan
     - [Sistema de Lanzamiento en Dos Fases](#sistema-de-lanzamiento-en-dos-fases)
     - [Entorno Invernal Dinámico](#entorno-invernal-dinámico)
     - [Seguimiento de Puntuación y Progreso](#seguimiento-de-puntuación-y-progreso)
+    - [Sistema de Audio Avanzado](#sistema-de-audio-avanzado)
     - [Diseño UI Responsivo](#diseño-ui-responsivo)
     - [Gestión de Estados de Juego](#gestión-de-estados-de-juego)
   - [🔧 Arquitectura y Diseño Técnico](#-arquitectura-y-diseño-técnico)
@@ -75,10 +76,12 @@ Este remake aprovecha las tecnologías web modernas, especialmente Phaser 3 y Ja
 * 🎚️ Controles intuitivos optimizados para escritorio y móvil
 * 🌊 Jugabilidad física realista con trayectorias de proyectil naturales
 * 📊 Seguimiento de puntuación y récords personales con retroalimentación visual
+* 🔊 Sistema de audio completo con control de volumen avanzado y efectos de sonido
 * 🏆 Múltiples intentos de lanzamiento por sesión de juego
 * 📱 Diseño responsivo que funciona en diversos tamaños de pantalla
 * 🎨 Efectos visuales atractivos con animaciones fluidas y UI estilo glaciar
 * 🧩 Arquitectura de código modular para mejor mantenimiento y escalabilidad
+* 🎭 Personajes animados con comportamientos interactivos en menú y juego
 
 ## ✨ Funcionalidades en Detalle
 
@@ -100,13 +103,21 @@ El juego implementa un sistema estratégico de lanzamiento en dos fases:
 - **Elementos Ambientales**: Árboles, muñecos de nieve e iglús estratégicamente ubicados mejoran la experiencia visual
 - **Nubes Dinámicas**: Nubes a la deriva en diversas formas y tamaños añaden atmósfera al cielo
 - **Sol y Efectos de Luz**: Efectos visuales mejorados con rayos de sol e iluminación ambiental
+- **Animaciones de Personajes**: Yeti y pingüino animados con comportamientos que enriquecen la experiencia visual
 
 ### Seguimiento de Puntuación y Progreso
-- Seguimiento de distancia en tiempo real durante el vuelo del pingüino
+- Seguimiento de distancia en tiempo real durante el vuelo del pingüino, con cálculo preciso evitando duplicaciones
 - Acumulación de distancia total a través de múltiples intentos
 - Almacenamiento y visualización de récords personales usando localStorage
 - Retroalimentación visual muestra intentos restantes con iconos de pingüino animados
 - Efectos especiales para nuevos récords en la pantalla de Game Over
+
+### Sistema de Audio Avanzado
+- **Control de Volumen Personalizado**: Slider visual con estilo glaciar para ajuste fino del volumen (0-100%)
+- **Botón Mute/Unmute**: Control de silencio con indicación visual que cambia automáticamente según el nivel de volumen
+- **Música de Fondo**: Pistas musicales con transiciones suaves entre escenas y mecanismos anti-duplicación
+- **Efectos de Sonido**: Retroalimentación auditiva para interacciones de juego como botones, lanzamientos y eventos
+- **Persistencia de Preferencias**: Configuraciones de audio guardadas entre sesiones usando localStorage
 
 ### Diseño UI Responsivo
 - Se adapta perfectamente a diferentes tamaños de pantalla y orientaciones
@@ -114,6 +125,7 @@ El juego implementa un sistema estratégico de lanzamiento en dos fases:
 - Controles táctiles optimizados para dispositivos móviles
 - Controles de escritorio con atajos de teclado para mejor experiencia
 - Elementos UI con estilo glaciar con efectos brillantes y animaciones
+- Modal de configuración con controles avanzados para personalizar la experiencia
 
 ### Gestión de Estados de Juego
 - Gestión de estados centralizada con GameStateManager
@@ -121,6 +133,7 @@ El juego implementa un sistema estratégico de lanzamiento en dos fases:
 - Pantalla de Game Over pulida con puntuaciones finales, récords y opciones para reiniciar
 - Almacenamiento persistente para mejores distancias
 - Sistema de estados modales para controlar interacciones en diferentes etapas
+- Mecanismos mejorados para prevenir comportamientos inesperados en cálculos de distancia
 
 ## 🔧 Arquitectura y Diseño Técnico
 
@@ -147,6 +160,7 @@ PinguFly está construido con una arquitectura modular que separa claramente las
   - **GameStateManager**: Sistema central de estados del juego
   - **ScoreManager**: Gestión de puntuaciones y mejor distancia
   - **StorageManager**: Interfaz para localStorage
+  - **SoundManager**: Sistema completo de gestión de audio
   - **CameraController**: Control avanzado de cámara
 
 ### Sistema de Componentes
@@ -161,6 +175,8 @@ Cada componente del juego sigue el principio de responsabilidad única:
 4. **LaunchManager**: Coordina el proceso completo de lanzamiento, comunicándose con AngleIndicator y PowerBar.
 
 5. **GameUI**: Centraliza la creación y actualización de todos los elementos de interfaz, incluyendo puntuaciones, intentos e indicaciones.
+
+6. **SettingsModal**: Implementa un modal de configuración con controles avanzados para sonido y opciones de juego.
 
 ### Manejo de Recursos
 - **Carga Progresiva**: Los recursos se cargan en la escena Preload con una barra de progreso
@@ -190,6 +206,7 @@ Cada componente del juego sigue el principio de responsabilidad única:
 - Gestión de escenas para mejor utilización de memoria
 - Cálculos físicos optimizados para jugabilidad fluida
 - Detección de capacidades del dispositivo para ajustes dinámicos de calidad
+- Mecanismos para prevenir cálculos duplicados de distancia que afectan el rendimiento
 
 ### Arquitectura de Código Modular
 - Patrones de programación funcional para mejor organización del código
@@ -295,10 +312,13 @@ npm run preview
 - ✅ UI optimizada de selección de potencia y ángulo
 - ✅ Efecto de nevada dinámica con simulación de viento
 - ✅ Elementos ambientales (árboles, muñecos de nieve, iglús)
-- ❌ Assets finales de personajes y animaciones
-- ❌ Efectos de sonido y música de fondo
-- ❌ Optimizaciones de rendimiento para dispositivos móviles
+- ✅ Animaciones decorativas para personajes en el menú
+- ✅ Sistema de audio mejorado con control de volumen avanzado
+- ✅ Correcciones en el cálculo de distancia para prevenir duplicaciones
+- ❌ Efectos de sonido completos para todas las interacciones
+- ❌ Animaciones finales de personajes durante el juego
 - ❌ Obstáculos adicionales y elementos interactivos
+- ❌ Optimizaciones de rendimiento para dispositivos móviles
 - ❌ Tabla de clasificación online
 
 Para un roadmap más detallado, consulta [timeline.md](project_docs/timeline.md).
@@ -314,11 +334,11 @@ pingufly-2d
 │  │  ├─ characters/          # Componentes de personajes (CharacterManager)
 │  │  ├─ environment/         # Componentes del entorno (BackgroundManager, CloudManager, GroundManager)
 │  │  ├─ gameplay/            # Mecánicas de juego (LaunchManager)
-│  │  └─ ui/                  # Componentes de interfaz (GameUI, PowerBar, AngleIndicator, GameOverScreen)
+│  │  └─ ui/                  # Componentes de interfaz (GameUI, PowerBar, AngleIndicator, GameOverScreen, SettingsModal)
 │  ├─ config/                 # Configuración del juego (gameConfig, physicsConfig, penguinAnimations)
 │  ├─ entities/               # Entidades y objetos del juego
 │  ├─ scenes/                 # Escenas Phaser (Game, Menu, Preload, Boot, AnimationTest)
-│  ├─ utils/                  # Clases utilitarias (ScoreManager, CameraController, GameStateManager, StorageManager)
+│  ├─ utils/                  # Clases utilitarias (ScoreManager, CameraController, GameStateManager, StorageManager, SoundManager)
 │  └─ main.js                 # Punto de entrada
 ├─ public/                    # Assets estáticos
 │  └─ assets/                 # Assets del juego
