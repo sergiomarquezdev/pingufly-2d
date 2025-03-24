@@ -7,8 +7,7 @@
 ![Vite](https://img.shields.io/badge/Vite-6.2.2-blueviolet.svg)
 
 <div align="center">
-  <img src="public/assets/images/game-screenshot.png" alt="PinguFly Gameplay" width="80%">
-  <p><em>PinguFly en acción: Fase de selección de ángulo con el pingüino listo para ser lanzado</em></p>
+  <img src="public/assets/images/pingufly-cover.webp" alt="PinguFly Gameplay" width="80%">
 </div>
 
 Una reimaginación moderna del clásico juego Yeti Sports Pingu Throw, donde lanzas un pingüino lo más lejos posible a través de un hermoso paisaje invernal y compites por la mejor distancia.
