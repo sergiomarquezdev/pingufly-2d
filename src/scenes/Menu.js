@@ -628,7 +628,7 @@ export default class Menu extends Phaser.Scene {
       this.anims.create({
         key: 'menu_yeti_prepare',
         frames: this.anims.generateFrameNumbers('yeti_sheet', {
-          frames: [45, 46, 47, 48] // Frames de prepare
+          frames: [44, 45, 46, 47] // Frames de prepare
         }),
         frameRate: 6,
         repeat: 2

@@ -139,7 +139,7 @@ export default class SettingsModal {
   }
 
   /**
-   * Añade un toggle para activar/desactivar el sonido
+   * Añade un control de volumen con botón mute y slider
    * @private
    */
   addSoundToggle(x, y, width) {
@@ -147,15 +147,15 @@ export default class SettingsModal {
     const container = this.scene.add.container(x, y);
     container.setScrollFactor(0);
 
-    // Texto descriptivo
-    const label = this.scene.add.text(0, 0, 'SONIDO', {
+    // Texto descriptivo - mantener más a la izquierda
+    const label = this.scene.add.text(-width/2 + 30, 0, 'SONIDO', {
       fontFamily: 'Arial',
       fontSize: '24px',
       fontWeight: 'bold',
       color: '#ffffff',
       stroke: '#003366',
       strokeThickness: 3
-    }).setOrigin(0.5).setScrollFactor(0);
+    }).setOrigin(0, 0.5).setScrollFactor(0);
 
     container.add(label);
 
@@ -163,139 +163,319 @@ export default class SettingsModal {
     const isSoundEnabled = this.scene.soundManager ?
       (this.scene.soundManager.isMusicEnabled() && this.scene.soundManager.isSfxEnabled()) : true;
 
-    // Dimensiones del toggle
-    const toggleWidth = 80;
-    const toggleHeight = 40;
-    const toggleX = 120;
-    const toggleY = 0;
-    const knobSize = toggleHeight - 10; // Tamaño del círculo deslizante
+    // Obtener volumen actual (entre 0 y 1)
+    const currentVolume = this.scene.soundManager ?
+      this.scene.soundManager.getMusicVolume() : 0.1;
+
+    // Convertir a porcentaje para mostrar
+    const volumePercentage = Math.round(currentVolume * 100);
+
+    // Dimensiones del control de volumen
+    const sliderWidth = width * 0.42; // Reducir un poco más el ancho del slider
+    const sliderHeight = 30;
+    const sliderY = 0;
+
+    // Tamaño del icono y del control deslizante
+    const iconSize = 32;
+    const knobSize = sliderHeight - 10;
     const knobRadius = knobSize / 2;
 
-    // Posiciones absolutas del círculo
-    const offPosition = toggleX - toggleWidth/2 + knobRadius + 5;
-    const onPosition = toggleX + toggleWidth/2 - knobRadius - 5;
+    // Calcular posición del icono - más a la derecha del texto
+    const iconX = -width/2 + 160; // Aumentado desde 120 para alejarlo del texto
+    const iconY = sliderY;
 
-    // Crear grupo para el toggle
-    const toggleGroup = this.scene.add.group();
+    // --- ICONO DE ALTAVOZ ---
+    // Fondo circular para el icono
+    const iconBg = this.scene.add.graphics();
+    iconBg.fillStyle(0x2c85c1, 0.9);
+    iconBg.fillCircle(iconX, iconY, iconSize/2);
+    iconBg.lineStyle(2, 0x6baed6, 0.8);
+    iconBg.strokeCircle(iconX, iconY, iconSize/2);
 
-    // Fondo del toggle (rectángulo redondeado)
-    const toggleBg = this.scene.add.graphics();
-    // El color de fondo cambia según el estado
-    const bgColorOff = 0x555555;
-    const bgColorOn = 0x225555;
-    toggleBg.fillStyle(isSoundEnabled ? bgColorOn : bgColorOff, 0.9);
-    toggleBg.fillRoundedRect(toggleX - toggleWidth/2, toggleY - toggleHeight/2, toggleWidth, toggleHeight, toggleHeight/2);
-    toggleBg.lineStyle(2, 0x6baed6, 0.8);
-    toggleBg.strokeRoundedRect(toggleX - toggleWidth/2, toggleY - toggleHeight/2, toggleWidth, toggleHeight, toggleHeight/2);
+    // Dibujar icono de altavoz según estado y volumen
+    const speakerIcon = this.scene.add.graphics();
+    speakerIcon.lineStyle(2, 0xFFFFFF, 1);
 
-    // Texto de estado (ON/OFF)
-    const stateText = this.scene.add.text(
-      toggleX,
-      toggleY,
-      isSoundEnabled ? 'ON' : 'OFF',
-      {
-        fontFamily: 'Arial',
-        fontSize: '16px',
-        fontWeight: 'bold',
-        color: '#ffffff'
-      }
-    ).setOrigin(0.5).setScrollFactor(0);
+    // Determinar si debería estar silenciado (isEnabled false o volumen 0)
+    const isMuted = !isSoundEnabled || currentVolume === 0;
 
-    // Círculo deslizante (knob)
-    const knob = this.scene.add.graphics();
-    const knobColorOff = 0xE74C3C; // Rojo para OFF
-    const knobColorOn = 0x4CAF50;  // Verde para ON
-    const initialKnobPosition = isSoundEnabled ? onPosition : offPosition;
+    // Dibujar altavoz inicial
+    this.drawSpeakerIcon(speakerIcon, iconX, iconY, !isMuted);
 
-    knob.fillStyle(isSoundEnabled ? knobColorOn : knobColorOff, 1);
-    knob.fillCircle(initialKnobPosition, toggleY, knobRadius);
-
-    // Añadir todo al contenedor
-    container.add([toggleBg, stateText, knob]);
-
-    // Hacer el toggle interactivo
-    const hitArea = this.scene.add.rectangle(
-      toggleX,
-      toggleY,
-      toggleWidth,
-      toggleHeight
+    // Hacer el icono interactivo
+    const iconHitArea = this.scene.add.circle(
+      iconX,
+      iconY,
+      iconSize/2
     ).setInteractive({ useHandCursor: true });
 
-    container.add(hitArea);
+    // --- SLIDER DE VOLUMEN ---
+    // Recalcular posición del slider después del icono
+    const newSliderX = iconX + iconSize/2 + 25 + sliderWidth/2; // Más separación entre icono y slider
+
+    // Fondo del slider (rectángulo redondeado) con estilo glaciar
+    const sliderBg = this.scene.add.graphics();
+
+    // Crear efecto de profundidad (borde inferior y derecho más oscuro)
+    sliderBg.lineStyle(2, 0x225577, 0.8);
+    sliderBg.strokeRoundedRect(newSliderX - sliderWidth/2 + 1, sliderY - sliderHeight/2 + 1, sliderWidth, sliderHeight, sliderHeight/2);
+
+    // Fondo con gradiente estilo glaciar (similar a los botones)
+    sliderBg.fillGradientStyle(0x3d5e7e, 0x3d5e7e, 0x555555, 0x555555, 0.8);
+    sliderBg.fillRoundedRect(newSliderX - sliderWidth/2, sliderY - sliderHeight/2, sliderWidth, sliderHeight, sliderHeight/2);
+
+    // Borde exterior
+    sliderBg.lineStyle(2, 0x6baed6, 0.9);
+    sliderBg.strokeRoundedRect(newSliderX - sliderWidth/2, sliderY - sliderHeight/2, sliderWidth, sliderHeight, sliderHeight/2);
+
+    // Efecto de brillo en la parte superior (similar a los botones glaciares)
+    const sliderGlow = this.scene.add.graphics();
+    sliderGlow.fillStyle(0xe8f4fc, 0.3);
+    sliderGlow.fillRoundedRect(
+      newSliderX - sliderWidth/2 + 2,
+      sliderY - sliderHeight/2 + 2,
+      sliderWidth - 4,
+      sliderHeight/2 - 2,
+      { tl: sliderHeight/2 - 2, tr: sliderHeight/2 - 2, bl: 0, br: 0 }
+    );
+
+    // Barra de progreso (nivel actual)
+    const progressBar = this.scene.add.graphics();
+    this.updateVolumeBar(progressBar, newSliderX, sliderY, sliderWidth, sliderHeight, currentVolume);
+
+    // Control deslizante (knob)
+    const knob = this.scene.add.graphics();
+    knob.fillStyle(0x4CAF50, 1);
+
+    // Posición inicial del knob basada en el volumen actual
+    const knobPosition = newSliderX - sliderWidth/2 + (sliderWidth * currentVolume);
+    knob.fillCircle(knobPosition, sliderY, knobRadius);
+
+    // Texto del porcentaje - más compacto
+    const percentText = this.scene.add.text(
+      newSliderX + sliderWidth/2 + 15,
+      sliderY,
+      `${volumePercentage}%`,
+      {
+        fontFamily: 'Arial',
+        fontSize: '18px',
+        fontWeight: 'bold',
+        color: '#ffffff',
+        stroke: '#003366',
+        strokeThickness: 2
+      }
+    ).setOrigin(0, 0.5).setScrollFactor(0);
+
+    // Hacer el slider interactivo
+    const sliderHitArea = this.scene.add.rectangle(
+      newSliderX,
+      sliderY,
+      sliderWidth + 20, // Ligeramente más ancho para facilitar la interacción
+      sliderHeight + 10
+    ).setInteractive({ useHandCursor: true });
+
+    // Añadir todo al contenedor
+    container.add([iconBg, speakerIcon, sliderBg, sliderGlow, progressBar, knob, percentText, iconHitArea, sliderHitArea]);
 
     // Variable para rastrear el estado
     const state = {
-      isOn: isSoundEnabled
+      isOn: isSoundEnabled,
+      volume: currentVolume,
+      isDragging: false
     };
 
-    // Manejar el evento de clic
-    hitArea.on('pointerdown', (pointer, localX, localY, event) => {
+    // --- EVENTOS PARA EL ICONO DE ALTAVOZ ---
+    iconHitArea.on('pointerdown', (pointer, localX, localY, event) => {
       event.stopPropagation();
 
-      // Reproducir sonido de botón si está disponible
-      if (this.scene.soundManager) {
+      // Reproducir sonido de botón si está disponible y el sonido está activado
+      if (this.scene.soundManager && state.isOn && state.volume > 0) {
         this.scene.soundManager.playSfx('sfx_button');
       }
 
       // Cambiar estado
       state.isOn = !state.isOn;
 
-      // Actualizar texto
-      stateText.setText(state.isOn ? 'ON' : 'OFF');
+      // Redibujamos el icono según el nuevo estado
+      speakerIcon.clear();
+      this.drawSpeakerIcon(speakerIcon, iconX, iconY, state.isOn);
 
-      // Actualizar color del fondo
-      toggleBg.clear();
-      toggleBg.fillStyle(state.isOn ? bgColorOn : bgColorOff, 0.9);
-      toggleBg.fillRoundedRect(toggleX - toggleWidth/2, toggleY - toggleHeight/2, toggleWidth, toggleHeight, toggleHeight/2);
-      toggleBg.lineStyle(2, 0x6baed6, 0.8);
-      toggleBg.strokeRoundedRect(toggleX - toggleWidth/2, toggleY - toggleHeight/2, toggleWidth, toggleHeight, toggleHeight/2);
-
-      // Posición final absoluta
-      const targetPosition = state.isOn ? onPosition : offPosition;
-
-      // Animar deslizamiento
-      this.scene.tweens.add({
-        targets: {},
-        progress: 0,
-        duration: 200,
-        ease: 'Power2',
-        onUpdate: (tween) => {
-          knob.clear();
-
-          // Color según estado
-          const currentColor = state.isOn ? knobColorOn : knobColorOff;
-
-          // Calcular posición actual en el proceso de animación
-          const startPosition = state.isOn ? offPosition : onPosition;
-          const currentPosition = Phaser.Math.Linear(startPosition, targetPosition, tween.progress);
-
-          // Dibujar el círculo en la posición actual
-          knob.fillStyle(currentColor, 1);
-          knob.fillCircle(currentPosition, toggleY, knobRadius);
-        },
-        onComplete: () => {
-          // Asegurar posición final exacta
-          knob.clear();
-          knob.fillStyle(state.isOn ? knobColorOn : knobColorOff, 1);
-          knob.fillCircle(targetPosition, toggleY, knobRadius);
-
-          // Aplicar la configuración de sonido
-          if (this.scene.soundManager) {
-            this.scene.soundManager.setMusicEnabled(state.isOn);
-            this.scene.soundManager.setSfxEnabled(state.isOn);
-          }
-        }
-      });
+      // Actualizar la configuración de sonido
+      if (this.scene.soundManager) {
+        this.scene.soundManager.setMusicEnabled(state.isOn);
+        this.scene.soundManager.setSfxEnabled(state.isOn);
+      }
     });
 
-    // Guardar referencia al toggle
+    // --- EVENTOS PARA EL SLIDER ---
+    // Evento de clic en el slider
+    sliderHitArea.on('pointerdown', (pointer, localX, localY, event) => {
+      event.stopPropagation();
+      state.isDragging = true;
+
+      // Obtener la posición X relativa al slider
+      const relativeX = pointer.x - (x + newSliderX - sliderWidth/2);
+
+      // Calcular el nuevo volumen (0-1)
+      const newVolume = Phaser.Math.Clamp(relativeX / sliderWidth, 0, 1);
+      state.volume = newVolume;
+
+      // Actualizar interfaz y aplicar el volumen
+      this.updateVolumeControls(state, knob, progressBar, percentText, newSliderX, sliderY, sliderWidth, sliderHeight, speakerIcon, iconX, iconY);
+
+      // Si el sonido estaba desactivado y ponemos volumen > 0, activarlo
+      if (!state.isOn && state.volume > 0) {
+        state.isOn = true;
+
+        if (this.scene.soundManager) {
+          this.scene.soundManager.setMusicEnabled(true);
+          this.scene.soundManager.setSfxEnabled(true);
+        }
+      }
+    });
+
+    // Evento de movimiento para arrastrar el knob
+    this.scene.input.on('pointermove', (pointer) => {
+      if (state.isDragging) {
+        // Obtener la posición X relativa al slider
+        const relativeX = pointer.x - (x + newSliderX - sliderWidth/2);
+
+        // Calcular el nuevo volumen (0-1)
+        const newVolume = Phaser.Math.Clamp(relativeX / sliderWidth, 0, 1);
+        state.volume = newVolume;
+
+        // Actualizar interfaz y aplicar el volumen
+        this.updateVolumeControls(state, knob, progressBar, percentText, newSliderX, sliderY, sliderWidth, sliderHeight, speakerIcon, iconX, iconY);
+      }
+    });
+
+    // Evento para dejar de arrastrar
+    this.scene.input.on('pointerup', () => {
+      state.isDragging = false;
+    });
+
+    // Guardar referencia al control de volumen
     this.toggles.sound = {
       container,
       state
     };
 
+    // Limpiar eventos al destruir
+    this.scene.events.once('shutdown', () => {
+      this.scene.input.off('pointermove');
+      this.scene.input.off('pointerup');
+    });
+
     this.container.add(container);
     return container;
+  }
+
+  /**
+   * Dibuja el icono de altavoz según el estado
+   * @private
+   */
+  drawSpeakerIcon(graphics, x, y, isEnabled) {
+    graphics.clear();
+    graphics.lineStyle(2, 0xFFFFFF, 1);
+
+    // Base del altavoz (igual en ambos estados)
+    graphics.beginPath();
+    graphics.moveTo(x - 6, y - 2);
+    graphics.lineTo(x - 2, y - 2);
+    graphics.lineTo(x + 2, y - 6);
+    graphics.lineTo(x + 2, y + 6);
+    graphics.lineTo(x - 2, y + 2);
+    graphics.lineTo(x - 6, y + 2);
+    graphics.closePath();
+    graphics.strokePath();
+
+    if (isEnabled) {
+      // Ondas de sonido (solo si está activado)
+      graphics.beginPath();
+      graphics.arc(x, y, 8, -0.7, 0.7, false);
+      graphics.strokePath();
+
+      graphics.beginPath();
+      graphics.arc(x, y, 12, -0.5, 0.5, false);
+      graphics.strokePath();
+    } else {
+      // X de mute (solo si está desactivado)
+      graphics.beginPath();
+      graphics.moveTo(x + 5, y - 5);
+      graphics.lineTo(x + 10, y - 10);
+      graphics.moveTo(x + 10, y - 5);
+      graphics.lineTo(x + 5, y - 10);
+      graphics.strokePath();
+    }
+  }
+
+  /**
+   * Actualiza la barra de volumen
+   * @private
+   */
+  updateVolumeBar(graphics, x, y, width, height, volume) {
+    graphics.clear();
+
+    // Solo dibujamos si hay volumen
+    if (volume > 0) {
+      const fillWidth = width * volume;
+
+      // Gradiente azul para la barra de progreso
+      graphics.fillGradientStyle(0x2c85c1, 0x88c1dd, 0x2c85c1, 0x88c1dd, 1);
+
+      // Dibujamos la barra redondeada en los extremos
+      if (fillWidth >= height) {
+        // Si la barra es suficientemente ancha, usamos bordes redondeados
+        graphics.fillRoundedRect(
+          x - width/2,
+          y - height/2,
+          fillWidth,
+          height,
+          { tl: height/2, bl: height/2, tr: 0, br: 0 }
+        );
+      } else {
+        // Si es muy corta, usamos un círculo
+        graphics.fillCircle(
+          x - width/2 + fillWidth/2,
+          y,
+          height/2 - 1
+        );
+      }
+    }
+  }
+
+  /**
+   * Actualiza todos los controles de volumen
+   * @private
+   */
+  updateVolumeControls(state, knob, progressBar, percentText, sliderX, sliderY, sliderWidth, sliderHeight, speakerIcon, iconX, iconY) {
+    // Actualizar posición del knob
+    knob.clear();
+    knob.fillStyle(0x4CAF50, 1);
+    const knobPosition = sliderX - sliderWidth/2 + (sliderWidth * state.volume);
+    knob.fillCircle(knobPosition, sliderY, (sliderHeight - 10) / 2);
+
+    // Actualizar barra de progreso
+    this.updateVolumeBar(progressBar, sliderX, sliderY, sliderWidth, sliderHeight, state.volume);
+
+    // Actualizar texto de porcentaje
+    const volumePercentage = Math.round(state.volume * 100);
+    percentText.setText(`${volumePercentage}%`);
+
+    // Verificar si debemos actualizar el icono basado en el volumen
+    if (speakerIcon && iconX !== undefined && iconY !== undefined) {
+      const shouldBeMuted = state.volume === 0 || !state.isOn;
+
+      // Redibujamos el icono solo si el estado mute cambió
+      speakerIcon.clear();
+      this.drawSpeakerIcon(speakerIcon, iconX, iconY, !shouldBeMuted);
+    }
+
+    // Aplicar volumen al SoundManager
+    if (this.scene.soundManager) {
+      this.scene.soundManager.setMusicVolume(state.volume);
+      this.scene.soundManager.setSfxVolume(state.volume);
+    }
   }
 
   /**
