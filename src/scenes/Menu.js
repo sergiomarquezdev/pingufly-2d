@@ -557,14 +557,73 @@ export default class Menu extends Phaser.Scene {
     // Recortar 1px de la parte superior para eliminar la línea extraña
     pinguin.setCrop(0, 1, 32, 31);
 
-    // Animar el pingüino para que parezca moverse ligeramente
-    this.tweens.add({
-      targets: pinguin,
-      y: pinguin.y - 35,
-      duration: 7000,
-      yoyo: true,
-      repeat: -1,
-      ease: 'Sine.easeInOut'
+    // Crear la animación idle para el pingüino decorativo
+    if (!this.anims.exists('menu_penguin_idle')) {
+      this.anims.create({
+        key: 'menu_penguin_idle',
+        frames: this.anims.generateFrameNumbers('penguin_sheet', {
+          frames: [40, 41, 42, 40] // Mismos frames que en penguinAnimations.js para idle
+        }),
+        frameRate: 2,
+        repeat: -1
+      });
+    }
+
+    // Reproducir la animación idle
+    pinguin.play('menu_penguin_idle');
+
+    // Añadir un yeti decorativo (usando el sheet)
+    const yetiFrame = 1; // Frame inicial
+    const yeti = this.add.sprite(width * 0.83, height * 0.91, 'yeti_sheet', yetiFrame)
+      .setScale(1.2)
+      .setDepth(7);
+
+    // Voltear el yeti para que mire hacia la izquierda
+    yeti.setFlipX(true);
+
+    // Recortar 1px de la parte superior para eliminar la línea extraña
+    yeti.setCrop(0, 1, 64, 63);
+
+    // Crear las animaciones para el yeti decorativo
+    if (!this.anims.exists('menu_yeti_idle')) {
+      this.anims.create({
+        key: 'menu_yeti_idle',
+        frames: this.anims.generateFrameNumbers('yeti_sheet', {
+          frames: [0,1,2,3,4,5,6,7] // Frames de idle
+        }),
+        frameRate: 4,
+        repeat: -1
+      });
+    }
+
+    if (!this.anims.exists('menu_yeti_prepare')) {
+      this.anims.create({
+        key: 'menu_yeti_prepare',
+        frames: this.anims.generateFrameNumbers('yeti_sheet', {
+          frames: [45, 46, 47, 48] // Frames de prepare
+        }),
+        frameRate: 6,
+        repeat: 1 // Solo repetir una vez
+      });
+    }
+
+    // Iniciar con animación idle
+    yeti.play('menu_yeti_idle');
+
+    // Configurar evento para alternar ocasionalmente a la animación 'prepare'
+    this.time.addEvent({
+      delay: 7000, // Cada 7 segundos
+      callback: () => {
+        // Cambiar a animación prepare
+        yeti.play('menu_yeti_prepare');
+
+        // Volver a idle cuando termine la animación prepare
+        yeti.once('animationcomplete', () => {
+          yeti.play('menu_yeti_idle');
+        });
+      },
+      callbackScope: this,
+      loop: true
     });
 
     // Añadir copos de nieve usando el sprite en lugar de crearlos programáticamente
