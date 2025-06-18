@@ -37,3 +37,6 @@ dist-ssr
 
 # Package lock
 package-lock.json
+
+# Github
+gh-pages
